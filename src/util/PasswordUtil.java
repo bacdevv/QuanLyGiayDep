@@ -1,5 +1,9 @@
 package util;
 
-/** TODO: Thành viên phụ trách tự hiện thực lớp này. */
+/**
+ * Phụ trách: Bắc.
+ * Việc cần làm: Tiện ích: So khớp/ghi hash BCrypt sau khi thêm thư viện.
+ * TODO: Tự triển khai; xem bảng chức năng trong README.md.
+ */
 public class PasswordUtil {
 }

@@ -1,5 +1,9 @@
 package util;
 
-/** TODO: Thành viên phụ trách tự hiện thực lớp này. */
+/**
+ * Phụ trách: Phúc.
+ * Việc cần làm: Tiện ích: Quản lý transaction dùng chung kết nối cho nghiệp vụ nhiều bảng.
+ * TODO: Tự triển khai; xem bảng chức năng trong README.md.
+ */
 public class TransactionManager {
 }
