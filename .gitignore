@@ -1,0 +1,6 @@
+# File riêng của từng máy; không đẩy mật khẩu lên GitHub.
+config/db.properties
+bin/
+*.class
+lib/*.jar
+.DS_Store

@@ -1,5 +1,5 @@
 package dao;
 
-public class HoaDonDao {
-
+/** TODO: Thành viên phụ trách tự hiện thực lớp này. */
+public class HoaDonDAO {
 }

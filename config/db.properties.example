@@ -1,0 +1,5 @@
+# Sao chép thành db.properties, sau đó sửa tài khoản SQL Server trên máy bạn.
+# trustServerCertificate chỉ dùng khi học và chạy cục bộ.
+db.url=jdbc:sqlserver://localhost:1433;databaseName=QuanLyGiayDep;encrypt=true;trustServerCertificate=true
+db.user=sa
+db.password=DOI_MAT_KHAU

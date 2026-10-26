@@ -1,0 +1,172 @@
+// Phương án 14 bảng, thống nhất với TaoCSDL.sql.
+// Ràng buộc CHECK, cột tính toán và chỉ mục xem trong TaoCSDL.sql.
+
+Table NHANVIEN {
+  MaNhanVien varchar(12) [pk]
+  TenNhanVien nvarchar(100)
+  NgaySinh date
+  SoDienThoai varchar(15)
+  Email varchar(100)
+  CCCD varchar(12)
+  DiaChi nvarchar(255)
+  GioiTinh nvarchar(10)
+  ChucVu nvarchar(50)
+  CaLam nvarchar(30)
+  TrangThai varchar(20)
+  HinhAnh nvarchar(255)
+}
+
+Table TAIKHOAN {
+  MaTK varchar(12) [pk]
+  MaNhanVien varchar(12)
+  TenDangNhap varchar(50)
+  MatKhau varchar(255)
+  VaiTro varchar(20)
+  HoatDong bit
+  NgayTao datetime2
+}
+
+Table DANHMUC {
+  MaDanhMuc varchar(12) [pk]
+  TenDanhMuc nvarchar(100)
+  HoatDong bit
+}
+
+Table THUONGHIEU {
+  MaThuongHieu varchar(12) [pk]
+  TenThuongHieu nvarchar(100)
+  HoatDong bit
+}
+
+Table SANPHAM {
+  MaSP varchar(12) [pk]
+  MaDanhMuc varchar(12)
+  MaThuongHieu varchar(12)
+  TenSP nvarchar(150)
+  ChatLieu nvarchar(100)
+  MoTa nvarchar(500)
+  HinhAnh nvarchar(255)
+  HoatDong bit
+}
+
+Table CHITIETSANPHAM {
+  MaCTSP varchar(12) [pk]
+  MaSP varchar(12)
+  SKU varchar(40)
+  KichCo nvarchar(10)
+  MauSac nvarchar(30)
+  GiaBan decimal(18,0)
+  SoLuongTon int
+  MucTonToiThieu int
+  HoatDong bit
+}
+
+Table NHACUNGCAP {
+  MaNCC varchar(12) [pk]
+  TenNCC nvarchar(150)
+  SoDienThoai varchar(15)
+  Email varchar(100)
+  DiaChi nvarchar(255)
+  HoatDong bit
+}
+
+Table KHACHHANG {
+  MaKH varchar(12) [pk]
+  TenKH nvarchar(100)
+  NamSinh smallint
+  GioiTinh nvarchar(10)
+  SoDienThoai varchar(15)
+  DiaChi nvarchar(255)
+}
+
+Table HOADON {
+  MaHD varchar(12) [pk]
+  MaNhanVien varchar(12)
+  MaKH varchar(12)
+  NgayLap datetime2
+  TrangThai varchar(20)
+  PhuongThucThanhToan varchar(20)
+  TongThanhToan decimal(18,0)
+  TienBuTruDoiTra decimal(18,0)
+  TienKhachDua decimal(18,0)
+  NgayThanhToan datetime2
+}
+
+Table CHITIETHOADON {
+  MaCTHD varchar(12) [pk]
+  MaHD varchar(12)
+  MaCTSP varchar(12)
+  SoLuong int
+  DonGia decimal(18,0)
+  ThanhTien decimal(18,0) [note: 'Cột tính toán và lưu sẵn trong SQL Server']
+}
+
+Table PHIEUNHAP {
+  MaPN varchar(12) [pk]
+  MaNhanVien varchar(12)
+  MaNCC varchar(12)
+  MaNhanVienDuyet varchar(12)
+  NgayLap datetime2
+  NgayDuyet datetime2
+  NgayHoanTat datetime2
+  TrangThai varchar(20)
+  TongTien decimal(18,0)
+  GhiChu nvarchar(500)
+}
+
+Table CHITIETPHIEUNHAP {
+  MaCTPN varchar(12) [pk]
+  MaPN varchar(12)
+  MaCTSP varchar(12)
+  SoLuong int
+  DonGiaNhap decimal(18,0)
+  ThanhTien decimal(18,0) [note: 'Cột tính toán và lưu sẵn trong SQL Server']
+}
+
+Table PHIEUDOITRA {
+  MaPDT varchar(12) [pk]
+  MaHDCu varchar(12)
+  MaHDMoi varchar(12)
+  MaNhanVien varchar(12)
+  LoaiXuLy varchar(10)
+  NgayLap datetime2
+  NgayHoanTat datetime2
+  LyDo nvarchar(255)
+  TrangThai varchar(20)
+  TongGiaTriTra decimal(18,0)
+  TongGiaTriDoi decimal(18,0)
+  SoTienHoan decimal(18,0)
+  SoTienThuThem decimal(18,0)
+  PhuongThucHoanTien varchar(20)
+  PhuongThucThuThem varchar(20)
+  GhiChu nvarchar(500)
+}
+
+Table CHITIETDOITRA {
+  MaCTDT varchar(12) [pk]
+  MaPDT varchar(12)
+  MaCTSP varchar(12)
+  SoLuong int
+  DonGiaHoan decimal(18,0)
+  ThanhTienHoan decimal(18,0) [note: 'Cột tính toán và lưu sẵn trong SQL Server']
+  TinhTrangHang varchar(20)
+}
+
+Ref: NHANVIEN.MaNhanVien < TAIKHOAN.MaNhanVien
+Ref: DANHMUC.MaDanhMuc < SANPHAM.MaDanhMuc
+Ref: THUONGHIEU.MaThuongHieu < SANPHAM.MaThuongHieu
+Ref: SANPHAM.MaSP < CHITIETSANPHAM.MaSP
+Ref: NHANVIEN.MaNhanVien < HOADON.MaNhanVien
+Ref: KHACHHANG.MaKH < HOADON.MaKH
+Ref: HOADON.MaHD < CHITIETHOADON.MaHD
+Ref: CHITIETSANPHAM.MaCTSP < CHITIETHOADON.MaCTSP
+Ref: NHANVIEN.MaNhanVien < PHIEUNHAP.MaNhanVien
+Ref: NHANVIEN.MaNhanVien < PHIEUNHAP.MaNhanVienDuyet
+Ref: NHACUNGCAP.MaNCC < PHIEUNHAP.MaNCC
+Ref: PHIEUNHAP.MaPN < CHITIETPHIEUNHAP.MaPN
+Ref: CHITIETSANPHAM.MaCTSP < CHITIETPHIEUNHAP.MaCTSP
+Ref: HOADON.MaHD < PHIEUDOITRA.MaHDCu
+Ref: HOADON.MaHD < PHIEUDOITRA.MaHDMoi
+Ref: NHANVIEN.MaNhanVien < PHIEUDOITRA.MaNhanVien
+Ref: PHIEUDOITRA.MaPDT < CHITIETDOITRA.MaPDT
+Ref: CHITIETSANPHAM.MaCTSP < CHITIETDOITRA.MaCTSP
