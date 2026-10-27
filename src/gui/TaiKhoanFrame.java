@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class TaiKhoanFrame extends JDialog {
+public class TaiKhoanFrame extends JPanel {
     private final TaiKhoanBUS bus = new TaiKhoanBUS();
     private final JTextField id = new JTextField();
     private final JComboBox<TaiKhoanDAO.EmployeeOption> employee = new JComboBox<>();
@@ -24,31 +24,51 @@ public class TaiKhoanFrame extends JDialog {
     };
     private List<TaiKhoan> accounts = List.of();
 
-    public TaiKhoanFrame(Frame owner) {
-        super(owner, "Quản lý tài khoản", false);
-        setSize(820, 500);
-        setLocationRelativeTo(owner);
+    public TaiKhoanFrame() {
+        super(new BorderLayout());
         build();
         refresh();
     }
 
     private void build() {
+        JPanel root = new JPanel(new BorderLayout(14, 14));
+        root.setOpaque(false);
+        root.setBorder(BorderFactory.createEmptyBorder(14, 18, 18, 18));
+        JLabel title = new JLabel("QUẢN LÝ TÀI KHOẢN", SwingConstants.CENTER);
+        title.setForeground(new Color(70, 127, 177));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        root.add(title, BorderLayout.NORTH);
+
         JPanel top = new JPanel(new BorderLayout(6, 6));
-        top.add(new JLabel("Tìm:"), BorderLayout.WEST);
+        top.setBackground(Color.WHITE);
+        top.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Tìm kiếm tài khoản"),
+                BorderFactory.createEmptyBorder(4, 8, 8, 8)));
+        top.add(new JLabel("Tên đăng nhập / nhân viên:"), BorderLayout.WEST);
         top.add(search, BorderLayout.CENTER);
         JButton find = new JButton("Tìm");
         find.addActionListener(e -> refresh());
         top.add(find, BorderLayout.EAST);
-        add(top, BorderLayout.NORTH);
 
         JTable table = new JTable(model);
+        table.setRowHeight(28);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.getTableHeader().setBackground(new Color(211, 226, 239));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && table.getSelectedRow() >= 0) fill(accounts.get(table.getSelectedRow()));
         });
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        JPanel list = new JPanel(new BorderLayout(0, 8));
+        list.setOpaque(false);
+        list.add(top, BorderLayout.NORTH);
+        list.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel form = new JPanel(new GridLayout(2, 6, 5, 5));
+        JPanel form = new JPanel(new GridLayout(2, 6, 10, 8));
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Thông tin tài khoản"),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)));
         form.add(labeled("Mã TK", id)); form.add(labeled("Nhân viên đang làm", employee));
         form.add(labeled("Tên đăng nhập", username)); form.add(labeled("Mật khẩu mới", password));
         form.add(labeled("Vai trò", role)); form.add(active);
@@ -61,7 +81,10 @@ public class TaiKhoanFrame extends JDialog {
         buttons.add(add); buttons.add(update); buttons.add(delete); buttons.add(clear);
         JPanel south = new JPanel(new BorderLayout());
         south.add(form, BorderLayout.CENTER); south.add(buttons, BorderLayout.SOUTH);
-        add(south, BorderLayout.SOUTH);
+        root.add(list, BorderLayout.CENTER);
+        root.add(south, BorderLayout.SOUTH);
+        setBackground(new Color(245, 247, 250));
+        add(root);
     }
 
     private static JPanel labeled(String label, JComponent input) {

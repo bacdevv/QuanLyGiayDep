@@ -29,20 +29,20 @@ INSERT INTO dbo.NHANVIEN (MaNhanVien, TenNhanVien, NgaySinh, SoDienThoai, Email,
     (N'NV011', N'Huỳnh Mỹ Sơn', N'2001-05-12', N'0901000011', N'nhanvien11@example.com', N'079206000011', N'11 Đường Lê Lợi, TP.HCM', N'Nữ', N'Bán hàng', N'Ca sáng', N'DANG_LAM', NULL),
     (N'NV012', N'Dương Anh Trang', N'2002-05-13', N'0901000012', N'nhanvien12@example.com', N'079206000012', N'12 Đường Lê Lợi, TP.HCM', N'Nữ', N'Bán hàng', N'Ca chiều', N'DANG_LAM', NULL);
 
--- TAIKHOAN: 12 bản ghi.
+-- TAIKHOAN: 12 bản ghi. Mật khẩu mặc định cho toàn bộ tài khoản mẫu: 123456.
 INSERT INTO dbo.TAIKHOAN (MaTK, MaNhanVien, TenDangNhap, MatKhau, VaiTro, HoatDong, NgayTao) VALUES
-    (N'TK001', N'NV001', N'quanly', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'QUAN_LY', 1, N'2026-08-01T09:00:00'),
-    (N'TK002', N'NV002', N'nv02', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'QUAN_LY', 1, N'2026-08-01T09:00:00'),
-    (N'TK003', N'NV003', N'nv03', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK004', N'NV004', N'nv04', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK005', N'NV005', N'nv05', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK006', N'NV006', N'nv06', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK007', N'NV007', N'nv07', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK008', N'NV008', N'nv08', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK009', N'NV009', N'nv09', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK010', N'NV010', N'nv10', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK011', N'NV011', N'nv11', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
-    (N'TK012', N'NV012', N'nv12', N'$2a$10$QMK5lQ0RcqJ1gbozmxYd0OXXzTzNFkyCABg/UFowrvXBRJzukCzqK', N'BAN_HANG', 1, N'2026-08-01T09:00:00');
+    (N'TK001', N'NV001', N'quanly', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'QUAN_LY', 1, N'2026-08-01T09:00:00'),
+    (N'TK002', N'NV002', N'nv02', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'QUAN_LY', 1, N'2026-08-01T09:00:00'),
+    (N'TK003', N'NV003', N'nv03', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK004', N'NV004', N'nv04', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK005', N'NV005', N'nv05', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK006', N'NV006', N'nv06', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK007', N'NV007', N'nv07', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK008', N'NV008', N'nv08', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK009', N'NV009', N'nv09', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK010', N'NV010', N'nv10', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK011', N'NV011', N'nv11', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00'),
+    (N'TK012', N'NV012', N'nv12', N'$2a$12$mY8vpB/4MApOU6fuitu0E.O6QOQMbvgSz/ctHDEjkdIzteLjinJOC', N'BAN_HANG', 1, N'2026-08-01T09:00:00');
 
 -- DANHMUC: 6 bản ghi.
 INSERT INTO dbo.DANHMUC (MaDanhMuc, TenDanhMuc, HoatDong) VALUES

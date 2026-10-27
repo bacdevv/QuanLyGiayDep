@@ -15,6 +15,8 @@
 3. Chép `mssql-jdbc-*.jre11.jar` và `jbcrypt-0.4.jar` vào `lib/`; sao chép `config/db.properties.example` → `config/db.properties`, điền tài khoản SQL Server.
 4. Mở **thư mục gốc** `QuanLyGiayDep` trong VS Code → chạy `src/util/KiemTraKetNoi.java` để kiểm tra kết nối và **14 bảng**.
 
+**Tài khoản mẫu:** `quanly` (quản lý) hoặc `nv03` (nhân viên bán hàng), mật khẩu mặc định `123456`. Các tài khoản `nv04` đến `nv12` cũng dùng mật khẩu này.
+
 **Khi code:** `GUI` nhận dữ liệu, hiển thị lỗi → `BUS` kiểm tra điều kiện/nghiệp vụ → `DAO` dùng JDBC đọc/ghi SQL. Tiền dùng `BigDecimal`; SQL có tham số dùng `PreparedStatement`. Nhiều câu SQL trong một nghiệp vụ phải **commit/rollback**.
 
 <a id="phan-cong"></a>
