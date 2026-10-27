@@ -1,9 +1,36 @@
 package util;
 
-/**
- * Phụ trách: Bắc.
- * Việc cần làm: Tiện ích: Lưu thông tin nhân viên và vai trò của phiên đăng nhập.
- * TODO: Tự triển khai; xem bảng chức năng trong README.md.
- */
-public class SessionContext {
+import entity.TaiKhoan;
+
+public final class SessionContext {
+    private static TaiKhoan currentUser;
+
+    private SessionContext() {
+    }
+
+    public static void login(TaiKhoan account) {
+        currentUser = account;
+    }
+
+    public static TaiKhoan getCurrentUser() {
+        return currentUser;
+    }
+
+    public static boolean isLoggedIn() {
+        return currentUser != null;
+    }
+
+    public static boolean isManager() {
+        return currentUser != null && "QUAN_LY".equals(currentUser.getVaiTro());
+    }
+
+    public static void requireManager() {
+        if (!isManager()) {
+            throw new SecurityException("Chỉ quản lý mới được thực hiện thao tác này");
+        }
+    }
+
+    public static void logout() {
+        currentUser = null;
+    }
 }

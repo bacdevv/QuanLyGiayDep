@@ -10,18 +10,19 @@ import java.sql.Statement;
  * Chạy trực tiếp bằng nút Run Java trong VS Code.
  */
 public final class KiemTraKetNoi {
-    private KiemTraKetNoi() {}
+    private KiemTraKetNoi() {
+    }
 
     public static void main(String[] args) {
         String[] tables = {
-            "NHANVIEN", "TAIKHOAN", "DANHMUC", "THUONGHIEU",
-            "SANPHAM", "CHITIETSANPHAM", "NHACUNGCAP", "KHACHHANG",
-            "PHIEUNHAP", "CHITIETPHIEUNHAP", "HOADON", "CHITIETHOADON",
-            "PHIEUDOITRA", "CHITIETDOITRA"
+                "NHANVIEN", "TAIKHOAN", "DANHMUC", "THUONGHIEU",
+                "SANPHAM", "CHITIETSANPHAM", "NHACUNGCAP", "KHACHHANG",
+                "PHIEUNHAP", "CHITIETPHIEUNHAP", "HOADON", "CHITIETHOADON",
+                "PHIEUDOITRA", "CHITIETDOITRA"
         };
 
         try (Connection conn = DBConnection.getConnection();
-             Statement statement = conn.createStatement()) {
+                Statement statement = conn.createStatement()) {
             System.out.println("Kết nối thành công: " + conn.getCatalog());
 
             int tablesFound = 0;
