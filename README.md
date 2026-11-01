@@ -24,9 +24,6 @@ Làm theo thứ tự **Entity → DAO → GUI → test**.
 entity → thuộc tính, constructor, getter/setter
 dao    → SQL và JDBC
 gui    → giao diện, xử lý sự kiện và gọi DAO
-
-File: NhanVien.java, NhanVien_DAO.java, NhanVien_GUI.java
-Biến: txtMaNV, lblMaNV, bttThem, cboDanhMuc, tableNhanVien...
 ```
 
 Mỗi người tạo nhánh riêng:
@@ -40,6 +37,7 @@ git switch -c ngan
 Trước buổi làm, commit phần đang làm rồi cập nhật:
 
 ```bash
+git pull
 git fetch origin
 git merge origin/main
 ```
@@ -49,7 +47,7 @@ Làm xong thì kiểm tra và thêm đúng file đã sửa. Ví dụ:
 ```bash
 git add .
 git commit -m "Hoan thanh quan ly khach hang"
-git push -u origin nganss
+git push -u origin ngan
 ```
 
 Tạo **Pull Request → mình review → merge**. Không push thẳng `main`.
