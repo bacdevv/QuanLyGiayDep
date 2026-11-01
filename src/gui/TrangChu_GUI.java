@@ -34,10 +34,8 @@ public class TrangChu_GUI extends JFrame implements ActionListener, ChangeListen
 		// Khi nhóm làm xong GUI extends JPanel, thay dòng choTichHop bằng new NhanVien_GUI(), ...
 		tabChucNang.addTab("Nhân viên", choTichHop("Ngần", "NhanVien_GUI"));
 		tabChucNang.addTab("Khách hàng", choTichHop("Ngần", "KhachHang_GUI"));
-		tabChucNang.addTab("Danh mục", choTichHop("Thi", "DanhMuc_GUI"));
-		tabChucNang.addTab("Thương hiệu", choTichHop("Thi", "ThuongHieu_GUI"));
-		tabChucNang.addTab("Sản phẩm", choTichHop("Thi", "SanPham_GUI"));
-		tabChucNang.addTab("Size - màu", choTichHop("Thi", "ChiTietSanPham_GUI"));
+		tabChucNang.addTab("Danh mục / thương hiệu", choTichHop("Thi", "DanhMuc_GUI"));
+		tabChucNang.addTab("Sản phẩm / size - màu", choTichHop("Thi", "SanPham_GUI"));
 		tabChucNang.addTab("Bán hàng / hóa đơn", choTichHop("Phúc", "HoaDon_GUI"));
 		tabChucNang.addChangeListener(this);
 		add(tabChucNang);

@@ -37,7 +37,6 @@ git switch -c ngan
 Trước buổi làm, commit phần đang làm rồi cập nhật:
 
 ```bash
-git pull
 git fetch origin
 git merge origin/main
 ```
@@ -52,6 +51,24 @@ git push -u origin ngan
 
 Tạo **Pull Request → mình review → merge**. Không push thẳng `main`.
 
+### Cấu trúc file
+
+**30 file Java:** 2 kết nối/kiểm tra, 9 entity, 10 DAO và 9 GUI. Entity/DAO vẫn tách theo dữ liệu để dễ viết JDBC; một GUI có thể gọi nhiều DAO.
+
+| GUI | Nội dung | Người làm |
+|---|---|---|
+| `DangNhap_GUI` | Đăng nhập | Bắc |
+| `TrangChu_GUI` | Cửa sổ chính, chứa các tab | Bắc |
+| `TaiKhoan_GUI` | Tài khoản | Bắc |
+| `ThongKe_GUI` | Thống kê | Bắc |
+| `NhanVien_GUI` | Nhân viên | Ngần |
+| `KhachHang_GUI` | Khách hàng | Ngần |
+| `DanhMuc_GUI` | Danh mục + thương hiệu | Thi |
+| `SanPham_GUI` | Mẫu sản phẩm + size–màu, giá và tồn | Thi |
+| `HoaDon_GUI` | Bán hàng + tra cứu + chi tiết + in | Phúc |
+
+Các màn hình con dùng `JPanel`, ghép vào `TrangChu_GUI`; không mở một cửa sổ cho mỗi bảng. Ảnh tham khảo chỉ dùng để hình dung bố cục. Không thêm nhập hàng, nhà cung cấp, tích điểm, thuế hoặc giảm giá từ ảnh vào phạm vi bài.
+
 ## 3. Phân công
 
 | Thành viên           | Nhánh  | Phần phụ trách                                               |
@@ -61,7 +78,7 @@ Tạo **Pull Request → mình review → merge**. Không push thẳng `main`.
 | Nguyễn Phạm Đình Thi | `thi`  | Danh mục, thương hiệu, sản phẩm, size–màu                    |
 | Hồng Phúc            | `phuc` | Hóa đơn, chi tiết hóa đơn, thanh toán, in                    |
 
-Mỗi người làm đủ **entity, DAO và GUI** phần mình. Các phần quản lý cần có danh sách, chi tiết, thêm/sửa/xóa, tìm đơn giản và lọc kết hợp.
+Mỗi người làm **entity, DAO và GUI** phần mình. GUI chia theo chức năng, không chia theo từng bảng. Các phần quản lý cần có danh sách, chi tiết, thêm/sửa/xóa, tìm đơn giản và lọc kết hợp.
 
 <details>
 <summary>Bắc — kết nối, tài khoản và ghép bài</summary>
@@ -91,8 +108,9 @@ Mỗi người làm đủ **entity, DAO và GUI** phần mình. Các phần qu�
 <details>
 <summary>Thi — sản phẩm và size–màu</summary>
 
-- [ ] Làm `DanhMuc`, `ThuongHieu` → `SanPham` → `ChiTietSanPham`.
-- [ ] Mỗi phần có entity, DAO, GUI và các chức năng quản lý.
+- [ ] Entity/DAO: `DanhMuc`, `ThuongHieu`, `SanPham`, `ChiTietSanPham`.
+- [ ] GUI: `DanhMuc_GUI` gồm danh mục + thương hiệu; `SanPham_GUI` gồm mẫu + size–màu.
+- [ ] Mỗi phần có đầy đủ chức năng quản lý trong màn hình đã gộp.
 - [ ] Dùng ComboBox để chọn dữ liệu liên quan.
 - [ ] Không trùng size–màu trong cùng mẫu; giá và tồn nằm ở biến thể.
 - [ ] Chỉ nhập tồn ban đầu; biến thể đã bán không đổi sản phẩm/size/màu.
@@ -104,7 +122,7 @@ Mỗi người làm đủ **entity, DAO và GUI** phần mình. Các phần qu�
 <details>
 <summary>Phúc — bán hàng và hóa đơn</summary>
 
-- [ ] Làm entity, DAO và GUI cho `HoaDon`, `ChiTietHoaDon`.
+- [ ] Entity/DAO: `HoaDon`, `ChiTietHoaDon`; dùng chung `HoaDon_GUI` cho lập, tra cứu và chi tiết hóa đơn.
 - [ ] Chọn khách/khách lẻ → chọn size–màu → số lượng → tính tiền.
 - [ ] Chọn lại cùng biến thể thì cộng số lượng.
 - [ ] Giỏ chưa thanh toán được sửa số lượng và xóa dòng.

@@ -2,10 +2,10 @@ package gui;
 
 public class SanPham_GUI {
 
-	// Khai báo DAO, txt..., btt..., cbo..., tableSanPham, modelSanPham.
-	// Khởi tạo DAO; tạo giao diện và gắn sự kiện.
-	// DocDuLieuDatabaseVaoTable(): lấy danh sách → model.addRow(...).
-	// ComboBox: lấy danh sách liên quan → cbo.addItem(mã).
-	// Nút thêm/sửa/xóa/tìm gọi DAO, sau đó tải lại bảng.
+	// Quản lý mẫu sản phẩm và các size–màu trong cùng màn hình.
+	// DAO: SanPham_DAO, ChiTietSanPham_DAO, DanhMuc_DAO, ThuongHieu_DAO.
+	// Chọn mẫu → xem bảng size, màu, giá, tồn của mẫu đó.
+	// Thêm/sửa/xóa, xem chi tiết, tìm và lọc; dùng ComboBox cho dữ liệu liên quan.
+	// Khi triển khai: extends JPanel để ghép vào TrangChu_GUI.
 
 }
