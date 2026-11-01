@@ -1,172 +1,77 @@
-// Phương án 14 bảng, thống nhất với TaoCSDL.sql.
-// Ràng buộc CHECK, cột tính toán và chỉ mục xem trong TaoCSDL.sql.
-
-Table NHANVIEN {
-  MaNhanVien varchar(12) [pk]
-  TenNhanVien nvarchar(100)
-  NgaySinh date
-  SoDienThoai varchar(15)
-  Email varchar(100)
-  CCCD varchar(12)
-  DiaChi nvarchar(255)
-  GioiTinh nvarchar(10)
-  ChucVu nvarchar(50)
-  CaLam nvarchar(30)
-  TrangThai varchar(20)
-  HinhAnh nvarchar(255)
+// 9 bảng. Tổng tiền được tính từ chi tiết hóa đơn.
+Table NhanVien {
+  maNhanVien varchar(12) [pk, not null]
+  tenNhanVien nvarchar(100) [not null]
+  soDienThoai varchar(15)
+  hoatDong bit [not null]
 }
 
-Table TAIKHOAN {
-  MaTK varchar(12) [pk]
-  MaNhanVien varchar(12)
-  TenDangNhap varchar(50)
-  MatKhau varchar(255)
-  VaiTro varchar(20)
-  HoatDong bit
-  NgayTao datetime2
+Table TaiKhoan {
+  maNhanVien varchar(12) [pk, not null]
+  tenDangNhap varchar(50) [not null, unique]
+  matKhauHash varchar(255) [not null]
 }
 
-Table DANHMUC {
-  MaDanhMuc varchar(12) [pk]
-  TenDanhMuc nvarchar(100)
-  HoatDong bit
+Table DanhMuc {
+  maDanhMuc varchar(12) [pk, not null]
+  tenDanhMuc nvarchar(100) [not null, unique]
 }
 
-Table THUONGHIEU {
-  MaThuongHieu varchar(12) [pk]
-  TenThuongHieu nvarchar(100)
-  HoatDong bit
+Table ThuongHieu {
+  maThuongHieu varchar(12) [pk, not null]
+  tenThuongHieu nvarchar(100) [not null, unique]
 }
 
-Table SANPHAM {
-  MaSP varchar(12) [pk]
-  MaDanhMuc varchar(12)
-  MaThuongHieu varchar(12)
-  TenSP nvarchar(150)
-  ChatLieu nvarchar(100)
-  MoTa nvarchar(500)
-  HinhAnh nvarchar(255)
-  HoatDong bit
+Table SanPham {
+  maSP varchar(12) [pk, not null]
+  maDanhMuc varchar(12) [not null]
+  maThuongHieu varchar(12) [not null]
+  tenSP nvarchar(150) [not null]
+  hoatDong bit [not null]
 }
 
-Table CHITIETSANPHAM {
-  MaCTSP varchar(12) [pk]
-  MaSP varchar(12)
-  SKU varchar(40)
-  KichCo nvarchar(10)
-  MauSac nvarchar(30)
-  GiaBan decimal(18,0)
-  SoLuongTon int
-  MucTonToiThieu int
-  HoatDong bit
+Table ChiTietSanPham {
+  maCTSP varchar(12) [pk, not null]
+  maSP varchar(12) [not null]
+  kichCo nvarchar(10) [not null]
+  mauSac nvarchar(30) [not null]
+  giaBan decimal(18,0) [not null]
+  soLuongTon int [not null]
+  hoatDong bit [not null]
+  indexes {
+    (maSP, kichCo, mauSac) [unique]
+  }
 }
 
-Table NHACUNGCAP {
-  MaNCC varchar(12) [pk]
-  TenNCC nvarchar(150)
-  SoDienThoai varchar(15)
-  Email varchar(100)
-  DiaChi nvarchar(255)
-  HoatDong bit
+Table KhachHang {
+  maKH varchar(12) [pk, not null]
+  tenKH nvarchar(100) [not null]
+  soDienThoai varchar(15)
 }
 
-Table KHACHHANG {
-  MaKH varchar(12) [pk]
-  TenKH nvarchar(100)
-  NamSinh smallint
-  GioiTinh nvarchar(10)
-  SoDienThoai varchar(15)
-  DiaChi nvarchar(255)
+Table HoaDon {
+  maHD varchar(12) [pk, not null]
+  maNhanVien varchar(12) [not null]
+  maKH varchar(12)
+  ngayLap datetime2(0) [not null]
+  phuongThucThanhToan varchar(20) [not null]
 }
 
-Table HOADON {
-  MaHD varchar(12) [pk]
-  MaNhanVien varchar(12)
-  MaKH varchar(12)
-  NgayLap datetime2
-  TrangThai varchar(20)
-  PhuongThucThanhToan varchar(20)
-  TongThanhToan decimal(18,0)
-  TienBuTruDoiTra decimal(18,0)
-  TienKhachDua decimal(18,0)
-  NgayThanhToan datetime2
+Table ChiTietHoaDon {
+  maHD varchar(12) [not null]
+  maCTSP varchar(12) [not null]
+  soLuong int [not null]
+  donGia decimal(18,0) [not null]
+  indexes {
+    (maHD, maCTSP) [pk]
+  }
 }
 
-Table CHITIETHOADON {
-  MaCTHD varchar(12) [pk]
-  MaHD varchar(12)
-  MaCTSP varchar(12)
-  SoLuong int
-  DonGia decimal(18,0)
-  ThanhTien decimal(18,0) [note: 'Cột tính toán và lưu sẵn trong SQL Server']
-}
-
-Table PHIEUNHAP {
-  MaPN varchar(12) [pk]
-  MaNhanVien varchar(12)
-  MaNCC varchar(12)
-  MaNhanVienDuyet varchar(12)
-  NgayLap datetime2
-  NgayDuyet datetime2
-  NgayHoanTat datetime2
-  TrangThai varchar(20)
-  TongTien decimal(18,0)
-  GhiChu nvarchar(500)
-}
-
-Table CHITIETPHIEUNHAP {
-  MaCTPN varchar(12) [pk]
-  MaPN varchar(12)
-  MaCTSP varchar(12)
-  SoLuong int
-  DonGiaNhap decimal(18,0)
-  ThanhTien decimal(18,0) [note: 'Cột tính toán và lưu sẵn trong SQL Server']
-}
-
-Table PHIEUDOITRA {
-  MaPDT varchar(12) [pk]
-  MaHDCu varchar(12)
-  MaHDMoi varchar(12)
-  MaNhanVien varchar(12)
-  LoaiXuLy varchar(10)
-  NgayLap datetime2
-  NgayHoanTat datetime2
-  LyDo nvarchar(255)
-  TrangThai varchar(20)
-  TongGiaTriTra decimal(18,0)
-  TongGiaTriDoi decimal(18,0)
-  SoTienHoan decimal(18,0)
-  SoTienThuThem decimal(18,0)
-  PhuongThucHoanTien varchar(20)
-  PhuongThucThuThem varchar(20)
-  GhiChu nvarchar(500)
-}
-
-Table CHITIETDOITRA {
-  MaCTDT varchar(12) [pk]
-  MaPDT varchar(12)
-  MaCTSP varchar(12)
-  SoLuong int
-  DonGiaHoan decimal(18,0)
-  ThanhTienHoan decimal(18,0) [note: 'Cột tính toán và lưu sẵn trong SQL Server']
-  TinhTrangHang varchar(20)
-}
-
-Ref: NHANVIEN.MaNhanVien < TAIKHOAN.MaNhanVien
-Ref: DANHMUC.MaDanhMuc < SANPHAM.MaDanhMuc
-Ref: THUONGHIEU.MaThuongHieu < SANPHAM.MaThuongHieu
-Ref: SANPHAM.MaSP < CHITIETSANPHAM.MaSP
-Ref: NHANVIEN.MaNhanVien < HOADON.MaNhanVien
-Ref: KHACHHANG.MaKH < HOADON.MaKH
-Ref: HOADON.MaHD < CHITIETHOADON.MaHD
-Ref: CHITIETSANPHAM.MaCTSP < CHITIETHOADON.MaCTSP
-Ref: NHANVIEN.MaNhanVien < PHIEUNHAP.MaNhanVien
-Ref: NHANVIEN.MaNhanVien < PHIEUNHAP.MaNhanVienDuyet
-Ref: NHACUNGCAP.MaNCC < PHIEUNHAP.MaNCC
-Ref: PHIEUNHAP.MaPN < CHITIETPHIEUNHAP.MaPN
-Ref: CHITIETSANPHAM.MaCTSP < CHITIETPHIEUNHAP.MaCTSP
-Ref: HOADON.MaHD < PHIEUDOITRA.MaHDCu
-Ref: HOADON.MaHD < PHIEUDOITRA.MaHDMoi
-Ref: NHANVIEN.MaNhanVien < PHIEUDOITRA.MaNhanVien
-Ref: PHIEUDOITRA.MaPDT < CHITIETDOITRA.MaPDT
-Ref: CHITIETSANPHAM.MaCTSP < CHITIETDOITRA.MaCTSP
+Ref: TaiKhoan.maNhanVien - NhanVien.maNhanVien
+Ref: SanPham.maDanhMuc > DanhMuc.maDanhMuc
+Ref: SanPham.maThuongHieu > ThuongHieu.maThuongHieu
+Ref: ChiTietSanPham.maSP > SanPham.maSP
+Ref: HoaDon.maNhanVien > NhanVien.maNhanVien
+Ref: HoaDon.maKH > KhachHang.maKH
+Ref: ChiTietHoaDon.maHD > HoaDon.maHD
+Ref: ChiTietHoaDon.maCTSP > ChiTietSanPham.maCTSP
