@@ -1,31 +1,37 @@
 package connectDB;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 public class ConnectDB {
 	public static Connection con = null;
 	private static ConnectDB instance = new ConnectDB();
+
 	public static ConnectDB getInstance() {
 		return instance;
 	}
+
 	public void connect() throws SQLException {
-		if (con != null && !con.isClosed()) return;
-		String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyGiayDep;encrypt=true;trustServerCertificate=true";
+		if (con != null && !con.isClosed())
+			return;
+		String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyGiayDep";
 		String user = "sa";
-		String password = "DIEN_MAT_KHAU_SQL_SERVER";
+		String password = "123456";
 		con = DriverManager.getConnection(url, user, password);
 	}
+
 	public void disconnect() {
 		if (con != null) {
 			try {
 				con.close();
 				con = null;
-			}
-			catch (SQLException e) {
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
 	public static Connection getConnection() {
 		return con;
 	}

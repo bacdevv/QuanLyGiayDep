@@ -1,11 +1,7 @@
 package gui;
 
-public class NhanVien_GUI {
-
-	// Khai báo DAO, txt..., btt..., cbo..., tableNhanVien, modelNhanVien.
-	// Khởi tạo DAO; tạo giao diện và gắn sự kiện.
-	// DocDuLieuDatabaseVaoTable(): lấy danh sách → model.addRow(...).
-	// ComboBox: lấy danh sách liên quan → cbo.addItem(mã).
-	// Nút thêm/sửa/xóa/tìm gọi DAO, sau đó tải lại bảng.
-
+public class NhanVien_GUI extends JFrame {
+    public static void main(String[] args) {
+        new NhanVien_GUI().setVisible(true);
+    }
 }
