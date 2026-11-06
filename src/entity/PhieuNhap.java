@@ -47,7 +47,7 @@ public class PhieuNhap {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("PhieuNhap{");
+        sb.append("PhieuNhap");
         sb.append("maPN=").append(maPN);
         sb.append(", nhaCungCap=").append(nhaCungCap);
         sb.append(", nhanVien=").append(nhanVien);
