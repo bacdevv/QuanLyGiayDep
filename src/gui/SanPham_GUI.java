@@ -1,4 +1,4 @@
-package gui;
+﻿package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -11,16 +11,15 @@ import javax.swing.table.DefaultTableModel;
 public class SanPham_GUI extends JFrame {
 
     private JButton btnChonAnh;
-    private JButton btnNCC;
     private JTextField txtmaSP;
     private JTextField txttenSP;
     private JTextField txtGiaBan;
     private JTextField txtSoLuong;
-    private JTextField txtTrangThai;
-    private JComboBox cboNCC;
-    private JComboBox cboLoaiSP;
-    private JComboBox cboHanSuDung;
-    private JComboBox cboDonVi;
+    private JComboBox<String> cboTrangThai;
+    private JComboBox<String> cboThuongHieu;
+    private JComboBox<String> cboDanhMuc;
+    private JComboBox<String> cboKichCo;
+    private JComboBox<String> cboMauSac;
     private JButton btnThem;
     private JButton btnLuu;
     private JButton btnSua;
@@ -28,8 +27,8 @@ public class SanPham_GUI extends JFrame {
     private JButton btnLamMoi;
     private JTextField txtTimMaSP;
     private JTextField txtTimTenSP;
-    private JComboBox cboTimLoaiSP;
-    private JComboBox cboTimTrangThai;
+    private JComboBox<String> cboTimDanhMuc;
+    private JComboBox<String> cboTimTrangThai;
     private DefaultTableModel model;
     private JTable table;
 
@@ -80,11 +79,7 @@ public class SanPham_GUI extends JFrame {
         pNhap.add(pBenPhai, BorderLayout.CENTER);
 
       
-        JPanel pNCC = new JPanel(new BorderLayout());
-        btnNCC = new JButton("Nhà cung cấp");
 
-        pNCC.add(btnNCC, BorderLayout.EAST);
-        pBenPhai.add(pNCC, BorderLayout.NORTH);
 
         
         JPanel pThongTin = new JPanel(new BorderLayout(0, 15));
@@ -101,19 +96,19 @@ public class SanPham_GUI extends JFrame {
 
         JLabel lblmaSP = new JLabel("Mã sản phẩm: ");
         JLabel lbltenSP = new JLabel("Tên sản phẩm: ");
-        JLabel lblNCC = new JLabel("Nhà cung cấp: ");
-        JLabel lblLoaiSP = new JLabel("Loại sản phẩm: ");
+        JLabel lblThuongHieu = new JLabel("Thương hiệu: ");
+        JLabel lblDanhMuc = new JLabel("Danh mục: ");
         JLabel lblGiaBan = new JLabel("Giá bán: ");
-        JLabel lblHanSuDung = new JLabel("Hạn sử dụng: ");
-        JLabel lblSoLuong = new JLabel("Số lượng: ");
-        JLabel lblDonVi = new JLabel("Đơn vị: ");
+        JLabel lblKichCo = new JLabel("Kích cỡ: ");
+        JLabel lblSoLuong = new JLabel("Tồn kho (đôi): ");
+        JLabel lblMauSac = new JLabel("Màu sắc: ");
         JLabel lblTrangThai = new JLabel("Trạng thái: ");
 
         Dimension dim = new Dimension(105, 28);
 
         JLabel[] nhan = {
-            lblmaSP, lbltenSP, lblNCC, lblLoaiSP,
-            lblGiaBan, lblHanSuDung, lblSoLuong, lblTrangThai
+            lblmaSP, lbltenSP, lblThuongHieu, lblDanhMuc,
+            lblGiaBan, lblKichCo, lblSoLuong, lblTrangThai
         };
 
         for (JLabel lbl : nhan) {
@@ -124,25 +119,24 @@ public class SanPham_GUI extends JFrame {
         txttenSP = new JTextField(18);
         txtGiaBan = new JTextField(18);
         txtSoLuong = new JTextField(6);
-        txtTrangThai = new JTextField(18);
-        txtTrangThai.setEditable(false);
+        cboTrangThai = new JComboBox<>(new String[]{"Đang kinh doanh", "Ngừng kinh doanh"});
 
-        cboNCC = new JComboBox<>(new String[]{
-            "-- Chọn nhà cung cấp --"
+        cboThuongHieu = new JComboBox<>(new String[]{
+            "-- Chọn thương hiệu --"
         });
 
-        cboLoaiSP = new JComboBox<>(new String[]{
-            "-- Chọn loại sản phẩm --"
+        cboDanhMuc = new JComboBox<>(new String[]{
+            "-- Chọn danh mục --"
         });
 
-        cboHanSuDung = new JComboBox<>(new String[]{
-            "-- Hạn sử dụng --",
-            "1 tháng", "6 tháng", "9 tháng", "12 tháng"
+        cboKichCo = new JComboBox<>(new String[]{
+            "-- Kích cỡ --",
+            "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45"
         });
 
-        cboDonVi = new JComboBox<>(new String[]{
-            "-- Đơn vị --",
-            "Cái", "Đôi", "Hộp", "Chai", "Lon", "Thùng"
+        cboMauSac = new JComboBox<>(new String[]{
+            "-- Màu sắc --",
+            "Đen", "Trắng", "Nâu", "Xám", "Xanh", "Đỏ", "Be"
         });
 
        
@@ -153,34 +147,40 @@ public class SanPham_GUI extends JFrame {
         b1.add(txttenSP);
 
        
-        b2.add(lblNCC);
-        b2.add(cboNCC);
+        b2.add(lblThuongHieu);
+        b2.add(cboThuongHieu);
         b2.add(Box.createHorizontalStrut(20));
-        b2.add(lblLoaiSP);
-        b2.add(cboLoaiSP);
+        b2.add(lblDanhMuc);
+        b2.add(cboDanhMuc);
 
      
         b3.add(lblGiaBan);
         b3.add(txtGiaBan);
         b3.add(Box.createHorizontalStrut(20));
-        b3.add(lblHanSuDung);
-        b3.add(cboHanSuDung);
+        b3.add(lblKichCo);
+        b3.add(cboKichCo);
 
  
         JPanel pSoLuong = new JPanel(new BorderLayout(10, 0));
         pSoLuong.add(txtSoLuong, BorderLayout.CENTER);
 
-        Box bDonVi = Box.createHorizontalBox();
-        bDonVi.add(lblDonVi);
-        bDonVi.add(cboDonVi);
+        Box bMauSac = Box.createHorizontalBox();
+        bMauSac.add(lblMauSac);
+        bMauSac.add(cboMauSac);
 
-        pSoLuong.add(bDonVi, BorderLayout.EAST);
+        pSoLuong.add(bMauSac, BorderLayout.EAST);
 
         b4.add(lblSoLuong);
         b4.add(pSoLuong);
         b4.add(Box.createHorizontalStrut(20));
         b4.add(lblTrangThai);
-        b4.add(txtTrangThai);
+        b4.add(cboTrangThai);
+
+        Dimension kichThuoc = new Dimension(Integer.MAX_VALUE, 28);
+        b1.setMaximumSize(kichThuoc);
+        b2.setMaximumSize(kichThuoc);
+        b3.setMaximumSize(kichThuoc);
+        b4.setMaximumSize(kichThuoc);
 
         b.add(b1);
         b.add(Box.createVerticalStrut(10));
@@ -189,6 +189,7 @@ public class SanPham_GUI extends JFrame {
         b.add(b3);
         b.add(Box.createVerticalStrut(10));
         b.add(b4);
+        b.add(Box.createVerticalGlue());
 
         pThongTin.add(b, BorderLayout.CENTER);
 
@@ -221,13 +222,13 @@ public class SanPham_GUI extends JFrame {
         txtTimMaSP = new JTextField(10);
         txtTimTenSP = new JTextField(10);
 
-        cboTimLoaiSP = new JComboBox<>(new String[]{
-            "-- Tất cả loại sản phẩm --"
+        cboTimDanhMuc = new JComboBox<>(new String[]{
+            "-- Tất cả danh mục --"
         });
 
         cboTimTrangThai = new JComboBox<>(new String[]{
             "-- Tất cả trạng thái --",
-            "Còn hàng", "Hết hàng", "Sắp hết hàng"
+            "Đang kinh doanh", "Ngừng kinh doanh"
         });
 
         bTim.add(new JLabel("Mã sản phẩm: "));
@@ -238,8 +239,8 @@ public class SanPham_GUI extends JFrame {
         bTim.add(txtTimTenSP);
         bTim.add(Box.createHorizontalStrut(15));
 
-        bTim.add(new JLabel("Loại sản phẩm: "));
-        bTim.add(cboTimLoaiSP);
+        bTim.add(new JLabel("Danh mục: "));
+        bTim.add(cboTimDanhMuc);
         bTim.add(Box.createHorizontalStrut(15));
 
         bTim.add(new JLabel("Trạng thái: "));
@@ -248,7 +249,7 @@ public class SanPham_GUI extends JFrame {
         pTimKiem.add(bTim, BorderLayout.CENTER);
 
      
-        String[] cot = {"Mã sản phẩm","Tên sản phẩm","Loại sản phẩm","Giá bán","Số lượng","Đơn vị","Nhà cung cấp","Hạn sử dụng","Trạng thái"};
+        String[] cot = {"Mã sản phẩm","Tên sản phẩm","Danh mục","Giá bán","Tồn kho (đôi)","Màu sắc","Thương hiệu","Kích cỡ","Trạng thái"};
 
         model = new DefaultTableModel(cot, 0);
         table = new JTable(model);
