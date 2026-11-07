@@ -1,4 +1,4 @@
-﻿package gui;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,6 +13,7 @@ public class SanPham_GUI extends JFrame {
     private JButton btnChonAnh;
     private JButton btnThuongHieu;
     private JButton btnDanhMuc;
+    private JButton btnChiTietSanPham;
     private JTextField txtmaSP;
     private JTextField txttenSP;
     private JTextField txtGiaBan;
@@ -83,8 +84,10 @@ public class SanPham_GUI extends JFrame {
         JPanel pQuanLy = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
         btnThuongHieu = new JButton("Thương hiệu");
         btnDanhMuc = new JButton("Danh mục");
+        btnChiTietSanPham = new JButton("Chi tiết sản phẩm");
         pQuanLy.add(btnThuongHieu);
         pQuanLy.add(btnDanhMuc);
+        pQuanLy.add(btnChiTietSanPham);
         pBenPhai.add(pQuanLy, BorderLayout.NORTH);
 
       
@@ -258,7 +261,7 @@ public class SanPham_GUI extends JFrame {
         pTimKiem.add(bTim, BorderLayout.CENTER);
 
      
-        String[] cot = {"Mã sản phẩm","Tên sản phẩm","Danh mục","Giá bán","Tồn kho (đôi)","Màu sắc","Thương hiệu","Kích cỡ","Trạng thái"};
+        String[] cot = {"Mã sản phẩm","Tên sản phẩm","Danh mục","Giá bán","Trạng thái"};
 
         model = new DefaultTableModel(cot, 0);
         table = new JTable(model);
