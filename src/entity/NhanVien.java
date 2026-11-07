@@ -57,5 +57,7 @@ public class NhanVien {
     public String toString() {
         return maNhanVien + " " + tenNhanVien;
     }
-
+    public static void main(String[] args) {
+        System.out.println("sas");
+    }
 }
