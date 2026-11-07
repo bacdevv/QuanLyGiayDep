@@ -34,7 +34,7 @@ public class SanPham_GUI extends JFrame {
     private JTable table;
 
     public SanPham_GUI() {
-        setTitle("Quản lý sản phẩm");
+        setTitle("Sản phẩm");
         setSize(1250, 750);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
