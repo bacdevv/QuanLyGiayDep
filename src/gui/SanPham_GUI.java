@@ -11,6 +11,8 @@ import javax.swing.table.DefaultTableModel;
 public class SanPham_GUI extends JFrame {
 
     private JButton btnChonAnh;
+    private JButton btnThuongHieu;
+    private JButton btnDanhMuc;
     private JTextField txtmaSP;
     private JTextField txttenSP;
     private JTextField txtGiaBan;
@@ -47,7 +49,7 @@ public class SanPham_GUI extends JFrame {
 
         JLabel lblTieuDe = new JLabel("SẢN PHẨM");
         lblTieuDe.setFont(new Font("Tahoma", Font.BOLD, 28));
-        lblTieuDe.setForeground(new Color(90, 145, 180));
+        lblTieuDe.setForeground(Color.DARK_GRAY);
 
         pTren.add(lblTieuDe);
         p.add(pTren, BorderLayout.NORTH);
@@ -77,6 +79,13 @@ public class SanPham_GUI extends JFrame {
 
         JPanel pBenPhai = new JPanel(new BorderLayout(0, 10));
         pNhap.add(pBenPhai, BorderLayout.CENTER);
+
+        JPanel pQuanLy = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        btnThuongHieu = new JButton("Thương hiệu");
+        btnDanhMuc = new JButton("Danh mục");
+        pQuanLy.add(btnThuongHieu);
+        pQuanLy.add(btnDanhMuc);
+        pBenPhai.add(pQuanLy, BorderLayout.NORTH);
 
       
 
