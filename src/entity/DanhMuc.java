@@ -60,8 +60,7 @@ public class DanhMuc {
 
     @Override
     public String toString() {
-        return maDanhMuc + " " +tenDanhMuc;
+        return maDanhMuc + " " + tenDanhMuc;
     }
 
-    
 }
