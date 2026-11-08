@@ -104,7 +104,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame {
 		scroll.setPreferredSize(new Dimension(0, 350));
 	}
 
-	// public static void main(String[] args) {
-	// 	new ChiTietPhieuNhap_GUI().setVisible(true);
-	// }
+	public static void main(String[] args) {
+		new ChiTietPhieuNhap_GUI().setVisible(true);
+	}
 }

@@ -52,8 +52,8 @@ public class ChiTietSanPham_GUI extends JFrame {
         p.add(pTren, BorderLayout.NORTH);
 
         String[] cot = {
-            "Mã chi tiết SP", "Mã sản phẩm", "Tên sản phẩm", "Danh mục",
-            "Thương hiệu", "Giá bán", "Kích cỡ", "Màu sắc", "Tồn kho (đôi)", "Trạng thái"
+                "Mã chi tiết SP", "Mã sản phẩm", "Tên sản phẩm", "Danh mục",
+                "Thương hiệu", "Giá bán", "Kích cỡ", "Màu sắc", "Tồn kho (đôi)", "Trạng thái"
         };
         model = new DefaultTableModel(cot, 0);
         table = new JTable(model);

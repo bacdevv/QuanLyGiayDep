@@ -81,7 +81,8 @@ public class NhaCungCap_GUI extends JFrame {
 		pnlCenter.add(btnSua = new JButton("Sửa"));
 		pnlCenter.add(btnLuu = new JButton("Lưu"));
 		pnlCenter.add(new JLabel("Trạng thái: "));
-		pnlCenter.add(cboTrangThai = new JComboBox<String>(new String[] { "Tất cả", "Đang hoạt động", "Ngưng hoạt động" }));
+		pnlCenter.add(
+				cboTrangThai = new JComboBox<String>(new String[] { "Tất cả", "Đang hoạt động", "Ngưng hoạt động" }));
 		cboTrangThai.setPreferredSize(new Dimension(130, 25));
 		pnlCenter.add(btnLoc = new JButton("Lọc theo trạng thái"));
 
@@ -97,7 +98,7 @@ public class NhaCungCap_GUI extends JFrame {
 		scroll.setPreferredSize(new Dimension(0, 350));
 	}
 
-	// public static void main(String[] args) {
-	// 	new NhaCungCap_GUI().setVisible(true);
-	// }
+	public static void main(String[] args) {
+		new NhaCungCap_GUI().setVisible(true);
+	}
 }

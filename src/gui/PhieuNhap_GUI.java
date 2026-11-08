@@ -105,5 +105,7 @@ public class PhieuNhap_GUI extends JFrame {
 		scroll.setPreferredSize(new Dimension(0, 350));
 	}
 
-	
+	public static void main(String[] args) {
+		new PhieuNhap_GUI().setVisible(true);
+	}
 }

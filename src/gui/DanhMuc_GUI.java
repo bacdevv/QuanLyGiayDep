@@ -52,7 +52,7 @@ public class DanhMuc_GUI extends JFrame {
         pTren.add(bThongTin, BorderLayout.SOUTH);
         p.add(pTren, BorderLayout.NORTH);
 
-        String[] cot = {"Mã danh mục", "Tên danh mục"};
+        String[] cot = { "Mã danh mục", "Tên danh mục" };
         model = new DefaultTableModel(cot, 0);
         table = new JTable(model);
         JScrollPane srp = new JScrollPane(table);
