@@ -41,10 +41,7 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        // Panel chính
         JPanel pnlMain = new JPanel(new GridLayout(1, 2));
-
-        // ================= PANEL BÊN TRÁI =================
 
         JPanel pnlLeft = new JPanel();
         pnlLeft.setBackground(new Color(225, 237, 250));
@@ -78,8 +75,6 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         pnlLeft.add(Box.createVerticalStrut(100));
         pnlLeft.add(lblImage);
 
-        // ================= PANEL BÊN PHẢI =================
-
         JPanel pnlRight = new JPanel();
         pnlRight.setBackground(Color.WHITE);
         pnlRight.setLayout(new BoxLayout(pnlRight, BoxLayout.Y_AXIS));
@@ -96,6 +91,7 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         lblSubTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Tên đăng nhập
+        JPanel pDangNhap = new JPanel(new GridLayout(2, 1));
         JLabel lblTenDangNhap = new JLabel("Tên đăng nhập");
         lblTenDangNhap.setFont(new Font("Arial", Font.BOLD, 14));
         lblTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -112,6 +108,7 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
                         new EmptyBorder(5, 10, 5, 10)));
 
         // Mật khẩu
+        JPanel pMatKhau = new JPanel(new GridLayout(2, 1));
         JLabel lblMatKhau = new JLabel("Mật khẩu");
         lblMatKhau.setFont(new Font("Arial", Font.BOLD, 14));
         lblMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -173,23 +170,19 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         lblFooter.setForeground(new Color(50, 90, 140));
         lblFooter.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ================= THÊM CÁC THÀNH PHẦN =================
-
         pnlRight.add(lblTitle);
         pnlRight.add(Box.createVerticalStrut(10));
 
         pnlRight.add(lblSubTitle);
         pnlRight.add(Box.createVerticalStrut(45));
 
-        pnlRight.add(lblTenDangNhap);
-        pnlRight.add(Box.createVerticalStrut(8));
-        pnlRight.add(txtTenDangNhap);
-        pnlRight.add(Box.createVerticalStrut(22));
+        pDangNhap.add(lblTenDangNhap);
+        pDangNhap.add(txtTenDangNhap);
+        pnlRight.add(pDangNhap);
 
-        pnlRight.add(lblMatKhau);
-        pnlRight.add(Box.createVerticalStrut(8));
-        pnlRight.add(txtMatKhau);
-        pnlRight.add(Box.createVerticalStrut(12));
+        pMatKhau.add(lblMatKhau);
+        pMatKhau.add(txtMatKhau);
+        pnlRight.add(pMatKhau);
 
         pnlRight.add(chkHienMatKhau);
         pnlRight.add(Box.createVerticalStrut(30));
@@ -199,15 +192,11 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
 
         pnlRight.add(lblFooter);
 
-        // ================= GHÉP GIAO DIỆN =================
-
         pnlMain.add(pnlLeft);
         pnlMain.add(pnlRight);
 
         add(pnlMain);
     }
-
-    // ================= XỬ LÝ SỰ KIỆN =================
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -257,12 +246,8 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         }
     }
 
-    // ================= HÀM MAIN =================
-
     public static void main(String[] args) {
 
-        SwingUtilities.invokeLater(() -> {
-            new NhanVien_GUI().setVisible(true);
-        });
+        new NhanVien_GUI().setVisible(true);
     }
 }
