@@ -1,8 +1,10 @@
 package entity;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class PhieuDoiTra {
+
     private String maPDT;
     private HoaDon hoaDonGoc;
     private HoaDon hoaDonMoi;
@@ -11,16 +13,14 @@ public class PhieuDoiTra {
     private String lyDo;
 
     public PhieuDoiTra() {
-
     }
 
     public PhieuDoiTra(String maPDT) {
-        super();
         this.maPDT = maPDT;
     }
 
-    public PhieuDoiTra(String maPDT, HoaDon hoaDonGoc, HoaDon hoaDonMoi, NhanVien nhanVien, LocalDateTime ngayLap,
-            String lyDo) {
+    public PhieuDoiTra(String maPDT, HoaDon hoaDonGoc, HoaDon hoaDonMoi,
+            NhanVien nhanVien, LocalDateTime ngayLap, String lyDo) {
         this.maPDT = maPDT;
         this.hoaDonGoc = hoaDonGoc;
         this.hoaDonMoi = hoaDonMoi;
@@ -76,38 +76,27 @@ public class PhieuDoiTra {
     public void setLyDo(String lyDo) {
         if (lyDo == null || lyDo.isBlank())
             throw new IllegalArgumentException("Lý do đổi trả không được rỗng");
-
-        this.lyDo = lyDo.trim();
+        lyDo = lyDo.trim();
+        this.lyDo = lyDo;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((maPDT == null) ? 0 : maPDT.hashCode());
-        return result;
+        return Objects.hash(maPDT);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof PhieuDoiTra))
             return false;
         PhieuDoiTra other = (PhieuDoiTra) obj;
-        if (maPDT == null) {
-            if (other.maPDT != null)
-                return false;
-        } else if (!maPDT.equals(other.maPDT))
-            return false;
-        return true;
+        return Objects.equals(maPDT, other.maPDT);
     }
 
     @Override
     public String toString() {
         return maPDT + " " + lyDo;
     }
-
 }

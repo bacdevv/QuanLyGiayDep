@@ -1,23 +1,24 @@
 package entity;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class ChiTietHoaDon {
+
     private HoaDon hoaDon;
     private ChiTietSanPham chiTietSanPham;
     private int soLuong;
     private BigDecimal donGia;
 
     public ChiTietHoaDon() {
-
     }
 
     public ChiTietHoaDon(HoaDon hoaDon) {
-        super();
         this.hoaDon = hoaDon;
     }
 
-    public ChiTietHoaDon(HoaDon hoaDon, ChiTietSanPham chiTietSanPham, int soLuong, BigDecimal donGia) {
+    public ChiTietHoaDon(HoaDon hoaDon, ChiTietSanPham chiTietSanPham,
+            int soLuong, BigDecimal donGia) {
         this.hoaDon = hoaDon;
         this.chiTietSanPham = chiTietSanPham;
         setSoLuong(soLuong);
@@ -65,7 +66,23 @@ public class ChiTietHoaDon {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(hoaDon, chiTietSanPham);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof ChiTietHoaDon))
+            return false;
+        ChiTietHoaDon other = (ChiTietHoaDon) obj;
+        return Objects.equals(hoaDon, other.hoaDon)
+                && Objects.equals(chiTietSanPham, other.chiTietSanPham);
+    }
+
+    @Override
     public String toString() {
-        return hoaDon.getMaHD();
+        return hoaDon == null ? "" : hoaDon.getMaHD();
     }
 }
