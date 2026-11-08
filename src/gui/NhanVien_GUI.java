@@ -1,253 +1,141 @@
 
 package gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 
 public class NhanVien_GUI extends JFrame implements ActionListener {
 
-	private JTextField txtTenDangNhap;
-	private JPasswordField txtMatKhau;
+    private JTextField txtTenDN;
+    private JCheckBox chkHienMatKhau;
+    private JPasswordField txtMatKhau;
 
-	private JCheckBox chkHienMatKhau;
+    private JButton btnDangNhap;
+    private JButton btnThoat;
 
-	private JButton btnDangNhap, btnThoat;
+    public NhanVien_GUI() {
 
-	public NhanVien_GUI() {
+        setTitle("Quản lý giày dép");
+        setSize(600, 480);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-		setTitle("Đăng Nhập Hệ Thống");
-		setSize(900, 550);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setResizable(false);
+        JPanel p = new JPanel(new BorderLayout(10, 20));
+        p.setBorder(BorderFactory.createEmptyBorder(30, 35, 25, 35));
+        add(p);
 
-		JPanel pnlMain = new JPanel(new GridLayout(1, 2));
+        JPanel pTren = new JPanel(new GridLayout(2, 1, 0, 10));
 
-		JPanel pnlLeft = new JPanel();
-		pnlLeft.setBackground(new Color(225, 237, 250));
-		pnlLeft.setLayout(new BoxLayout(pnlLeft, BoxLayout.Y_AXIS));
-		pnlLeft.setBorder(new EmptyBorder(70, 30, 30, 30));
+        JPanel plb = new JPanel();
+        JLabel lblTieuDe = new JLabel("QUẢN LÝ GIÀY DÉP");
+        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 25));
 
-		JLabel lblIcon = new JLabel("👟");
-		lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 75));
-		lblIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel plb2 = new JPanel();
 
-		JLabel lblLogo = new JLabel("ShoeStore");
-		lblLogo.setFont(new Font("Arial", Font.BOLD, 38));
-		lblLogo.setForeground(new Color(24, 72, 130));
-		lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel lblDangNhap = new JLabel("ĐĂNG NHẬP");
+        lblDangNhap.setFont(new Font("Arial", Font.BOLD, 18));
 
-		JLabel lblSlogan = new JLabel("Thời trang giày - Phong cách của bạn");
-		lblSlogan.setFont(new Font("Arial", Font.ITALIC, 14));
-		lblSlogan.setForeground(new Color(70, 90, 120));
-		lblSlogan.setAlignmentX(Component.CENTER_ALIGNMENT);
+        plb.add(lblTieuDe);
+        plb2.add(lblDangNhap);
 
-		JLabel lblImage = new JLabel("GIÀY THỂ THAO");
-		lblImage.setFont(new Font("Arial", Font.BOLD, 24));
-		lblImage.setForeground(new Color(35, 85, 145));
-		lblImage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        pTren.add(plb);
+        pTren.add(plb2);
 
-		pnlLeft.add(lblIcon);
-		pnlLeft.add(Box.createVerticalStrut(15));
-		pnlLeft.add(lblLogo);
-		pnlLeft.add(Box.createVerticalStrut(10));
-		pnlLeft.add(lblSlogan);
-		pnlLeft.add(Box.createVerticalStrut(100));
-		pnlLeft.add(lblImage);
+        p.add(pTren, BorderLayout.NORTH);
 
-		JPanel pnlRight = new JPanel();
-		pnlRight.setBackground(Color.WHITE);
-		pnlRight.setLayout(new BoxLayout(pnlRight, BoxLayout.Y_AXIS));
-		pnlRight.setBorder(new EmptyBorder(65, 45, 40, 45));
+        JPanel pGiua = new JPanel();
+        pGiua.setLayout(new BoxLayout(pGiua, BoxLayout.Y_AXIS));
 
-		JLabel lblTitle = new JLabel("ĐĂNG NHẬP");
-		lblTitle.setFont(new Font("Arial", Font.BOLD, 30));
-		lblTitle.setForeground(new Color(24, 72, 130));
-		lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Tên đăng nhập
+        JLabel lblTenDN = new JLabel("Tên đăng nhập");
+        lblTenDN.setFont(new Font("Arial", Font.BOLD, 16));
 
-		JLabel lblSubTitle = new JLabel("Tài khoản nhân viên");
-		lblSubTitle.setFont(new Font("Arial", Font.PLAIN, 17));
-		lblSubTitle.setForeground(Color.GRAY);
-		lblSubTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel ptxt1 = new JPanel();
+        txtTenDN = new JTextField();
+        txtTenDN.setFont(new Font("Arial", Font.PLAIN, 16));
+        txtTenDN.setPreferredSize(new Dimension(500, 38));
+        ptxt1.add(txtTenDN);
 
-		// Tên đăng nhập
-		JPanel pDangNhap = new JPanel(new GridLayout(2, 1));
-		JLabel lblTenDangNhap = new JLabel("Tên đăng nhập");
-		lblTenDangNhap.setFont(new Font("Arial", Font.BOLD, 14));
-		lblTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // Mật khẩu
+        JLabel lblMatKhau = new JLabel("Mật khẩu");
+        lblMatKhau.setFont(new Font("Arial", Font.BOLD, 16));
 
-		txtTenDangNhap = new JTextField();
-		txtTenDangNhap.setFont(new Font("Arial", Font.PLAIN, 16));
-		txtTenDangNhap.setPreferredSize(new Dimension(350, 42));
-		txtTenDangNhap.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
-		txtTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel ptxt2 = new JPanel();
+        txtMatKhau = new JPasswordField();
+        txtMatKhau.setFont(new Font("Arial", Font.PLAIN, 16));
+        txtMatKhau.setPreferredSize(new Dimension(500, 38));
 
-		txtTenDangNhap.setBorder(
-				BorderFactory.createCompoundBorder(
-						BorderFactory.createLineBorder(new Color(190, 205, 225)),
-						new EmptyBorder(5, 10, 5, 10)));
+        ptxt2.add(txtMatKhau);
 
-		// Mật khẩu
-		JPanel pMatKhau = new JPanel(new GridLayout(2, 1));
-		JLabel lblMatKhau = new JLabel("Mật khẩu");
-		lblMatKhau.setFont(new Font("Arial", Font.BOLD, 14));
-		lblMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // Hiển thị mật khẩu
+        chkHienMatKhau = new JCheckBox("Hiển thị mật khẩu");
+        chkHienMatKhau.setFont(new Font("Arial", Font.PLAIN, 15));
 
-		txtMatKhau = new JPasswordField();
-		txtMatKhau.setFont(new Font("Arial", Font.PLAIN, 16));
-		txtMatKhau.setPreferredSize(new Dimension(350, 42));
-		txtMatKhau.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
-		txtMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // Thêm thành phần vào panel giữa
+        pGiua.add(lblTenDN);
+        pGiua.add(Box.createVerticalStrut(8));
+        pGiua.add(ptxt1);
+        pGiua.add(Box.createVerticalStrut(15));
 
-		txtMatKhau.setBorder(
-				BorderFactory.createCompoundBorder(
-						BorderFactory.createLineBorder(new Color(190, 205, 225)),
-						new EmptyBorder(5, 10, 5, 10)));
+        pGiua.add(lblMatKhau);
+        pGiua.add(Box.createVerticalStrut(8));
+        pGiua.add(ptxt2);
+        pGiua.add(Box.createVerticalStrut(5));
 
-		// Hiển thị mật khẩu
-		chkHienMatKhau = new JCheckBox("Hiển thị mật khẩu");
-		chkHienMatKhau.setBackground(Color.WHITE);
-		chkHienMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pGiua.add(chkHienMatKhau);
 
-		chkHienMatKhau.addActionListener(e -> {
-			if (chkHienMatKhau.isSelected()) {
-				txtMatKhau.setEchoChar((char) 0);
-			} else {
-				txtMatKhau.setEchoChar('•');
-			}
-		});
+        p.add(pGiua, BorderLayout.CENTER);
 
-		// Nút đăng nhập
-		btnDangNhap = new JButton("ĐĂNG NHẬP");
-		btnDangNhap.setFont(new Font("Arial", Font.BOLD, 15));
-		btnDangNhap.setForeground(Color.WHITE);
-		btnDangNhap.setBackground(new Color(35, 100, 180));
-		btnDangNhap.setFocusPainted(false);
-		btnDangNhap.setBorderPainted(false);
-		btnDangNhap.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		btnDangNhap.addActionListener(this);
+        JPanel pCuoi = new JPanel();
 
-		// Nút thoát
-		btnThoat = new JButton("THOÁT");
-		btnThoat.setFont(new Font("Arial", Font.BOLD, 15));
-		btnThoat.setForeground(Color.WHITE);
-		btnThoat.setBackground(new Color(130, 145, 165));
-		btnThoat.setFocusPainted(false);
-		btnThoat.setBorderPainted(false);
-		btnThoat.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		btnThoat.addActionListener(this);
+        btnDangNhap = new JButton("ĐĂNG NHẬP");
+        btnDangNhap.setFont(new Font("Arial", Font.BOLD, 16));
 
-		JPanel pnlButton = new JPanel(new GridLayout(1, 2, 15, 0));
-		pnlButton.setBackground(Color.WHITE);
-		pnlButton.setMaximumSize(new Dimension(350, 48));
-		pnlButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnThoat = new JButton("THOÁT");
+        btnThoat.setFont(new Font("Arial", Font.BOLD, 16));
 
-		pnlButton.add(btnDangNhap);
-		pnlButton.add(btnThoat);
+        pCuoi.add(btnDangNhap);
+        pCuoi.add(btnThoat);
 
-		JLabel lblFooter = new JLabel("Hệ Thống Quản Lý Bán Hàng Giày");
-		lblFooter.setFont(new Font("Arial", Font.ITALIC, 13));
-		lblFooter.setForeground(new Color(50, 90, 140));
-		lblFooter.setAlignmentX(Component.CENTER_ALIGNMENT);
+        p.add(pCuoi, BorderLayout.SOUTH);
 
-		pnlRight.add(lblTitle);
-		pnlRight.add(Box.createVerticalStrut(10));
+        // Đăng ký sự kiện
+        btnDangNhap.addActionListener(this);
+        btnThoat.addActionListener(this);
+        chkHienMatKhau.addActionListener(this);
 
-		pnlRight.add(lblSubTitle);
-		pnlRight.add(Box.createVerticalStrut(45));
+        setVisible(true);
+    }
 
-		pDangNhap.add(lblTenDangNhap);
-		pDangNhap.add(txtTenDangNhap);
-		pnlRight.add(pDangNhap);
+    public static void main(String[] args) {
+        new NhanVien_GUI();
+    }
 
-		pMatKhau.add(lblMatKhau);
-		pMatKhau.add(txtMatKhau);
-		pnlRight.add(pMatKhau);
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-		pnlRight.add(chkHienMatKhau);
-		pnlRight.add(Box.createVerticalStrut(30));
+        if (e.getSource() == chkHienMatKhau) {
 
-		pnlRight.add(pnlButton);
-		pnlRight.add(Box.createVerticalStrut(40));
-
-		pnlRight.add(lblFooter);
-
-		pnlMain.add(pnlLeft);
-		pnlMain.add(pnlRight);
-
-		add(pnlMain);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		if (e.getSource() == btnDangNhap) {
-
-			String tenDangNhap = txtTenDangNhap.getText().trim();
-
-			String matKhau = new String(txtMatKhau.getPassword());
-
-			if (tenDangNhap.isEmpty() || matKhau.isEmpty()) {
-
-				JOptionPane.showMessageDialog(
-						this,
-						"Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
-
-			} else if (tenDangNhap.equals("nhanvien")
-					&& matKhau.equals("123456")) {
-
-				JOptionPane.showMessageDialog(
-						this,
-						"Đăng nhập thành công!");
-
-				// TODO: Mở giao diện quản lý bán hàng tại đây
-
-			} else {
-
-				JOptionPane.showMessageDialog(
-						this,
-						"Tên đăng nhập hoặc mật khẩu không đúng!",
-						"Thông báo",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		}
-
-		if (e.getSource() == btnThoat) {
-
-			int chon = JOptionPane.showConfirmDialog(
-					this,
-					"Bạn có chắc chắn muốn thoát?",
-					"Xác nhận",
-					JOptionPane.YES_NO_OPTION);
-
-			if (chon == JOptionPane.YES_OPTION) {
-				System.exit(0);
-			}
-		}
-	}
-
-	public static void main(String[] args) {
-
-		new NhanVien_GUI().setVisible(true);
-	}
+            if (chkHienMatKhau.isSelected()) {
+                txtMatKhau.setEchoChar((char) 0);
+            } else {
+                txtMatKhau.setEchoChar('•');
+            }
+        }
+    }
 }
