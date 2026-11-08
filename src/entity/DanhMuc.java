@@ -31,6 +31,32 @@ public class DanhMuc {
     public void setTenDanhMuc(String tenDanhMuc) {
         this.tenDanhMuc = tenDanhMuc;
     }
+    
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((maDanhMuc == null) ? 0 : maDanhMuc.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DanhMuc other = (DanhMuc) obj;
+        if (maDanhMuc == null) {
+            if (other.maDanhMuc != null)
+                return false;
+        } else if (!maDanhMuc.equals(other.maDanhMuc))
+            return false;
+        return true;
+    }
 
     @Override
     public String toString() {
