@@ -118,8 +118,8 @@ public class PhieuDoiTra_GUI extends JFrame {
 
         JPanel pnlHangDaMua = new JPanel(new BorderLayout());
         pnlHangDaMua.setBorder(BorderFactory.createTitledBorder("Hàng trong hóa đơn gốc"));
-        String[] colHeader = {"Mã biến thể", "Tên giày/dép", "Size", "Màu",
-                "Đã mua", "Đã trả", "Còn được trả", "Đơn giá gốc"};
+        String[] colHeader = { "Mã biến thể", "Tên giày/dép", "Size", "Màu",
+                "Đã mua", "Đã trả", "Còn được trả", "Đơn giá gốc" };
         modelHangDaMua = new DefaultTableModel(colHeader, 0);
         tableHangDaMua = new JTable(modelHangDaMua);
         tableHangDaMua.setDefaultEditor(Object.class, null);

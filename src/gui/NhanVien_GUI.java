@@ -122,10 +122,6 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
-        new NhanVien_GUI();
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
 
@@ -138,4 +134,9 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
             }
         }
     }
+
+    public static void main(String[] args) {
+        new NhanVien_GUI();
+    }
+
 }
