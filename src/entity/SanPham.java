@@ -10,16 +10,13 @@ public class SanPham {
     private boolean hoatDong;
     private BigDecimal giaBan;
 
-
-    public SanPham(){
+    public SanPham() {
 
     }
-
 
     public SanPham(String maSP) {
         this.maSP = maSP;
     }
-
 
     public SanPham(String maSP, DanhMuc danhMuc, ThuongHieu thuongHieu, String tenSP, boolean hoatDong,
             BigDecimal giaBan) {
@@ -31,68 +28,49 @@ public class SanPham {
         this.giaBan = giaBan;
     }
 
-
     public String getMaSP() {
         return maSP;
     }
-
 
     public void setMaSP(String maSP) {
         this.maSP = maSP;
     }
 
-
     public DanhMuc getDanhMuc() {
         return danhMuc;
     }
-
 
     public void setDanhMuc(DanhMuc danhMuc) {
         this.danhMuc = danhMuc;
     }
 
-
     public ThuongHieu getThuongHieu() {
         return thuongHieu;
     }
-
 
     public void setThuongHieu(ThuongHieu thuongHieu) {
         this.thuongHieu = thuongHieu;
     }
 
-
     public String getTenSP() {
         return tenSP;
     }
-
 
     public void setTenSP(String tenSP) {
         this.tenSP = tenSP;
     }
 
-
     public boolean isHoatDong() {
         return hoatDong;
     }
-
 
     public void setHoatDong(boolean hoatDong) {
         this.hoatDong = hoatDong;
     }
 
-
     public BigDecimal getGiaBan() {
         return giaBan;
     }
-
-
-    public void setGiaBan(BigDecimal giaBan) {
-        this.giaBan = giaBan;
-    }
-
-    
-
 
     @Override
     public int hashCode() {
@@ -101,7 +79,6 @@ public class SanPham {
         result = prime * result + ((maSP == null) ? 0 : maSP.hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -120,11 +97,9 @@ public class SanPham {
         return true;
     }
 
-
     @Override
     public String toString() {
-        return maSP +" "+  danhMuc +" "+  thuongHieu +" "+  tenSP;
+        return maSP + " " + danhMuc + " " + thuongHieu + " " + tenSP;
     }
 
-    
 }

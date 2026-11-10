@@ -11,6 +11,10 @@ public class ChiTietPhieuNhap {
     public ChiTietPhieuNhap() {
     }
 
+    public ChiTietPhieuNhap(PhieuNhap phieuNhap) {
+        this.phieuNhap = phieuNhap;
+    }
+
     public ChiTietPhieuNhap(ChiTietSanPham chiTietSanPham, BigDecimal donGiaNhap, PhieuNhap phieuNhap, int soLuong) {
         this.chiTietSanPham = chiTietSanPham;
         this.donGiaNhap = donGiaNhap;

@@ -31,7 +31,6 @@ public class DanhMuc {
     public void setTenDanhMuc(String tenDanhMuc) {
         this.tenDanhMuc = tenDanhMuc;
     }
-    
 
     @Override
     public int hashCode() {

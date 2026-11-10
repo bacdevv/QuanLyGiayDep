@@ -20,7 +20,6 @@ public class KhachHang {
     }
 
     public KhachHang() {
-        this("", "", "");
     }
 
     public String getMaKH() {

@@ -8,10 +8,8 @@ public class ChiTietSanPham {
     private int soLuongTon;
     private boolean hoatDong;
 
-
     public ChiTietSanPham() {
     }
-
 
     public ChiTietSanPham(String maCTSP) {
         this.maCTSP = maCTSP;
@@ -27,66 +25,53 @@ public class ChiTietSanPham {
         this.hoatDong = hoatDong;
     }
 
-
     public String getMaCTSP() {
         return maCTSP;
     }
-
 
     public void setMaCTSP(String maCTSP) {
         this.maCTSP = maCTSP;
     }
 
-
     public SanPham getSanPham() {
         return sanPham;
     }
-
 
     public void setSanPham(SanPham sanPham) {
         this.sanPham = sanPham;
     }
 
-
     public String getKichCo() {
         return kichCo;
     }
-
 
     public void setKichCo(String kichCo) {
         this.kichCo = kichCo;
     }
 
-
     public String getMauSac() {
         return mauSac;
     }
-
 
     public void setMauSac(String mauSac) {
         this.mauSac = mauSac;
     }
 
-
     public int getSoLuongTon() {
         return soLuongTon;
     }
-
 
     public void setSoLuongTon(int soLuongTon) {
         this.soLuongTon = soLuongTon;
     }
 
-
     public boolean isHoatDong() {
         return hoatDong;
     }
 
-
     public void setHoatDong(boolean hoatDong) {
         this.hoatDong = hoatDong;
     }
-
 
     @Override
     public int hashCode() {
@@ -95,7 +80,6 @@ public class ChiTietSanPham {
         result = prime * result + ((maCTSP == null) ? 0 : maCTSP.hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -114,11 +98,9 @@ public class ChiTietSanPham {
         return true;
     }
 
-
     @Override
     public String toString() {
         return maCTSP + " " + sanPham + " " + soLuongTon;
     }
 
-    
 }

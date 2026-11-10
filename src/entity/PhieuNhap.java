@@ -8,41 +8,53 @@ public class PhieuNhap {
     private NhaCungCap nhaCungCap;
     private NhanVien nhanVien;
     private LocalDateTime ngayNhap;
-    public String getMaPN() {
-        return maPN;
-    }
-    public void setMaPN(String maPN) {
+
+    public PhieuNhap(String maPN) {
         this.maPN = maPN;
+
     }
-    public NhaCungCap getNhaCungCap() {
-        return nhaCungCap;
+
+    public PhieuNhap() {
     }
-    public void setNhaCungCap(NhaCungCap nhaCungCap) {
-        this.nhaCungCap = nhaCungCap;
-    }
-    public NhanVien getNhanVien() {
-        return nhanVien;
-    }
-    public void setNhanVien(NhanVien nhanVien) {
-        this.nhanVien = nhanVien;
-    }
-    public LocalDateTime getNgayNhap() {
-        return ngayNhap;
-    }
-    public void setNgayNhap(LocalDateTime ngayNhap) {
-        this.ngayNhap = ngayNhap;
-    }
+
     public PhieuNhap(String maPN, NhaCungCap nhaCungCap, NhanVien nhanVien, LocalDateTime ngayNhap) {
         this.maPN = maPN;
         this.nhaCungCap = nhaCungCap;
         this.nhanVien = nhanVien;
         this.ngayNhap = ngayNhap;
     }
-    public PhieuNhap(String maPN) {
-        this.maPN = maPN;
-     
+
+    public String getMaPN() {
+        return maPN;
     }
-    public PhieuNhap() { }
+
+    public void setMaPN(String maPN) {
+        this.maPN = maPN;
+    }
+
+    public NhaCungCap getNhaCungCap() {
+        return nhaCungCap;
+    }
+
+    public void setNhaCungCap(NhaCungCap nhaCungCap) {
+        this.nhaCungCap = nhaCungCap;
+    }
+
+    public NhanVien getNhanVien() {
+        return nhanVien;
+    }
+
+    public void setNhanVien(NhanVien nhanVien) {
+        this.nhanVien = nhanVien;
+    }
+
+    public LocalDateTime getNgayNhap() {
+        return ngayNhap;
+    }
+
+    public void setNgayNhap(LocalDateTime ngayNhap) {
+        this.ngayNhap = ngayNhap;
+    }
 
     @Override
     public String toString() {
@@ -77,6 +89,5 @@ public class PhieuNhap {
         final PhieuNhap other = (PhieuNhap) obj;
         return Objects.equals(this.maPN, other.maPN);
     }
-    
-    
+
 }

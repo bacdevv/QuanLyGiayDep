@@ -57,7 +57,30 @@ public class NhanVien {
     public String toString() {
         return maNhanVien + " " + tenNhanVien;
     }
-    public static void main(String[] args) {
-        System.out.println("sas");
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((maNhanVien == null) ? 0 : maNhanVien.hashCode());
+        return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NhanVien other = (NhanVien) obj;
+        if (maNhanVien == null) {
+            if (other.maNhanVien != null)
+                return false;
+        } else if (!maNhanVien.equals(other.maNhanVien))
+            return false;
+        return true;
+    }
+
 }

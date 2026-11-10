@@ -16,8 +16,10 @@ public class NhaCungCap {
     }
 
     public NhaCungCap(String maNCC) {
-
         this.maNCC = maNCC;
+    }
+
+    public NhaCungCap() {
 
     }
 

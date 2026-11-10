@@ -52,7 +52,7 @@ public class ThuongHieu_GUI extends JFrame {
         pTren.add(bThongTin, BorderLayout.SOUTH);
         p.add(pTren, BorderLayout.NORTH);
 
-        String[] cot = {"Mã thương hiệu", "Tên thương hiệu"};
+        String[] cot = { "Mã thương hiệu", "Tên thương hiệu" };
         model = new DefaultTableModel(cot, 0);
         table = new JTable(model);
         JScrollPane srp = new JScrollPane(table);
