@@ -35,6 +35,7 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
         private JTextField txtmaSP;
         private JTextField txttenSP;
         private JTextField txtGiaBan;
+        private JTextField txtThongBao;
         private JComboBox<String> cboTrangThai;
         private JComboBox<String> cboThuongHieu;
         private JComboBox<String> cboDanhMuc;
@@ -46,8 +47,6 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
         private JButton btnTim;
         private JTextField txtTimMaSP;
         private JTextField txtTimTenSP;
-        private JComboBox<String> cboTimDanhMuc;
-        private JComboBox<String> cboTimTrangThai;
         private DefaultTableModel model;
         private JTable table;
 
@@ -208,7 +207,17 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
                 pNut.add(btnXoa);
                 pNut.add(btnLamMoi);
 
-                pThongTin.add(pNut, BorderLayout.SOUTH);
+                txtThongBao = new JTextField();
+                txtThongBao.setEditable(false);
+                txtThongBao.setFocusable(false);
+                txtThongBao.setForeground(Color.RED);
+                txtThongBao.setOpaque(false);
+                txtThongBao.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
+                txtThongBao.setPreferredSize(new Dimension(0, 24));
+                JPanel pThongBaoVaNut = new JPanel(new BorderLayout(0, 3));
+                pThongBaoVaNut.add(txtThongBao, BorderLayout.NORTH);
+                pThongBaoVaNut.add(pNut, BorderLayout.CENTER);
+                pThongTin.add(pThongBaoVaNut, BorderLayout.SOUTH);
 
                 JPanel pDanhSach = new JPanel(new BorderLayout(0, 15));
                 pGiua.add(pDanhSach, BorderLayout.CENTER);
@@ -222,14 +231,6 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
                 txtTimMaSP = new JTextField(10);
                 txtTimTenSP = new JTextField(10);
 
-                cboTimDanhMuc = new JComboBox<>(new String[] {
-                                "-- Tất cả danh mục --"
-                });
-
-                cboTimTrangThai = new JComboBox<>(new String[] {
-                                "-- Tất cả trạng thái --"
-                });
-
                 bTim.add(new JLabel("Mã sản phẩm: "));
                 bTim.add(txtTimMaSP);
                 bTim.add(Box.createHorizontalStrut(15));
@@ -238,13 +239,6 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
                 bTim.add(txtTimTenSP);
                 bTim.add(Box.createHorizontalStrut(15));
 
-                bTim.add(new JLabel("Danh mục: "));
-                bTim.add(cboTimDanhMuc);
-                bTim.add(Box.createHorizontalStrut(15));
-
-                bTim.add(new JLabel("Trạng thái: "));
-                bTim.add(cboTimTrangThai);
-                bTim.add(Box.createHorizontalStrut(15));
                 btnTim = new JButton("Tìm");
                 bTim.add(btnTim);
 
@@ -283,7 +277,6 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
                 btnThuongHieu.addActionListener(this);
                 btnDanhMuc.addActionListener(this);
                 btnChiTietSanPham.addActionListener(this);
-                cboTimDanhMuc.addActionListener(this);
                 table.addMouseListener(this);
 
         }
@@ -316,6 +309,7 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
 
                 txtGiaBan.setText(model.getValueAt(row, 4).toString());
                 cboTrangThai.setSelectedItem(model.getValueAt(row, 6).toString());
+                txtmaSP.setEditable(false);
 
         }
 
@@ -342,28 +336,24 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
         public void actionPerformed(ActionEvent e) {
                 Object o = e.getSource();
                 if (o.equals(btnThem)) {
-                        String ma = txtmaSP.getText().trim();
-                        String ten = txttenSP.getText().trim();
-
-                        String thuonghieu = cboThuongHieu.getSelectedItem().toString();
-                        String danhmuc = cboDanhMuc.getSelectedItem().toString();
-                        BigDecimal giaBan = new BigDecimal(txtGiaBan.getText().trim());
-                        boolean hoatDong = cboTrangThai.getSelectedItem().toString().equals("Đang kinh doanh");
-
-                        ThuongHieu thieu = new ThuongHieu(thuonghieu);
-                        DanhMuc dmuc = new DanhMuc(danhmuc);
-                        SanPham sp = new SanPham(ma, dmuc, thieu, ten, hoatDong, giaBan);
-                        int tongTon = sp_dao.getTongTon(sp.getMaSP());
-
+                        if (!valiDate())
+                                return;
+                        SanPham sp = reverSanPhamFromTextField();
                         try {
-                                sp_dao.create(sp);
-                                model.addRow(new Object[] {
-                                                sp.getMaSP(), sp.getTenSP(), sp.getThuongHieu().getMaThuongHieu(),
-                                                sp.getDanhMuc().getMaDanhMuc(), sp.getGiaBan(), tongTon,
-                                                sp.isHoatDong() ? "Đang kinh doanh" : "Ngừng kinh doanh"
-                                });
+                                if (sp_dao.create(sp)) {
+                                        model.addRow(new Object[] {
+                                                        sp.getMaSP(), sp.getTenSP(),
+                                                        sp.getThuongHieu().getTenThuongHieu(),
+                                                        sp.getDanhMuc().getTenDanhMuc(), sp.getGiaBan(), 0,
+                                                        sp.isHoatDong() ? "Đang kinh doanh" : "Ngừng kinh doanh"
+                                        });
+                                        clearTextField();
+                                } else {
+                                        txtThongBao.setText(
+                                                        "Không thêm được sản phẩm. Kiểm tra mã trùng hoặc xem lỗi SQL trong Console.");
+                                }
                         } catch (Exception e1) {
-                                JOptionPane.showMessageDialog(this, "Trung ma");
+                                txtThongBao.setText("Không thể thêm sản phẩm: " + e1.getMessage());
                         }
                 } else if (o.equals(btnLamMoi)) {
                         clearTextField();
@@ -390,12 +380,86 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
                         gui.setSanPham(maSP, tenSP);
                         gui.setLocationRelativeTo(this);
                         gui.setVisible(true);
+                } else if (o.equals(btnTim)) {
+                        String maSP = txtTimMaSP.getText().trim();
+                        String tenSP = txtTimTenSP.getText().trim();
+
+                        List<SanPham> dsSP;
+
+                        if (!maSP.isEmpty()) {
+                                dsSP = sp_dao.getSanPhamTheoMaSP(maSP);
+                        } else if (!tenSP.isEmpty()) {
+                                dsSP = sp_dao.getSanPhamTheoTenSP(tenSP);
+                        } else {
+                                dsSP = sp_dao.getallSanPham();
+                        }
+                        model.setRowCount(0);
+                        for (SanPham sp : dsSP) {
+                                int tongTon = sp_dao.getTongTon(sp.getMaSP());
+                                model.addRow(new Object[] {
+                                                sp.getMaSP(), sp.getTenSP(), sp.getThuongHieu().getTenThuongHieu(),
+                                                sp.getDanhMuc().getTenDanhMuc(), sp.getGiaBan(), tongTon,
+                                                sp.isHoatDong() ? "Đang kinh doanh" : "Ngừng kinh doanh"
+                                });
+                        }
+                } else if (o.equals(btnXoa)) {
+                        int row = table.getSelectedRow();
+                        if (row < 0) {
+                                JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm để xóa.");
+                                return;
+                        }
+                        String maSP = model.getValueAt(row, 0).toString();
+                        int BD = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa sản phẩm này?",
+                                        "Xác nhận", JOptionPane.YES_NO_OPTION);
+                        if (BD == JOptionPane.YES_OPTION) {
+                                boolean TC = sp_dao.delete(maSP);
+                                if (TC) {
+                                        model.removeRow(row);
+                                        clearTextField();
+                                        JOptionPane.showMessageDialog(this, "Xóa sản phẩm thành công.");
+                                } else {
+                                        JOptionPane.showMessageDialog(this, "Xóa sản phẩm thất bại.");
+                                }
+                        }
+                } else if (o.equals(btnSua)) {
+                        int row = table.getSelectedRow();
+
+                        if (row < 0) {
+                                JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm để cập nhật.");
+                                return;
+                        }
+
+                        String maSPOld = table.getValueAt(row, 0).toString();
+
+                        if (valiDate()) {
+                                SanPham spNew = reverSanPhamFromTextField();
+                                if (!maSPOld.equals(spNew.getMaSP())) {
+                                        JOptionPane.showMessageDialog(this, "Không được thay đổi mã sản phẩm khi sửa.");
+                                        txtmaSP.requestFocus();
+                                        return;
+                                }
+                                if (sp_dao.update(spNew)) {
+                                        DocDuLieuDatabaseVaoTable();
+                                        for (int i = 0; i < table.getRowCount(); i++) {
+                                                if (maSPOld.equals(table.getValueAt(i, 0).toString())) {
+                                                        table.setRowSelectionInterval(i, i);
+                                                        table.scrollRectToVisible(table.getCellRect(i, 0, true));
+                                                        break;
+                                                }
+                                        }
+                                        JOptionPane.showMessageDialog(this, "Cập nhật sản phẩm thành công.");
+                                } else {
+                                        JOptionPane.showMessageDialog(this,
+                                                        "Cập nhật thất bại. Kiểm tra lỗi SQL trong Console.");
+                                }
+                        }
                 }
         }
 
         public void clearTextField() {
 
                 table.clearSelection();
+                txtThongBao.setText("");
 
                 txtmaSP.setText("");
                 txttenSP.setText("");
@@ -405,5 +469,78 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
                 cboTrangThai.setSelectedIndex(0);
                 txtmaSP.setEditable(true);
                 txtmaSP.requestFocus();
+        }
+
+        private boolean valiDate() {
+                txtThongBao.setText("");
+                String maSP = txtmaSP.getText().trim();
+                String tenSP = txttenSP.getText().trim();
+                String gia = txtGiaBan.getText().trim();
+
+                // SQL: maSP VARCHAR(20), tenSP NVARCHAR(300).
+                if (maSP.isEmpty()) {
+                        txtThongBao.setText("Mã sản phẩm không được rỗng");
+                        txtmaSP.requestFocusInWindow();
+                        return false;
+                }
+                if (maSP.length() > 20) {
+                        txtThongBao.setText("Mã sản phẩm có tối đa 20 ký tự.");
+                        txtmaSP.requestFocusInWindow();
+                        return false;
+                }
+                if (tenSP.isEmpty()) {
+                        txtThongBao.setText("Tên sản phẩm không được rỗng ");
+                        txttenSP.requestFocusInWindow();
+                        return false;
+                }
+                if (tenSP.length() > 300) {
+                        txtThongBao.setText("Tên sản phẩm có tối đa 300 ký tự.");
+                        txttenSP.requestFocusInWindow();
+                        return false;
+                }
+                if (cboThuongHieu.getSelectedIndex() <= 0 || cboThuongHieu.getSelectedIndex() > listTH.size()) {
+                        txtThongBao.setText("Vui lòng chọn thương hiệu.");
+                        cboThuongHieu.requestFocusInWindow();
+                        return false;
+                }
+                if (cboDanhMuc.getSelectedIndex() <= 0 || cboDanhMuc.getSelectedIndex() > listDM.size()) {
+                        txtThongBao.setText("Vui lòng chọn danh mục.");
+                        cboDanhMuc.requestFocusInWindow();
+                        return false;
+                }
+                // Nhập giá bằng chữ số, có thể có phần thập phân sau dấu chấm.
+                if (!gia.matches("[0-9]+(\\.[0-9]{1,2})?")) {
+                        txtThongBao.setText("Giá bán phải là số dương, tối đa 2 số thập phân.(VD: 1000.00)");
+                        txtGiaBan.requestFocusInWindow();
+                        return false;
+                }
+                // SQL: giaBan DECIMAL(18,2), CHECK (giaBan >= 0).
+                if (new BigDecimal(gia).compareTo(new BigDecimal("9999999999999999.99")) > 0) {
+                        txtThongBao.setText("Giá bán không được vượt quá 9999999999999999.99.");
+                        txtGiaBan.requestFocusInWindow();
+                        return false;
+                }
+                if (cboTrangThai.getSelectedIndex() <= 0) {
+                        txtThongBao.setText("Vui lòng chọn trạng thái.");
+                        cboTrangThai.requestFocusInWindow();
+                        return false;
+                }
+                return true;
+        }
+
+        private SanPham reverSanPhamFromTextField() {
+                String maSP = txtmaSP.getText().trim();
+                String tenSP = txttenSP.getText().trim();
+
+                String gia = txtGiaBan.getText().trim();
+                BigDecimal giaBan = gia.isEmpty() ? BigDecimal.ZERO : new BigDecimal(gia);
+
+                ThuongHieu thuongHieu = listTH.get(cboThuongHieu.getSelectedIndex() - 1);
+
+                DanhMuc danhMuc = listDM.get(cboDanhMuc.getSelectedIndex() - 1);
+
+                boolean hoatDong = "Đang kinh doanh".equals(cboTrangThai.getSelectedItem());
+
+                return new SanPham(maSP, danhMuc, thuongHieu, tenSP, hoatDong, giaBan);
         }
 }

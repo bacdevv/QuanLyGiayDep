@@ -22,10 +22,11 @@ public class SanPham_DAO {
         try {
             ConnectDB.getInstance().connect();
             Connection con = ConnectDB.getConnection();
-            String sql = "SELECT sp.*, dm.tenDanhMuc, th.tenThuongHieu FROM SanPham sp "
-                    + "JOIN DanhMuc dm ON sp.maDanhMuc = dm.maDanhMuc "
-                    + "JOIN ThuongHieu th ON sp.maThuongHieu = th.maThuongHieu "
-                    + "ORDER BY sp.maSP";
+            String sql = "Select sp.maSP, sp.maDanhMuc, dm.tenDanhMuc, sp.maThuongHieu, th.tenThuongHieu, sp.tenSP, sp.hoatDong, sp.giaBan "
+                    + "from SanPham sp "
+                    + "join DanhMuc dm on sp.maDanhMuc = dm.maDanhMuc "
+                    + "join ThuongHieu th on sp.maThuongHieu = th.maThuongHieu "
+                    + "ORDER BY maSP";
             try (Statement statement = con.createStatement();
                     ResultSet rs = statement.executeQuery(sql)) {
                 while (rs.next()) {
@@ -82,42 +83,12 @@ public class SanPham_DAO {
         Connection con = ConnectDB.getConnection();
         PreparedStatement statement = null;
         try {
-            String sql = "SELECT * FROM SanPham WHERE maSP = ?";
+            String sql = "SELECT * FROM SanPham sp "
+                    + "JOIN DanhMuc dm ON sp.maDanhMuc = dm.maDanhMuc "
+                    + "JOIN ThuongHieu th ON sp.maThuongHieu = th.maThuongHieu "
+                    + "WHERE sp.maSP = ?";
             statement = con.prepareStatement(sql);
             statement.setString(1, id);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                String maSP = rs.getString("maSP");
-                String tenSP = rs.getString("tenSP");
-                boolean hoatDong = rs.getBoolean("hoatDong");
-                BigDecimal giaBan = rs.getBigDecimal("giaBan");
-                DanhMuc dm = new DanhMuc(rs.getString("maDanhMuc"));
-                ThuongHieu th = new ThuongHieu(rs.getString("maThuongHieu"));
-                SanPham sp = new SanPham(maSP, dm, th, tenSP, hoatDong, giaBan);
-                dsSP.add(sp);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                statement.close();
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
-        return dsSP;
-    }
-
-    public ArrayList<SanPham> getSanPhamTheoDanhMuc(String maDM) {
-        ArrayList<SanPham> dsSP = new ArrayList<SanPham>();
-        ConnectDB.getInstance();
-        Connection con = ConnectDB.getConnection();
-        PreparedStatement statement = null;
-        try {
-            String sql = "SELECT * FROM SanPham WHERE maDanhMuc = ? ORDER BY maSP";
-            statement = con.prepareStatement(sql);
-            statement.setString(1, maDM);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 String maSP = rs.getString("maSP");
@@ -140,6 +111,65 @@ public class SanPham_DAO {
             }
         }
         return dsSP;
+    }
+
+    public ArrayList<SanPham> getSanPhamTheoTenSP(String tenSP) {
+        ArrayList<SanPham> dsSP = new ArrayList<SanPham>();
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement statement = null;
+        try {
+            String sql = "SELECT * FROM SanPham sp "
+                    + "JOIN DanhMuc dm ON sp.maDanhMuc = dm.maDanhMuc "
+                    + "JOIN ThuongHieu th ON sp.maThuongHieu = th.maThuongHieu "
+                    + "WHERE sp.tenSP LIKE ? ORDER BY sp.maSP";
+            statement = con.prepareStatement(sql);
+            statement.setString(1, "%" + tenSP + "%");
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                String maSP = rs.getString("maSP");
+                String tenSanPham = rs.getString("tenSP");
+                boolean hoatDong = rs.getBoolean("hoatDong");
+                BigDecimal giaBan = rs.getBigDecimal("giaBan");
+                DanhMuc dm = new DanhMuc(rs.getString("maDanhMuc"), rs.getString("tenDanhMuc"));
+                ThuongHieu th = new ThuongHieu(rs.getString("maThuongHieu"), rs.getString("tenThuongHieu"));
+                SanPham sp = new SanPham(maSP, dm, th, tenSanPham, hoatDong, giaBan);
+                dsSP.add(sp);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        return dsSP;
+    }
+
+    public boolean delete(String maSP) {
+        int n = 0;
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM SanPham WHERE maSP = ?");
+            stmt.setString(1, maSP);
+            n = stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return n > 0;
     }
 
     public boolean update(SanPham sp) {
@@ -179,6 +209,7 @@ public class SanPham_DAO {
         Connection con = ConnectDB.getConnection();
         PreparedStatement stmt = null;
         ResultSet rs = null;
+
         try {
             stmt = con.prepareStatement("SELECT COALESCE(SUM(soLuongTon), 0) FROM ChiTietSanPham WHERE maSP = ?");
             stmt.setString(1, maSP);
