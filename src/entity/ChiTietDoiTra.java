@@ -20,44 +20,24 @@ public class ChiTietDoiTra {
             int soLuong, int soLuongNhapLai) {
         this.phieuDoiTra = phieuDoiTra;
         this.chiTietSanPham = chiTietSanPham;
-        setSoLuong(soLuong);
-        setSoLuongNhapLai(soLuongNhapLai);
+        this.soLuong = soLuong;
+        this.soLuongNhapLai = soLuongNhapLai;
     }
 
     public PhieuDoiTra getPhieuDoiTra() {
         return phieuDoiTra;
     }
 
-    public void setPhieuDoiTra(PhieuDoiTra phieuDoiTra) {
-        this.phieuDoiTra = phieuDoiTra;
-    }
-
     public ChiTietSanPham getChiTietSanPham() {
         return chiTietSanPham;
-    }
-
-    public void setChiTietSanPham(ChiTietSanPham chiTietSanPham) {
-        this.chiTietSanPham = chiTietSanPham;
     }
 
     public int getSoLuong() {
         return soLuong;
     }
 
-    public void setSoLuong(int soLuong) {
-        if (soLuong <= 0 || soLuong < soLuongNhapLai)
-            throw new IllegalArgumentException("Số lượng không hợp lệ");
-        this.soLuong = soLuong;
-    }
-
     public int getSoLuongNhapLai() {
         return soLuongNhapLai;
-    }
-
-    public void setSoLuongNhapLai(int soLuongNhapLai) {
-        if (soLuongNhapLai < 0 || soLuongNhapLai > soLuong)
-            throw new IllegalArgumentException("Số lượng nhập lại không hợp lệ");
-        this.soLuongNhapLai = soLuongNhapLai;
     }
 
     @Override

@@ -11,6 +11,7 @@ public class PhieuDoiTra {
     private NhanVien nhanVien;
     private LocalDateTime ngayLap;
     private String lyDo;
+    private String trangThai;
 
     public PhieuDoiTra() {
     }
@@ -20,64 +21,43 @@ public class PhieuDoiTra {
     }
 
     public PhieuDoiTra(String maPDT, HoaDon hoaDonGoc, HoaDon hoaDonMoi,
-            NhanVien nhanVien, LocalDateTime ngayLap, String lyDo) {
+            NhanVien nhanVien, LocalDateTime ngayLap, String lyDo,
+            String trangThai) {
         this.maPDT = maPDT;
         this.hoaDonGoc = hoaDonGoc;
         this.hoaDonMoi = hoaDonMoi;
         this.nhanVien = nhanVien;
         this.ngayLap = ngayLap;
-        setLyDo(lyDo);
+        this.lyDo = lyDo;
+        this.trangThai = trangThai;
     }
 
     public String getMaPDT() {
         return maPDT;
     }
 
-    public void setMaPDT(String maPDT) {
-        this.maPDT = maPDT;
-    }
-
     public HoaDon getHoaDonGoc() {
         return hoaDonGoc;
-    }
-
-    public void setHoaDonGoc(HoaDon hoaDonGoc) {
-        this.hoaDonGoc = hoaDonGoc;
     }
 
     public HoaDon getHoaDonMoi() {
         return hoaDonMoi;
     }
 
-    public void setHoaDonMoi(HoaDon hoaDonMoi) {
-        this.hoaDonMoi = hoaDonMoi;
-    }
-
     public NhanVien getNhanVien() {
         return nhanVien;
-    }
-
-    public void setNhanVien(NhanVien nhanVien) {
-        this.nhanVien = nhanVien;
     }
 
     public LocalDateTime getNgayLap() {
         return ngayLap;
     }
 
-    public void setNgayLap(LocalDateTime ngayLap) {
-        this.ngayLap = ngayLap;
-    }
-
     public String getLyDo() {
         return lyDo;
     }
 
-    public void setLyDo(String lyDo) {
-        if (lyDo == null || lyDo.isBlank())
-            throw new IllegalArgumentException("Lý do đổi trả không được rỗng");
-        lyDo = lyDo.trim();
-        this.lyDo = lyDo;
+    public String getTrangThai() {
+        return trangThai;
     }
 
     @Override
