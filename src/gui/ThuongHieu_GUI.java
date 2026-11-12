@@ -151,6 +151,93 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener, MouseListe
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Object o = e.getSource();
+        if (o.equals(btnLamMoi)) {
+            clearTextField();
+        } else if (o.equals(btnThem)) {
+            if (valiData()) {
+                ThuongHieu th = reverThuongHieu();
+                if (th_dao.create(th)) {
+                    DocDuLieuDatabaseVaoTable();
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this, "Thêm thương hiệu thành công.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thêm thương hiệu thất bại.");
+                }
+            }
+        } else if (o.equals(btnXoa)) {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn thương hiệu để xóa.");
+                return;
+            }
+            String maThuongHieu = model.getValueAt(row, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa thương hiệu này?",
+                    "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (th_dao.delete(maThuongHieu)) {
+                    DocDuLieuDatabaseVaoTable();
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this, "Xóa thương hiệu thành công.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Xóa thương hiệu thất bại.");
+                }
+            }
+        } else if (o.equals(btnSua)) {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn thương hiệu để cập nhật.");
+                return;
+            }
+            String maThuongHieuOld = model.getValueAt(row, 0).toString();
+            if (valiData()) {
+                ThuongHieu thNew = reverThuongHieu();
+                if (!maThuongHieuOld.equals(thNew.getMaThuongHieu())) {
+                    JOptionPane.showMessageDialog(this, "Không được thay đổi mã thương hiệu khi sửa.");
+                    txtMaThuongHieu.requestFocus();
+                    return;
+                }
+                if (th_dao.update(thNew)) {
+                    DocDuLieuDatabaseVaoTable();
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this, "Cập nhật thương hiệu thành công.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thương hiệu thất bại.");
+                }
+            }
+        }
+
     }
 
+    public void clearTextField() {
+        txtMaThuongHieu.setText("");
+        txtTenThuongHieu.setText("");
+        txtMaThuongHieu.setEditable(true);
+        txtMaThuongHieu.requestFocus();
+    }
+
+    public boolean valiData() {
+        String maThuongHieu = txtMaThuongHieu.getText().trim();
+        String tenThuongHieu = txtTenThuongHieu.getText().trim();
+
+        if (maThuongHieu.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã thương hiệu không được rỗng.");
+            txtMaThuongHieu.requestFocus();
+            return false;
+        }
+
+        if (tenThuongHieu.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên thương hiệu không được rỗng.");
+            txtTenThuongHieu.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    public ThuongHieu reverThuongHieu() {
+        String maThuongHieu = txtMaThuongHieu.getText().trim();
+        String tenThuongHieu = txtTenThuongHieu.getText().trim();
+        return new ThuongHieu(maThuongHieu, tenThuongHieu);
+    }
 }

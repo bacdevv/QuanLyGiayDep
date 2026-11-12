@@ -152,9 +152,91 @@ public class DanhMuc_GUI extends JFrame implements ActionListener, MouseListener
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
-        if (o.equals(btnThem)) {
-
+        if (o.equals(btnLamMoi)) {
+            clearTextField();
+        } else if (o.equals(btnThem)) {
+            if (valiData()) {
+                DanhMuc dm = reverDanhMuc();
+                if (dm_dao.create(dm)) {
+                    DocDuLieuDatabaseVaoTable();
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this, "Thêm danh mục thành công.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thêm danh mục thất bại.");
+                }
+            }
+        } else if (o.equals(btnXoa)) {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn danh mục để xóa.");
+                return;
+            }
+            String maDanhMuc = model.getValueAt(row, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa danh mục này?",
+                    "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (dm_dao.delete(maDanhMuc)) {
+                    DocDuLieuDatabaseVaoTable();
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this, "Xóa danh mục thành công.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Xóa danh mục thất bại.");
+                }
+            }
+        } else if (o.equals(btnSua)) {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn danh mục để cập nhật.");
+                return;
+            }
+            String maDanhMucOld = model.getValueAt(row, 0).toString();
+            if (valiData()) {
+                DanhMuc dmNew = reverDanhMuc();
+                if (!maDanhMucOld.equals(dmNew.getMaDanhMuc())) {
+                    JOptionPane.showMessageDialog(this, "Không được thay đổi mã danh mục khi sửa.");
+                    txtMaDanhMuc.requestFocus();
+                    return;
+                }
+                if (dm_dao.update(dmNew)) {
+                    DocDuLieuDatabaseVaoTable();
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this, "Cập nhật danh mục thành công.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cập nhật danh mục thất bại.");
+                }
+            }
         }
     }
 
+    public void clearTextField() {
+        txtMaDanhMuc.setText("");
+        txtTenDanhMuc.setText("");
+        txtMaDanhMuc.setEditable(true);
+        txtMaDanhMuc.requestFocus();
+    }
+
+    public boolean valiData() {
+        String maDanhMuc = txtMaDanhMuc.getText().trim();
+        String tenDanhMuc = txtTenDanhMuc.getText().trim();
+
+        if (maDanhMuc.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã danh mục không được rỗng.");
+            txtMaDanhMuc.requestFocus();
+            return false;
+        }
+
+        if (tenDanhMuc.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên danh mục không được rỗng.");
+            txtTenDanhMuc.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    public DanhMuc reverDanhMuc() {
+        String maDanhMuc = txtMaDanhMuc.getText().trim();
+        String tenDanhMuc = txtTenDanhMuc.getText().trim();
+        return new DanhMuc(maDanhMuc, tenDanhMuc);
+    }
 }
