@@ -1,110 +1,109 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FlowLayout;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
+import dao.ChiTietHoaDon_DAO;
+import dao.HoaDon_DAO;
+import entity.ChiTietHoaDon;
+import entity.HoaDon;
+
+// Chi xem va in cac dong cua mot hoa don da luu, khong them/sua/xoa tai day.
 public class ChiTietHoaDon_GUI extends JFrame {
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
-	private JTextField txtMaHD;
-	private JComboBox<String> cboChiTietSanPham;
-	private JTextField txtSoLuong;
-	private JTextField txtDonGia;
-	private JTextField txtThanhTien;
-	private JTextField txtTongTien;
-	private JButton btnThem;
-	private JButton btnXoaRong;
-	private JButton btnXoa;
-	private JButton btnSua;
-	private JButton btnLuu;
-	private JTable table;
-	private DefaultTableModel tableModel;
+    private final HoaDon_DAO hd_dao = new HoaDon_DAO();
+    private final ChiTietHoaDon_DAO ct_dao = new ChiTietHoaDon_DAO();
+    private DefaultTableModel model;
+    private JTable table;
+    private JLabel lblThongTin;
 
-	public ChiTietHoaDon_GUI() {
-		setTitle("Chi tiết hóa đơn");
-		setSize(900, 600);
-		setLocationRelativeTo(null);
-		setResizable(false);
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		buildUI();
-	}
+    public ChiTietHoaDon_GUI(String maHD) {
+        setTitle("Chi tiết hóa đơn " + maHD);
+        setSize(1200, 700);
+        setMinimumSize(new java.awt.Dimension(900, 500));
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-	private void buildUI() {
+        JLabel tieuDe = new JLabel("CHI TIẾT HÓA ĐƠN", SwingConstants.CENTER);
+        tieuDe.setForeground(Color.BLUE);
+        tieuDe.setFont(new Font("Arial", Font.BOLD, 26));
+        add(tieuDe, BorderLayout.NORTH);
 
-		// Phần North
-		JPanel pnlNorth;
-		add(pnlNorth = new JPanel(), BorderLayout.NORTH);
-		pnlNorth.setPreferredSize(new Dimension(0, 140));
-		pnlNorth.setBorder(BorderFactory.createTitledBorder("Thông tin chi tiết hóa đơn"));
-		pnlNorth.setLayout(null); // Absolute layout
+        JPanel noiDung = new JPanel(new BorderLayout(8, 8));
+        lblThongTin = new JLabel("", SwingConstants.CENTER);
+        lblThongTin.setFont(new Font("Arial", Font.PLAIN, 16));
+        noiDung.add(lblThongTin, BorderLayout.NORTH);
 
-		JLabel lblMaHD, lblSanPham, lblSoLuong, lblDonGia, lblThanhTien, lblTongTien;
-		pnlNorth.add(lblMaHD = new JLabel("Mã hóa đơn: "));
-		pnlNorth.add(lblSanPham = new JLabel("Sản phẩm: "));
-		pnlNorth.add(lblSoLuong = new JLabel("Số lượng: "));
-		pnlNorth.add(lblDonGia = new JLabel("Đơn giá: "));
-		pnlNorth.add(lblThanhTien = new JLabel("Thành tiền: "));
-		pnlNorth.add(lblTongTien = new JLabel("Tổng tiền hóa đơn: "));
+        model = new DefaultTableModel(new String[] {
+                "Mã CTSP", "Tên sản phẩm", "Size", "Màu", "Số lượng",
+                "Đơn giá", "Thành tiền" }, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+        table = new JTable(model);
+        table.setFont(new Font("Arial", Font.PLAIN, 15));
+        table.setRowHeight(32);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
+        DinhDangTien.dinhDangCotTien(table, 5, 6);
+        noiDung.add(new JScrollPane(table), BorderLayout.CENTER);
+        add(noiDung, BorderLayout.CENTER);
 
-		pnlNorth.add(txtMaHD = new JTextField());
-		pnlNorth.add(cboChiTietSanPham = new JComboBox<String>());
-		pnlNorth.add(txtSoLuong = new JTextField());
-		pnlNorth.add(txtDonGia = new JTextField());
-		pnlNorth.add(txtThanhTien = new JTextField());
-		pnlNorth.add(txtTongTien = new JTextField());
-		txtMaHD.setEditable(false);
-		txtThanhTien.setEditable(false);
-		txtTongTien.setEditable(false);
+        JPanel duoi = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton btnIn = new JButton("In hóa đơn");
+        btnIn.setFont(new Font("Arial", Font.PLAIN, 16));
+        btnIn.addActionListener(e -> {
+            try {
+                table.print(JTable.PrintMode.FIT_WIDTH,
+                        new MessageFormat("Hóa đơn " + maHD),
+                        new MessageFormat(lblThongTin.getText()));
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+        });
+        duoi.add(btnIn);
+        add(duoi, BorderLayout.SOUTH);
 
-		int w1 = 120, w2 = 250, h = 20;
-		lblMaHD.setBounds(20, 25, w1, h);
-		txtMaHD.setBounds(150, 25, 200, h);
-		lblSanPham.setBounds(450, 25, w1, h);
-		cboChiTietSanPham.setBounds(570, 25, w2, h);
+        try {
+            docDuLieuDatabaseVaoTable(maHD);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
 
-		lblSoLuong.setBounds(20, 55, w1, h);
-		txtSoLuong.setBounds(150, 55, 200, h);
-		lblDonGia.setBounds(450, 55, w1, h);
-		txtDonGia.setBounds(570, 55, 200, h);
-
-		lblThanhTien.setBounds(20, 85, w1, h);
-		txtThanhTien.setBounds(150, 85, 200, h);
-		lblTongTien.setBounds(450, 85, w1, h);
-		txtTongTien.setBounds(570, 85, 200, h);
-
-		// Phần Center
-		JPanel pnlCenter;
-		add(pnlCenter = new JPanel(), BorderLayout.CENTER);
-		pnlCenter.add(btnThem = new JButton("Thêm"));
-		pnlCenter.add(btnXoaRong = new JButton("Làm rỗng"));
-		pnlCenter.add(btnXoa = new JButton("Xóa"));
-		pnlCenter.add(btnSua = new JButton("Sửa"));
-		pnlCenter.add(btnLuu = new JButton("Lưu"));
-
-		// Phần South
-		JScrollPane scroll;
-		String[] headers = "Mã CTSP;Tên sản phẩm;Kích cỡ;Màu sắc;Số lượng;Đơn giá;Thành tiền".split(";");
-
-		tableModel = new DefaultTableModel(headers, 0);
-		add(scroll = new JScrollPane(table = new JTable(tableModel), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.SOUTH);
-		scroll.setBorder(BorderFactory.createTitledBorder("Danh sách chi tiết hóa đơn"));
-		table.setRowHeight(20);
-		scroll.setPreferredSize(new Dimension(0, 350));
-	}
-
-	public static void main(String[] args) {
-		new ChiTietHoaDon_GUI().setVisible(true);
-	}
+    public void docDuLieuDatabaseVaoTable(String maHD) throws SQLException {
+        HoaDon hd = hd_dao.getHoaDonTheoMaHD(maHD);
+        if (hd == null) throw new SQLException("Không tìm thấy hóa đơn: " + maHD);
+        ArrayList<ChiTietHoaDon> ds = ct_dao.getChiTietTheoMaHD(maHD);
+        model.setRowCount(0);
+        for (ChiTietHoaDon ct : ds) {
+            model.addRow(new Object[] {
+                    ct.getChiTietSanPham().getMaCTSP(),
+                    ct.getChiTietSanPham().getSanPham().getTenSP(),
+                    ct.getChiTietSanPham().getKichCo(),
+                    ct.getChiTietSanPham().getMauSac(),
+                    ct.getSoLuong(), ct.getDonGia(), ct.tinhThanhTien()
+            });
+        }
+        BigDecimal tong = hd.getTongTien();
+        lblThongTin.setText("Mã HD: " + maHD + "     |     Tổng thanh toán: "
+                + DinhDangTien.hienThi(tong));
+    }
 }
