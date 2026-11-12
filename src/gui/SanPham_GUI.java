@@ -460,6 +460,7 @@ public class SanPham_GUI extends JFrame implements ActionListener, MouseListener
 
                 table.clearSelection();
                 txtThongBao.setText("");
+
                 txtmaSP.setText("");
                 txttenSP.setText("");
                 cboDanhMuc.setSelectedIndex(0);
