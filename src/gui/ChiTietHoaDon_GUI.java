@@ -1,14 +1,17 @@
 package gui;
 
+import dao.ChiTietHoaDon_DAO;
+import dao.HoaDon_DAO;
+import entity.ChiTietHoaDon;
+import entity.HoaDon;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,11 +21,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
-
-import dao.ChiTietHoaDon_DAO;
-import dao.HoaDon_DAO;
-import entity.ChiTietHoaDon;
-import entity.HoaDon;
 
 // Chi xem va in cac dong cua mot hoa don da luu, khong them/sua/xoa tai day.
 public class ChiTietHoaDon_GUI extends JFrame {
@@ -106,4 +104,5 @@ public class ChiTietHoaDon_GUI extends JFrame {
         lblThongTin.setText("Mã HD: " + maHD + "     |     Tổng thanh toán: "
                 + DinhDangTien.hienThi(tong));
     }
+ 
 }

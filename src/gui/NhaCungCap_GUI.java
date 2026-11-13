@@ -52,6 +52,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
     private JButton btnSua;
     private JButton btnLuu;
     private JButton btnLoc;
+    private JButton btnTaoPhieu;
 
     private JComboBox<String> cboTimKiem;
     private JComboBox<String> cboTrangThai;
@@ -60,6 +61,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
     private DefaultTableModel tableModel;
 
     private NhaCungCap_DAO ncc_dao;
+    private PhieuNhap_GUI phieuNhapGUI;
 
     public NhaCungCap_GUI() {
 
@@ -69,7 +71,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         setSize(900, 650);
         setLocationRelativeTo(null);
         setResizable(false);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         try {
             ConnectDB.getInstance().connect();
@@ -131,11 +133,13 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         btnXoaRong = new JButton("Làm rỗng");
         btnSua = new JButton("Sửa");
         btnLuu = new JButton("In danh sách nhà cung cấp");
+        btnTaoPhieu = new JButton("Tạo phiếu nhập");
 
         pnlButton.add(btnThem);
         pnlButton.add(btnXoaRong);
         pnlButton.add(btnSua);
         pnlButton.add(btnLuu);
+        pnlButton.add(btnTaoPhieu);
 
         // HÀNG 2: TÌM KIẾM
         JPanel pnlTimKiem = new JPanel(
@@ -216,22 +220,22 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         btnSua.addActionListener(this);
         btnLuu.addActionListener(this);
         btnLoc.addActionListener(this);
+        btnTaoPhieu.addActionListener(this);
     }
 
     // ================= SỰ KIỆN CLICK BẢNG =================
     @Override
     public void mouseClicked(MouseEvent e) {
-
-        // int r = table.getSelectedRow();
-        // if (r != -1) {
-        //     txtTenNCC.setText(
-        //             tableModel.getValueAt(r, 1).toString());
-        //     txtSoDienThoai.setText(
-        //             tableModel.getValueAt(r, 2).toString());
-        //     chkHoatDong.setSelected(
-        //             tableModel.getValueAt(r, 3)
-        //                     .toString().equals("Hoạt động"));
-        // }
+        int r = table.getSelectedRow();
+        if (r != -1) {
+            txtTenNCC.setText(tableModel.getValueAt(r, 1).toString());
+            txtSoDienThoai.setText(tableModel.getValueAt(r, 2).toString());
+            chkHoatDong.setSelected(tableModel.getValueAt(r, 3).toString().equals("Hoạt động"));
+            if (e.getClickCount() == 2) {
+                String maNCC = tableModel.getValueAt(r, 0).toString();
+                moPhieuNhap(maNCC);
+            }
+        }
     }
 
     @Override
@@ -431,6 +435,27 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
                 JOptionPane.showMessageDialog(this,
                         "Không tìm thấy nhà cung cấp có trạng thái này");
             }
+        } else if (o == btnTaoPhieu) {
+            int r = table.getSelectedRow();
+            if (r == -1) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn một nhà cung cấp trong bảng để tạo phiếu nhập!");
+                return;
+            }
+            String maNCC = tableModel.getValueAt(r, 0).toString();
+            moPhieuNhap(maNCC);
+        }
+    }
+
+    public void moPhieuNhap(String maNCC) {
+        if (phieuNhapGUI == null || !phieuNhapGUI.isDisplayable()) {
+            phieuNhapGUI = new PhieuNhap_GUI(maNCC);
+            phieuNhapGUI.setVisible(true);
+        } else {
+            phieuNhapGUI.setNhaCungCap(maNCC);
+            phieuNhapGUI.setVisible(true);
+            phieuNhapGUI.toFront();
+            phieuNhapGUI.requestFocus();
         }
     }
 

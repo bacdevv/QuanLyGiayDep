@@ -31,6 +31,13 @@ public class ChiTietDoiTra_GUI extends JFrame {
         buildUI();
     }
 
+    public ChiTietDoiTra_GUI(String maPDT) {
+        this();
+        if (txtMaPDT != null && maPDT != null) {
+            txtMaPDT.setText(maPDT);
+        }
+    }
+
     private void buildUI() {
         // Phần North
         JPanel pnlNorth = new JPanel();
