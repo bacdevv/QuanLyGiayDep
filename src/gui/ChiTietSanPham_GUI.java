@@ -7,25 +7,20 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.util.List;
 import java.awt.Dimension;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
 
 import connectDB.ConnectDB;
 import dao.ChiTietSanPham_DAO;
 
-import dao.SanPham_DAO;
-
 import entity.ChiTietSanPham;
 import entity.SanPham;
 
-public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseListener {
+public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
 
     private JTextField txtMaSP;
@@ -34,6 +29,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
     private JTextField txtMauSac;
     private JTextField txtTonKho;
     private JTextField txtMaCTSP;
+    private JTextField txtThongBao;
     private JComboBox<String> cboTrangThai;
     private JComboBox<String> cboLocTheo;
     private JTextField txtTimMaCTSP;
@@ -44,9 +40,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
     private JButton btnLamMoi;
     private DefaultTableModel model;
     private JTable table;
-    private TableRowSorter<DefaultTableModel> sorter;
 
-    private SanPham_DAO sp_dao;
     private ChiTietSanPham_DAO ctsp_dao;
 
     public ChiTietSanPham_GUI() {
@@ -58,13 +52,12 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
             e.printStackTrace();
         }
 
-        sp_dao = new SanPham_DAO();
         ctsp_dao = new ChiTietSanPham_DAO();
 
         setTitle("Chi tiết sản phẩm");
         setSize(1150, 650);
         setMinimumSize(new java.awt.Dimension(950, 600));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         JPanel p = new JPanel(new BorderLayout());
@@ -135,7 +128,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
         txtMaCTSP = new JTextField(26);
 
         txtTonKho.setEditable(false);
-        txtMaCTSP.setEditable(false);
+        txtMaCTSP.setEditable(true);
 
         txtTonKho.setPreferredSize(new Dimension(260, 28));
         txtMaCTSP.setPreferredSize(new Dimension(260, 28));
@@ -181,7 +174,16 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
                 "-- Lọc theo --", "Kích cỡ", "Màu sắc", "Trạng thái"
         });
         pThaoTac.add(cboLocTheo);
-        pNhap.add(pThaoTac, BorderLayout.SOUTH);
+        txtThongBao = new JTextField();
+        txtThongBao.setEditable(false);
+        txtThongBao.setForeground(Color.RED);
+        txtThongBao.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
+        txtThongBao.setOpaque(false);
+
+        JPanel pThongBaoThaoTac = new JPanel(new BorderLayout());
+        pThongBaoThaoTac.add(txtThongBao, BorderLayout.NORTH);
+        pThongBaoThaoTac.add(pThaoTac, BorderLayout.SOUTH);
+        pNhap.add(pThongBaoThaoTac, BorderLayout.SOUTH);
 
         JPanel pNoiDungTren = new JPanel(new BorderLayout());
         pNoiDungTren.add(pThongTin, BorderLayout.NORTH);
@@ -193,8 +195,6 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
         };
         model = new DefaultTableModel(cot, 0);
         table = new JTable(model);
-        sorter = new TableRowSorter<>(model);
-        table.setRowSorter(sorter);
         table.setRowHeight(25);
         table.setDefaultEditor(Object.class, null);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -202,22 +202,15 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
         btnSua.setEnabled(false);
         btnXoa.setEnabled(false);
 
-        table.getSelectionModel().addListSelectionListener(e -> {
-            if (e.getValueIsAdjusting())
-                return;
-            boolean daChon = table.getSelectedRow() >= 0;
-            btnSua.setEnabled(daChon);
-            btnXoa.setEnabled(daChon);
-            if (daChon) {
-                int row = table.convertRowIndexToModel(table.getSelectedRow());
-                txtMaCTSP.setText(String.valueOf(model.getValueAt(row, 0)));
-                txtTonKho.setText(String.valueOf(model.getValueAt(row, 4)));
-                txtKichCo.setText(String.valueOf(model.getValueAt(row, 2)));
-                txtMauSac.setText(String.valueOf(model.getValueAt(row, 3)));
-                cboTrangThai.setSelectedItem(model.getValueAt(row, 5));
-            } else {
-                txtMaCTSP.setText("");
-                txtTonKho.setText("");
+        table.getSelectionModel().addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            @Override
+            public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    int row = table.getSelectedRow();
+                    btnSua.setEnabled(row >= 0);
+                    btnXoa.setEnabled(row >= 0);
+                    fillForm(row);
+                }
             }
         });
         JScrollPane srp = new JScrollPane(table);
@@ -232,7 +225,12 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
         pTimKiem.add(btnTim);
         pGiua.add(pTimKiem, BorderLayout.SOUTH);
 
-        table.addMouseListener(this);
+        btnTim.addActionListener(this);
+        btnLamMoi.addActionListener(this);
+        btnThem.addActionListener(this);
+        btnSua.addActionListener(this);
+        btnXoa.addActionListener(this);
+        cboLocTheo.addActionListener(this);
 
     }
 
@@ -241,41 +239,189 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        int row = table.getSelectedRow();
-        row = table.convertRowIndexToModel(row);
-        txtMaSP.setText(model.getValueAt(row, 1).toString());
-        List<SanPham> dsSP = sp_dao.getSanPhamTheoMaSP(model.getValueAt(row, 1).toString());
-        txtTenSP.setText(dsSP.isEmpty() ? "" : dsSP.get(0).getTenSP());
-        txtMaCTSP.setText(model.getValueAt(row, 0).toString());
-        txtTonKho.setText(model.getValueAt(row, 4).toString());
-        txtKichCo.setText(model.getValueAt(row, 2).toString());
-        txtMauSac.setText(model.getValueAt(row, 3).toString());
-        cboTrangThai.setSelectedItem(model.getValueAt(row, 5).toString());
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
+        Object o = e.getSource();
+        if (o.equals(btnTim)) {
+            String maCTSP = txtTimMaCTSP.getText().trim();
+            if (maCTSP.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã CTSP để tìm kiếm.", "Chưa nhập mã CTSP",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            List<ChiTietSanPham> list = ctsp_dao.getChiTietSanPhamTheoMaSP(txtMaSP.getText().trim());
+            for (int i = 0; i < list.size(); i++) {
+                if (!list.get(i).getMaCTSP().equalsIgnoreCase(maCTSP)) {
+                    list.remove(i);
+                    i--;
+                }
+            }
+            if (list.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy chi tiết sản phẩm với mã CTSP: " + maCTSP,
+                        "Không tìm thấy", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            txtThongBao.setText("");
+            cboLocTheo.removeActionListener(this);
+            cboLocTheo.setSelectedIndex(0);
+            cboLocTheo.addActionListener(this);
+            model.setRowCount(0);
+            for (ChiTietSanPham ctsp : list) {
+                model.addRow(new Object[] {
+                        ctsp.getMaCTSP(), ctsp.getSanPham().getMaSP(),
+                        ctsp.getKichCo(), ctsp.getMauSac(), ctsp.getSoLuongTon(),
+                        ctsp.isHoatDong() ? "Đang kinh doanh" : "Ngừng kinh doanh"
+                });
+            }
+        } else if (o.equals(btnLamMoi)) {
+            clearTextField();
+            DocDuLieuDatabaseVaoTable();
+        } else if (o.equals(btnThem)) {
+            if (validateInput()) {
+                ChiTietSanPham ctsp = reverChiTietSanPham();
+                ctsp.setSoLuongTon(0);
+
+                if (ctsp_dao.create(ctsp)) {
+                    model.addRow(new Object[] {
+                            ctsp.getMaCTSP(), ctsp.getSanPham().getMaSP(),
+                            ctsp.getKichCo(), ctsp.getMauSac(), ctsp.getSoLuongTon(),
+                            ctsp.isHoatDong() ? "Đang kinh doanh" : "Ngừng kinh doanh"
+                    });
+
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this,
+                            "Thêm chi tiết sản phẩm thành công.",
+                            "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Không thể thêm. Hãy kiểm tra mã chi tiết, kích cỡ và màu sắc có bị trùng không.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else if (o.equals(btnSua)) {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                return;
+            }
+            String maCTSPOld = table.getValueAt(row, 0).toString();
+            if (validateInput()) {
+                ChiTietSanPham ctspNew = reverChiTietSanPham();
+                if (!maCTSPOld.equals(ctspNew.getMaCTSP())) {
+                    JOptionPane.showMessageDialog(this,
+                            "Không được thay đổi mã chi tiết sản phẩm khi sửa.",
+                            "Không thể đổi mã", JOptionPane.WARNING_MESSAGE);
+                    txtMaCTSP.requestFocusInWindow();
+                    return;
+                }
+                if (ctsp_dao.update(ctspNew)) {
+                    DocDuLieuDatabaseVaoTable();
+                    for (int i = 0; i < table.getRowCount(); i++) {
+                        if (maCTSPOld.equals(table.getValueAt(i, 0).toString())) {
+                            table.setRowSelectionInterval(i, i);
+                            table.scrollRectToVisible(table.getCellRect(i, 0, true));
+                            break;
+                        }
+                    }
+                    JOptionPane.showMessageDialog(this,
+                            "Cập nhật chi tiết sản phẩm thành công.",
+                            "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Không thể cập nhật. Hãy kiểm tra mã chi tiết, kích cỡ và màu sắc có bị trùng không.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else if (o.equals(btnXoa)) {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                return;
+            }
+
+            String maCTSP = model.getValueAt(row, 0).toString();
+            int TH = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc chắn muốn xóa chi tiết sản phẩm với mã CTSP: " + maCTSP + "?",
+                    "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+            if (TH == JOptionPane.YES_OPTION) {
+                if (ctsp_dao.delete(maCTSP, txtMaSP.getText())) {
+                    model.removeRow(row);
+                    clearTextField();
+                    JOptionPane.showMessageDialog(this,
+                            "Xóa chi tiết sản phẩm thành công.",
+                            "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Không thể xóa chi tiết sản phẩm."
+                                    + "Hãy kiểm tra chi tiết sản phẩm có tồn tại trong các đơn hàng hay không.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+
+        else if (o.equals(cboLocTheo)) {
+            txtThongBao.setText("");
+
+            if (cboLocTheo.getSelectedIndex() == 1) {
+                String kichCo = txtKichCo.getText().trim();
+
+                if (kichCo.isEmpty()) {
+                    txtThongBao.setText("Vui lòng nhập kích cỡ cần lọc.");
+                    txtKichCo.requestFocusInWindow();
+                    return;
+                }
+
+                DocDuLieuDatabaseVaoTable();
+
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    String kichCoTrongBang = model.getValueAt(i, 2).toString();
+
+                    if (!kichCoTrongBang.equalsIgnoreCase(kichCo)) {
+                        model.removeRow(i);
+                        i--;
+                    }
+                }
+
+            } else if (cboLocTheo.getSelectedIndex() == 2) {
+                String mauSac = txtMauSac.getText().trim();
+
+                if (mauSac.isEmpty()) {
+                    txtThongBao.setText("Vui lòng nhập màu sắc cần lọc.");
+                    txtMauSac.requestFocusInWindow();
+                    return;
+                }
+
+                DocDuLieuDatabaseVaoTable();
+
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    String mauSacTrongBang = model.getValueAt(i, 3).toString();
+
+                    if (!mauSacTrongBang.equalsIgnoreCase(mauSac)) {
+                        model.removeRow(i);
+                        i--;
+                    }
+                }
+
+            } else if (cboLocTheo.getSelectedIndex() == 3) {
+                String trangThai = (String) cboTrangThai.getSelectedItem();
+
+                if (trangThai == null) {
+                    txtThongBao.setText("Vui lòng chọn trạng thái cần lọc.");
+                    return;
+                }
+
+                DocDuLieuDatabaseVaoTable();
+
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    String trangThaiTrongBang = model.getValueAt(i, 5).toString();
+
+                    if (!trangThaiTrongBang.equalsIgnoreCase(trangThai)) {
+                        model.removeRow(i);
+                        i--;
+                    }
+                }
+
+            } else {
+                DocDuLieuDatabaseVaoTable();
+            }
+        }
 
     }
 
@@ -297,6 +443,102 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener, MouseL
                     ctsp.isHoatDong() ? "Đang kinh doanh" : "Ngừng kinh doanh"
             });
         }
+    }
+
+    private void fillForm(int row) {
+        if (row < 0) {
+            txtMaCTSP.setText("");
+            txtTonKho.setText("");
+            txtMaCTSP.setEditable(true);
+            return;
+        }
+        txtMaCTSP.setText(model.getValueAt(row, 0).toString());
+        txtTonKho.setText(model.getValueAt(row, 4).toString());
+        txtKichCo.setText(model.getValueAt(row, 2).toString());
+        txtMauSac.setText(model.getValueAt(row, 3).toString());
+        cboTrangThai.setSelectedItem(model.getValueAt(row, 5));
+        txtMaCTSP.setEditable(false);
+    }
+
+    public void clearTextField() {
+        txtThongBao.setText("");
+        txtTimMaCTSP.setText("");
+        cboLocTheo.removeActionListener(this);
+        cboLocTheo.setSelectedIndex(0);
+        cboLocTheo.addActionListener(this);
+        table.clearSelection();
+        txtMaCTSP.setEditable(true);
+        txtKichCo.setText("");
+        txtMauSac.setText("");
+        cboTrangThai.setSelectedIndex(0);
+        txtMaCTSP.setText("");
+        txtTonKho.setText("");
+    }
+
+    private ChiTietSanPham reverChiTietSanPham() {
+        String maCTSP = txtMaCTSP.getText().trim();
+        SanPham sp = new SanPham(txtMaSP.getText().trim());
+        String kichCo = txtKichCo.getText().trim();
+        String mauSac = txtMauSac.getText().trim();
+        String tonKho = txtTonKho.getText().trim();
+        int soLuongTon = tonKho.isEmpty() ? 0 : Integer.parseInt(tonKho);
+        boolean hoatDong = cboTrangThai.getSelectedIndex() == 0;
+        return new ChiTietSanPham(maCTSP, sp, kichCo, mauSac, soLuongTon, hoatDong);
+    }
+
+    public boolean validateInput() {
+        txtThongBao.setText("");
+
+        String maCTSP = txtMaCTSP.getText().trim();
+        String kichCo = txtKichCo.getText().trim();
+        String mauSac = txtMauSac.getText().trim();
+
+        if (txtMaSP.getText().trim().isEmpty()) {
+            txtThongBao.setText("Vui lòng chọn sản phẩm trước khi thêm phiên bản.");
+            return false;
+        }
+
+        if (maCTSP.isEmpty()) {
+            txtThongBao.setText("Vui lòng nhập mã chi tiết sản phẩm.");
+            txtMaCTSP.requestFocusInWindow();
+            return false;
+        }
+
+        if (maCTSP.length() > 20) {
+            txtThongBao.setText("Mã chi tiết sản phẩm không được quá 20 ký tự.");
+            txtMaCTSP.requestFocusInWindow();
+            return false;
+        }
+
+        if (kichCo.isEmpty()) {
+            txtThongBao.setText("Vui lòng nhập kích cỡ.");
+            txtKichCo.requestFocusInWindow();
+            return false;
+        }
+        if (kichCo.length() > 10) {
+            txtThongBao.setText("Kích cỡ không được quá 10 ký tự.");
+            txtKichCo.requestFocusInWindow();
+            return false;
+        }
+
+        if (mauSac.isEmpty()) {
+            txtThongBao.setText("Vui lòng nhập màu sắc.");
+            txtMauSac.requestFocusInWindow();
+            return false;
+        }
+        if (mauSac.length() > 50) {
+            txtThongBao.setText("Màu sắc không được quá 50 ký tự.");
+            txtMauSac.requestFocusInWindow();
+            return false;
+        }
+
+        if (cboTrangThai.getSelectedIndex() < 0) {
+            txtThongBao.setText("Vui lòng chọn trạng thái.");
+            cboTrangThai.requestFocusInWindow();
+            return false;
+        }
+
+        return true;
     }
 
 }
