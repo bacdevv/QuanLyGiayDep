@@ -476,91 +476,70 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
     }
 
     
-public void xuatrafileXML() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setDialogTitle("Lưu danh sách nhà cung cấp");
-    chooser.setSelectedFile(new File("DanhSachNhaCungCap.xml"));
+    public void xuatrafileXML() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Lưu danh sách nhà cung cấp");
+        chooser.setSelectedFile(new File("DanhSachNhaCungCap.xml"));
 
-    int chon = chooser.showSaveDialog(this);
+        int chon = chooser.showSaveDialog(this);
 
-    if (chon != JFileChooser.APPROVE_OPTION) {
-        return;
-    }
-
-    File file = chooser.getSelectedFile();
-
-    
-    if (!file.getName().toLowerCase().endsWith(".xml")) {
-        file = new File(file.getAbsolutePath() + ".xml");
-    }
-
-    try {
-        DocumentBuilderFactory factory =
-                DocumentBuilderFactory.newInstance();
-
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.newDocument();
-
-     
-        Element root = doc.createElement("DanhSachNhaCungCap");
-        doc.appendChild(root);
-
-        
-        for (int i = 0; i < table.getRowCount(); i++) {
-
-            Element ncc = doc.createElement("NhaCungCap");
-            root.appendChild(ncc);
-
-          
-            Element ma = doc.createElement("MaNCC");
-            ma.setTextContent(
-                    table.getValueAt(i, 0).toString());
-            ncc.appendChild(ma);
-
-          
-            Element ten = doc.createElement("TenNCC");
-            ten.setTextContent(
-                    table.getValueAt(i, 1).toString());
-            ncc.appendChild(ten);
-
-           
-            Element sdt = doc.createElement("SoDienThoai");
-            sdt.setTextContent(
-                    table.getValueAt(i, 2).toString());
-            ncc.appendChild(sdt);
-
-            Element trangThai = doc.createElement("HoatDong");
-            trangThai.setTextContent(
-                    table.getValueAt(i, 3).toString());
-            ncc.appendChild(trangThai);
+        if (chon != JFileChooser.APPROVE_OPTION) {
+            return;
         }
 
-      
-        TransformerFactory tf = TransformerFactory.newInstance();
+        File file = chooser.getSelectedFile();
 
-        Transformer transformer = tf.newTransformer();
+        if (!file.getName().toLowerCase().endsWith(".xml")) {
+            file = new File(file.getAbsolutePath() + ".xml");
+        }
 
-        transformer.setOutputProperty(
-                OutputKeys.INDENT, "yes");
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.newDocument();
 
-        transformer.setOutputProperty(
-                OutputKeys.ENCODING, "UTF-8");
+            Element root = doc.createElement("DanhSachNhaCungCap");
+            doc.appendChild(root);
 
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(file);
+            for (int i = 0; i < table.getRowCount(); i++) {
+                Element ncc = doc.createElement("NhaCungCap");
+                root.appendChild(ncc);
 
-        transformer.transform(source, result);
+                Element ma = doc.createElement("MaNCC");
+                ma.setTextContent(table.getValueAt(i, 0).toString());
+                ncc.appendChild(ma);
 
-        JOptionPane.showMessageDialog(this,
-                "Xuất file XML thành công!");
+                Element ten = doc.createElement("TenNCC");
+                ten.setTextContent(table.getValueAt(i, 1).toString());
+                ncc.appendChild(ten);
 
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-                "Xuất file XML thất bại: " + e.getMessage());
+                Element sdt = doc.createElement("SoDienThoai");
+                sdt.setTextContent(table.getValueAt(i, 2).toString());
+                ncc.appendChild(sdt);
 
-        e.printStackTrace();
+                Element trangThai = doc.createElement("HoatDong");
+                trangThai.setTextContent(table.getValueAt(i, 3).toString());
+                ncc.appendChild(trangThai);
+            }
+
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(file);
+
+            transformer.transform(source, result);
+
+            JOptionPane.showMessageDialog(this, "Xuất file XML thành công!");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Xuất file XML thất bại: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-}
 
     public static void main(String[] args) {
 

@@ -21,7 +21,9 @@ public class ChiTietPhieuNhap {
         this.phieuNhap = phieuNhap;
         this.soLuong = soLuong;
     }
-
+    public BigDecimal tinhThanhTien() {
+        return donGiaNhap.multiply(BigDecimal.valueOf(soLuong));
+    }
     public PhieuNhap getPhieuNhap() {
         return phieuNhap;
     }
