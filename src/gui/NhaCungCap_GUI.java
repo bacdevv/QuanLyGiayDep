@@ -1,6 +1,5 @@
 package gui;
-
-import connectDB.ConnectDB;
+import  connectDB.ConnectDB;
 import dao.NhaCungCap_DAO;
 import entity.NhaCungCap;
 import java.awt.BorderLayout;
@@ -401,7 +400,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
                         "Cập nhật nhà cung cấp thất bại!");
             }
         } else if (o == btnLuu) {
-                xuatrafileXML();
+            xuatrafileXML();
         } else if (o == btnLoc) {
 
             String trangThai = cboTrangThai.getSelectedItem().toString();
@@ -500,7 +499,6 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         }
     }
 
-    
     public void xuatrafileXML() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Lưu danh sách nhà cung cấp");
