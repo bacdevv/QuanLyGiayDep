@@ -25,6 +25,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 
 import dao.TaiKhoan_DAO;
+import entity.NhanVien;
 
 public class NhanVien_GUI extends JFrame implements ActionListener {
 
@@ -180,32 +181,19 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
                 return;
             }
 
-            // Goi ham kiem tra dang nhap trong DAO
-            boolean ketQua = tk_dao.kiemTraDangNhap(
-                    tenDangNhap,
-                    matKhau);
-
-            if (ketQua) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Đăng nhập thành công!",
-                        "Thông báo",
-                        JOptionPane.INFORMATION_MESSAGE);
-
-                //
-                // Them chuc nang chuyen sang giao dien quan ly tai day
-
-            } else {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Tên đăng nhập hoặc mật khẩu không chính xác!",
-                        "Lỗi đăng nhập",
-                        JOptionPane.ERROR_MESSAGE);
-
-                txtMatKhau.setText("");
-                txtMatKhau.requestFocus();
+            try {
+                NhanVien nv = tk_dao.dangNhap(tenDangNhap, matKhau);
+                if (nv != null) {
+                    JOptionPane.showMessageDialog(this, "Đăng nhập thành công: " + nv.getTenNhanVien());
+                    new Main(nv).setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Sai tài khoản/mật khẩu hoặc nhân viên đã nghỉ!");
+                    txtMatKhau.setText("");
+                    txtMatKhau.requestFocus();
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi SQL Server: " + ex.getMessage());
             }
         }
 

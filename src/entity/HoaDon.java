@@ -13,7 +13,7 @@ public class HoaDon {
     private KhachHang khachHang;
     private LocalDateTime ngayLap;
     private String phuongThucThanhToan;
-    private BigDecimal thue = BigDecimal.ZERO;
+    private BigDecimal thue = new BigDecimal("8");
     private BigDecimal tongTien = BigDecimal.ZERO;
 
     public HoaDon() {

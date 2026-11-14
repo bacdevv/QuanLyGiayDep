@@ -1,88 +1,31 @@
-
 package dao;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-
+import java.sql.*;
 import connectDB.ConnectDB;
 import entity.NhanVien;
-import entity.TaiKhoan;
 
 public class TaiKhoan_DAO {
+    public TaiKhoan_DAO() {}
 
-    public TaiKhoan_DAO() {
-
-    }
-
-    public ArrayList<TaiKhoan> gettalltbNhanVien() {
-
-        ArrayList<TaiKhoan> dstk = new ArrayList<TaiKhoan>();
-
-        try {
-            ConnectDB.getInstance().connect();
-
-            Connection con = ConnectDB.getConnection();
-
-            String sql = "Select * from taikhoan";
-            Statement statement = con.createStatement();
-
-            ResultSet rs = statement.executeQuery(sql);
-
-            while (rs.next()) {
-                NhanVien nv = new NhanVien(rs.getString("maNV"));
-
-                String tenNV = rs.getString(2);
-                String soDienThoai = rs.getString(3);
-
-                TaiKhoan tk = new TaiKhoan(nv, tenNV, soDienThoai);
-                dstk.add(tk);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return dstk;
-    }
-
-    public boolean kiemTraDangNhap(String tenDangNhap, String matKhau) {
-
-        try {
-            ConnectDB.getInstance();
-
-            Connection con = ConnectDB.getConnection();
-
-            if (con == null) {
-                System.out.println("Khong ket noi duoc database!");
-                return false;
-            }
-
-            String sql = "SELECT * FROM TaiKhoan "
-                    + "WHERE tenDangNhap = ? AND taiKhoanHash = ?";
-
-            PreparedStatement stmt = con.prepareStatement(sql);
-
+    // Lay dung nhan vien cua tai khoan dang nhap.
+    public NhanVien dangNhap(String tenDangNhap, String matKhau) throws SQLException {
+        ConnectDB.getInstance().connect();
+        Connection con = ConnectDB.getConnection();
+        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.soDienThoai, nv.hoatDong "
+                + "FROM TaiKhoan tk JOIN NhanVien nv ON tk.maNhanVien = nv.maNhanVien "
+                + "WHERE tk.tenDangNhap = ? AND tk.taiKhoanHash = ? AND nv.hoatDong = 1";
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
             stmt.setString(1, tenDangNhap);
             stmt.setString(2, matKhau);
-
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                rs.close();
-                stmt.close();
-                return true;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return new NhanVien(rs.getString(1), rs.getString(2),
+                        rs.getString(3), rs.getBoolean(4));
             }
-
-            rs.close();
-            stmt.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        return null;
+    }
 
-        return false;
+    public boolean kiemTraDangNhap(String tenDangNhap, String matKhau) throws SQLException {
+        return dangNhap(tenDangNhap, matKhau) != null;
     }
 }

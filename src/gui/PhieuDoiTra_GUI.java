@@ -52,8 +52,8 @@ public class PhieuDoiTra_GUI extends JFrame
     private JTextField txtSoDienThoai, txtKhachHang;
     private JTextArea txtLyDo;
     private JComboBox<String> cboTrangThai;
-    private JComboBox<String> cboNhanVien;
-    private ArrayList<NhanVien> dsNhanVien = new ArrayList<>();
+    private JTextField txtNhanVien;
+    private NhanVien nhanVienDangNhap;
     private JTextField txtTienHangHoan, txtThueGoc, txtTienThueHoan, txtTongTienHoan;
     private JButton btnNapHoaDon, btnLuu, btnLamMoi, btnXemChiTiet;
     private JTable tableHangDaMua;
@@ -68,8 +68,18 @@ public class PhieuDoiTra_GUI extends JFrame
     private HoaDon hoaDonGoc;
     private KhachHang khachHangTheoSDT;
     private boolean daLuu;
+    private java.util.function.Consumer<String> moChiTiet;
+
+    public void setMoChiTiet(java.util.function.Consumer<String> moChiTiet) {
+        this.moChiTiet = moChiTiet;
+    }
 
     public PhieuDoiTra_GUI() {
+        this(null);
+    }
+
+    public PhieuDoiTra_GUI(NhanVien nhanVien) {
+        this.nhanVienDangNhap = nhanVien;
         setTitle("Quản lý giày dép - Phiếu đổi trả");
         setSize(1500, 880);
         setMinimumSize(new java.awt.Dimension(1120, 680));
@@ -79,7 +89,6 @@ public class PhieuDoiTra_GUI extends JFrame
         buildUI();
         try {
             ConnectDB.getInstance().connect();
-            docDuLieuNhanVien();
         } catch (SQLException e) {
             thongBao("Lỗi tải nhân viên: " + e.getMessage());
         }
@@ -105,7 +114,7 @@ public class PhieuDoiTra_GUI extends JFrame
             txt.setFont(font);
         txtLyDo.setFont(font);
         cboTrangThai.setFont(font);
-        cboNhanVien.setFont(font);
+        txtNhanVien.setFont(font);
         for (JButton btn : new JButton[] { btnNapHoaDon, btnLuu,
                 btnLamMoi, btnXemChiTiet, btnThem, btnSua, btnXoa })
             btn.setFont(font);
@@ -117,24 +126,10 @@ public class PhieuDoiTra_GUI extends JFrame
         dinhDangNhan(getContentPane());
     }
 
-    // Tam thoi chon nhan vien tu SQL cho den khi nhom tich hop dang nhap.
-    private void docDuLieuNhanVien() {
-        cboNhanVien.removeAllItems();
-        dsNhanVien.clear();
-        for (NhanVien nv : new NhanVien_DAO().gettalltbNhanVien()) {
-            if (nv.isHoatDong()) {
-                dsNhanVien.add(nv);
-                cboNhanVien.addItem(nv.getTenNhanVien());
-            }
-        }
-    }
-
     private NhanVien layNhanVien() {
-        int viTri = cboNhanVien.getSelectedIndex();
-        if (viTri < 0 || viTri >= dsNhanVien.size()) {
-            throw new IllegalArgumentException("Chưa có nhân viên hoạt động để lập phiếu");
-        }
-        return dsNhanVien.get(viTri);
+        if (nhanVienDangNhap == null)
+            throw new IllegalArgumentException("Cần đăng nhập trước khi lập phiếu");
+        return nhanVienDangNhap;
     }
 
     private void buildUI() {
@@ -162,7 +157,9 @@ public class PhieuDoiTra_GUI extends JFrame
         pnlThongTin.add(new JLabel("Hóa đơn mới (nếu đổi):"));
         pnlThongTin.add(txtHoaDonMoi = new JTextField());
         pnlThongTin.add(new JLabel("Nhân viên:"));
-        pnlThongTin.add(cboNhanVien = new JComboBox<>());
+        pnlThongTin.add(txtNhanVien = new JTextField(
+                nhanVienDangNhap == null ? "Chưa đăng nhập" : nhanVienDangNhap.getTenNhanVien()));
+        txtNhanVien.setEditable(false);
         pnlThongTin.add(new JLabel("Ngày lập:"));
         pnlThongTin.add(txtNgayLap = new JTextField());
         pnlThongTin.add(new JLabel("Số điện thoại KH:"));
@@ -463,7 +460,6 @@ public class PhieuDoiTra_GUI extends JFrame
         btnXoa.setEnabled(false);
         btnXemChiTiet.setEnabled(true);
         cboTrangThai.setEnabled(false);
-        cboNhanVien.setEnabled(false);
         txtHoaDonGoc.setEditable(false);
         txtHoaDonMoi.setEditable(false);
         txtSoDienThoai.setEditable(false);
@@ -494,7 +490,6 @@ public class PhieuDoiTra_GUI extends JFrame
         txtLyDo.setText("");
         txtLyDo.setEditable(true);
         cboTrangThai.setEnabled(true);
-        cboNhanVien.setEnabled(true);
         cboTrangThai.setSelectedItem("Trả hàng");
         txtThueGoc.setText("0");
         txtMaCTSP.setText("");
@@ -527,7 +522,8 @@ public class PhieuDoiTra_GUI extends JFrame
             else if (o == btnLamMoi)
                 lamMoi();
             else if (o == btnXemChiTiet) {
-                new ChiTietDoiTra_GUI(txtMaPDT.getText()).setVisible(true);
+                if (moChiTiet != null) moChiTiet.accept(txtMaPDT.getText());
+                else new ChiTietDoiTra_GUI(txtMaPDT.getText()).setVisible(true);
             } else if (o == cboTrangThai) {
                 boolean doi = "Đổi size".equals(cboTrangThai.getSelectedItem());
                 txtHoaDonMoi.setEditable(doi && !daLuu);
@@ -560,7 +556,7 @@ public class PhieuDoiTra_GUI extends JFrame
     }
 
     public static void main(String[] args) {
-        new PhieuDoiTra_GUI().setVisible(true);
+        Main.main(args);
     }
 
     @Override

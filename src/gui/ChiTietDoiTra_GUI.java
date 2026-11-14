@@ -1,84 +1,74 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import dao.ChiTietDoiTra_DAO;
 import entity.ChiTietDoiTra;
 
-// Chi xem cac san pham da doi/tra cua mot phieu, khong thao tac CRUD.
 public class ChiTietDoiTra_GUI extends JFrame {
-    private static final long serialVersionUID = 1L;
-    private final ChiTietDoiTra_DAO ct_dao = new ChiTietDoiTra_DAO();
+    private JTextField txtMaPDT;
     private DefaultTableModel model;
     private JTable table;
+    private ChiTietDoiTra_DAO ct_dao = new ChiTietDoiTra_DAO();
 
     public ChiTietDoiTra_GUI(String maPDT) {
-        setTitle("Chi tiết đổi trả " + maPDT);
-        setSize(1200, 700);
-        setMinimumSize(new java.awt.Dimension(900, 500));
+        setTitle("Chi tiết đổi/trả");
+        setSize(1000, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        buildUI();
-    }
+        setLayout(new BorderLayout(10, 10));
 
-    public ChiTietDoiTra_GUI(String maPDT) {
-        this();
-        if (txtMaPDT != null && maPDT != null) {
-            txtMaPDT.setText(maPDT);
-        }
-    }
+        JLabel lbl = new JLabel("CHI TIẾT PHIẾU ĐỔI/TRẢ", SwingConstants.CENTER);
+        lbl.setFont(new Font("Arial", Font.BOLD, 24));
+        add(lbl, BorderLayout.NORTH);
 
-    private void buildUI() {
-        // Phần North
-        JPanel pnlNorth = new JPanel();
-        add(pnlNorth, BorderLayout.NORTH);
-        pnlNorth.setPreferredSize(new Dimension(0, 140));
-        pnlNorth.setBorder(BorderFactory.createTitledBorder("Thông tin chi tiết đổi trả"));
-        pnlNorth.setLayout(null);
-
-        JLabel lblMaPDT = new JLabel("Mã phiếu đổi trả:");
-        JLabel lblSanPham = new JLabel("Sản phẩm:");
-        JLabel lblSoLuong = new JLabel("Số lượng trả:");
-        JLabel lblSoLuongNhapLai = new JLabel("Số nhập lại kho:");
-        pnlNorth.add(lblMaPDT);
-        pnlNorth.add(lblSanPham);
-        pnlNorth.add(lblSoLuong);
-        pnlNorth.add(lblSoLuongNhapLai);
-        pnlNorth.add(txtMaPDT = new JTextField());
-        pnlNorth.add(cboChiTietSanPham = new JComboBox<String>());
-        pnlNorth.add(txtSoLuong = new JTextField());
-        pnlNorth.add(txtSoLuongNhapLai = new JTextField());
+        JPanel pnl = new JPanel(new BorderLayout(5, 5));
+        pnl.setBorder(BorderFactory.createTitledBorder("Thông tin phiếu"));
+        JPanel pnlTim = new JPanel();
+        pnlTim.add(new JLabel("Mã phiếu đổi/trả:"));
+        txtMaPDT = new JTextField(maPDT, 18);
         txtMaPDT.setEditable(false);
-
-        JLabel tieuDe = new JLabel("CHI TIẾT ĐỔI TRẢ - " + maPDT,
-                SwingConstants.CENTER);
-        tieuDe.setForeground(Color.BLUE);
-        tieuDe.setFont(new Font("Arial", Font.BOLD, 26));
-        add(tieuDe, BorderLayout.NORTH);
+        pnlTim.add(txtMaPDT);
+        pnl.add(pnlTim, BorderLayout.NORTH);
 
         model = new DefaultTableModel(new String[] {
-                "Mã CTSP", "Tên sản phẩm", "Size", "Màu",
-                "Số lượng trả", "Nhập lại kho" }, 0) {
-            private static final long serialVersionUID = 1L;
+                "Mã CTSP", "Tên sản phẩm", "Size", "Màu", "Số lượng trả", "Số nhập lại"
+        }, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
         table = new JTable(model);
-        table.setFont(new Font("Arial", Font.PLAIN, 15));
-        table.setRowHeight(32);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table.setRowHeight(28);
+        pnl.add(new JScrollPane(table), BorderLayout.CENTER);
+        add(pnl, BorderLayout.CENTER);
+
+        JButton btnIn = new JButton("In phiếu");
+        btnIn.addActionListener(e -> {
+            try {
+                table.print(JTable.PrintMode.FIT_WIDTH,
+                        new MessageFormat("Phiếu đổi/trả " + maPDT), null);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+        });
+        JPanel duoi = new JPanel();
+        duoi.add(btnIn);
+        add(duoi, BorderLayout.SOUTH);
 
         try {
             docDuLieuDatabaseVaoTable(maPDT);
@@ -88,8 +78,8 @@ public class ChiTietDoiTra_GUI extends JFrame {
     }
 
     public void docDuLieuDatabaseVaoTable(String maPDT) throws SQLException {
-        ArrayList<ChiTietDoiTra> ds = ct_dao.getChiTietTheoMaPDT(maPDT);
         model.setRowCount(0);
+        ArrayList<ChiTietDoiTra> ds = ct_dao.getChiTietTheoMaPDT(maPDT);
         for (ChiTietDoiTra ct : ds) {
             model.addRow(new Object[] {
                     ct.getChiTietSanPham().getMaCTSP(),
@@ -99,6 +89,6 @@ public class ChiTietDoiTra_GUI extends JFrame {
                     ct.getSoLuong(), ct.getSoLuongNhapLai()
             });
         }
-        if (ds.isEmpty()) throw new SQLException("Không có chi tiết phiếu: " + maPDT);
+        if (ds.isEmpty()) throw new SQLException("Không tìm thấy chi tiết phiếu " + maPDT);
     }
 }

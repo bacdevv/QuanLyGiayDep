@@ -283,6 +283,24 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
         }
 
+
+        // Nap lai danh muc / thuong hieu sau khi them, sua, xoa.
+        public void updateCombobox() {
+                listTH = th_dao.getalltbThuongHieu();
+                listDM = dm_dao.getalltbDanhMuc();
+                cboThuongHieu.removeAllItems();
+                cboDanhMuc.removeAllItems();
+                cboLocDanhMuc.removeAllItems();
+                cboThuongHieu.addItem("-- Chọn thương hiệu --");
+                cboDanhMuc.addItem("-- Chọn danh mục --");
+                cboLocDanhMuc.addItem("-- Tất cả danh mục --");
+                for (ThuongHieu th : listTH) cboThuongHieu.addItem(th.getTenThuongHieu());
+                for (DanhMuc dm : listDM) {
+                        cboDanhMuc.addItem(dm.getTenDanhMuc());
+                        cboLocDanhMuc.addItem(dm.getTenDanhMuc());
+                }
+        }
+
         public static void main(String[] args) {
                 new SanPham_GUI().setVisible(true);
         }
@@ -604,5 +622,5 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 return new SanPham(maSP, danhMuc, thuongHieu, tenSP, hoatDong, giaBan);
         }
-        
+
 }
