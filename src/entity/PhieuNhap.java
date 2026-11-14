@@ -1,9 +1,12 @@
 package entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class PhieuNhap {
+
     private String maPN;
     private NhaCungCap nhaCungCap;
     private NhanVien nhanVien;
@@ -22,6 +25,16 @@ public class PhieuNhap {
         this.nhaCungCap = nhaCungCap;
         this.nhanVien = nhanVien;
         this.ngayNhap = ngayNhap;
+    }
+
+    public BigDecimal tinhTongTien(ArrayList<ChiTietPhieuNhap> dsChiTiet) {
+        BigDecimal tongTien = BigDecimal.ZERO;
+
+        for (ChiTietPhieuNhap ct : dsChiTiet) {
+            tongTien = tongTien.add(ct.tinhThanhTien());
+        }
+
+        return tongTien;
     }
 
     public String getMaPN() {

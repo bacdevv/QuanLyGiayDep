@@ -30,7 +30,37 @@ public class ChiTietDoiTra_GUI extends JFrame {
         setMinimumSize(new java.awt.Dimension(900, 500));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout(10, 10));
+        buildUI();
+    }
+
+    public ChiTietDoiTra_GUI(String maPDT) {
+        this();
+        if (txtMaPDT != null && maPDT != null) {
+            txtMaPDT.setText(maPDT);
+        }
+    }
+
+    private void buildUI() {
+        // Phần North
+        JPanel pnlNorth = new JPanel();
+        add(pnlNorth, BorderLayout.NORTH);
+        pnlNorth.setPreferredSize(new Dimension(0, 140));
+        pnlNorth.setBorder(BorderFactory.createTitledBorder("Thông tin chi tiết đổi trả"));
+        pnlNorth.setLayout(null);
+
+        JLabel lblMaPDT = new JLabel("Mã phiếu đổi trả:");
+        JLabel lblSanPham = new JLabel("Sản phẩm:");
+        JLabel lblSoLuong = new JLabel("Số lượng trả:");
+        JLabel lblSoLuongNhapLai = new JLabel("Số nhập lại kho:");
+        pnlNorth.add(lblMaPDT);
+        pnlNorth.add(lblSanPham);
+        pnlNorth.add(lblSoLuong);
+        pnlNorth.add(lblSoLuongNhapLai);
+        pnlNorth.add(txtMaPDT = new JTextField());
+        pnlNorth.add(cboChiTietSanPham = new JComboBox<String>());
+        pnlNorth.add(txtSoLuong = new JTextField());
+        pnlNorth.add(txtSoLuongNhapLai = new JTextField());
+        txtMaPDT.setEditable(false);
 
         JLabel tieuDe = new JLabel("CHI TIẾT ĐỔI TRẢ - " + maPDT,
                 SwingConstants.CENTER);
