@@ -12,6 +12,8 @@ import java.util.List;
 import java.awt.Dimension;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import connectDB.ConnectDB;
@@ -56,7 +58,6 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
 
         setTitle("Chi tiết sản phẩm");
         setSize(1150, 650);
-        setMinimumSize(new java.awt.Dimension(950, 600));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -202,9 +203,9 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         btnSua.setEnabled(false);
         btnXoa.setEnabled(false);
 
-        table.getSelectionModel().addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
-            public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+            public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
                     int row = table.getSelectedRow();
                     btnSua.setEnabled(row >= 0);
@@ -212,9 +213,10 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
                     fillForm(row);
                 }
             }
+
         });
         JScrollPane srp = new JScrollPane(table);
-        srp.setBorder(BorderFactory.createTitledBorder("Danh sách phiên bản theo kích cỡ và màu sắc"));
+        srp.setBorder(BorderFactory.createTitledBorder("Danh sách chi tiết sản phẩm"));
         pGiua.add(srp, BorderLayout.CENTER);
 
         JPanel pTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
@@ -493,13 +495,8 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         String kichCo = txtKichCo.getText().trim();
         String mauSac = txtMauSac.getText().trim();
 
-        if (txtMaSP.getText().trim().isEmpty()) {
-            txtThongBao.setText("Vui lòng chọn sản phẩm trước khi thêm phiên bản.");
-            return false;
-        }
-
         if (maCTSP.isEmpty()) {
-            txtThongBao.setText("Vui lòng nhập mã chi tiết sản phẩm.");
+            txtThongBao.setText("Mã chi tiết sản phẩm không được để trống.");
             txtMaCTSP.requestFocusInWindow();
             return false;
         }
@@ -511,7 +508,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         }
 
         if (kichCo.isEmpty()) {
-            txtThongBao.setText("Vui lòng nhập kích cỡ.");
+            txtThongBao.setText("Kích cỡ không được để trống.");
             txtKichCo.requestFocusInWindow();
             return false;
         }
@@ -522,7 +519,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         }
 
         if (mauSac.isEmpty()) {
-            txtThongBao.setText("Vui lòng nhập màu sắc.");
+            txtThongBao.setText("Màu sắc không được để trống.");
             txtMauSac.requestFocusInWindow();
             return false;
         }

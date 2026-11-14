@@ -540,7 +540,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 // SQL: maSP VARCHAR(20), tenSP NVARCHAR(300).
                 if (maSP.isEmpty()) {
-                        txtThongBao.setText("Vui lòng nhập mã sản phẩm.");
+                        txtThongBao.setText("Mã sản phẩm không được để trống.");
                         txtmaSP.requestFocusInWindow();
                         return false;
                 }
@@ -550,7 +550,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         return false;
                 }
                 if (tenSP.isEmpty()) {
-                        txtThongBao.setText("Vui lòng nhập tên sản phẩm.");
+                        txtThongBao.setText("Tên sản phẩm không được để trống.");
                         txttenSP.requestFocusInWindow();
                         return false;
                 }
