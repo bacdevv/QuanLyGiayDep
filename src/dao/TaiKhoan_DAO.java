@@ -17,7 +17,6 @@ public class TaiKhoan_DAO {
 
     }
 
-    // Ham lay tat ca tai khoan (code goc)
     public ArrayList<TaiKhoan> gettalltbNhanVien() {
 
         ArrayList<TaiKhoan> dstk = new ArrayList<TaiKhoan>();
@@ -49,7 +48,6 @@ public class TaiKhoan_DAO {
         return dstk;
     }
 
-    // Ham kiem tra dang nhap
     public boolean kiemTraDangNhap(String tenDangNhap, String matKhau) {
 
         try {

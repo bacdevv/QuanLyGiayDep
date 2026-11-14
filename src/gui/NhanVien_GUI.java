@@ -35,7 +35,6 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
     private JButton btnDangNhap;
     private JButton btnThoat;
 
-    // Khai bao DAO
     private TaiKhoan_DAO tk_dao;
 
     public NhanVien_GUI() {
@@ -194,8 +193,8 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
                         "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE);
 
-                // Sau khi dang nhap thanh cong
-                // Co the chuyen sang giao dien quan ly tai day
+                //
+                // Them chuc nang chuyen sang giao dien quan ly tai day
 
             } else {
 
