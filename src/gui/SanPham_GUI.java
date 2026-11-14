@@ -604,41 +604,5 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 return new SanPham(maSP, danhMuc, thuongHieu, tenSP, hoatDong, giaBan);
         }
-
-        public void updateCombobox() {
-                Object thuongHieuDaChon = cboThuongHieu.getSelectedItem();
-                Object danhMucDaChon = cboDanhMuc.getSelectedItem();
-                Object danhMucLocDaChon = cboLocDanhMuc.getSelectedItem();
-                cboLocDanhMuc.removeActionListener(this);
-                listTH = th_dao.getalltbThuongHieu();
-                String[] thuongHieu = new String[listTH.size() + 1];
-                thuongHieu[0] = "-- Chọn thương hiệu --";
-
-                int i = 1;
-                for (ThuongHieu th : listTH) {
-                        thuongHieu[i] = th.getTenThuongHieu();
-                        i++;
-                }
-                cboThuongHieu.setModel(
-                                new DefaultComboBoxModel<String>(thuongHieu));
-
-                listDM = dm_dao.getalltbDanhMuc();
-                String[] danhMuc = new String[listDM.size() + 1];
-                danhMuc[0] = "-- Chọn danh mục --";
-
-                i = 1;
-                for (DanhMuc dm : listDM) {
-                        danhMuc[i] = dm.getTenDanhMuc();
-                        i++;
-                }
-                cboDanhMuc.setModel(
-                                new DefaultComboBoxModel<String>(danhMuc));
-                String[] danhMucLoc = danhMuc.clone();
-                danhMucLoc[0] = "-- Tất cả danh mục --";
-                cboLocDanhMuc.setModel(new DefaultComboBoxModel<String>(danhMucLoc));
-                cboThuongHieu.setSelectedItem(thuongHieuDaChon);
-                cboDanhMuc.setSelectedItem(danhMucDaChon);
-                cboLocDanhMuc.setSelectedItem(danhMucLocDaChon);
-                cboLocDanhMuc.addActionListener(this);
-        }
+        
 }

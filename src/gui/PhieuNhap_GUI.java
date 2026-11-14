@@ -92,9 +92,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     }
 
     public void setNhaCungCap(String maNCC) {
-        if (maNCC == null || maNCC.trim().isEmpty()) {
-            return;
-        }
         String trimmed = maNCC.trim();
         for (int i = 0; i < cboNhaCungCap.getItemCount(); i++) {
             if (cboNhaCungCap.getItemAt(i).equalsIgnoreCase(trimmed)) {
@@ -500,21 +497,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        int r = table.getSelectedRow();
-        if (r != -1) {
-            String maPN = tableModel.getValueAt(r, 0).toString();
-            String maNCC = tableModel.getValueAt(r, 1).toString();
-            String maNV = tableModel.getValueAt(r, 2).toString();
-            String ngayStr = tableModel.getValueAt(r, 3).toString();
 
-            txtMaPN.setText(maPN);
-            setNhaCungCap(maNCC);
-            txtNhanVien.setText(maNV);
-            txtNgayNhap.setText(ngayStr);
-
-            // Bấm vào 1 phiếu sẽ mở ngay chi tiết phiếu với đầy đủ thuộc tính
-            moChiTietPhieuTheoDong(r);
-        }
     }
 
     public void moChiTietPhieu(PhieuNhap pn) {
@@ -600,7 +583,3 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     }
 
 }
-
-
-
-
