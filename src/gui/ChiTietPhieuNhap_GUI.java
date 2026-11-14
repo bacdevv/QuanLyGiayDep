@@ -1,5 +1,14 @@
 package gui;
 
+import connectDB.ConnectDB;
+import dao.ChiTietPhieuNhap_DAO;
+import dao.ChiTietSanPham_DAO;
+import dao.PhieuNhap_DAO;
+import dao.SanPham_DAO;
+import entity.ChiTietPhieuNhap;
+import entity.ChiTietSanPham;
+import entity.PhieuNhap;
+import entity.SanPham;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -11,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -27,45 +35,31 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
-import connectDB.ConnectDB;
-import dao.ChiTietPhieuNhap_DAO;
-import dao.ChiTietSanPham_DAO;
-import dao.PhieuNhap_DAO;
-import dao.SanPham_DAO;
-import entity.ChiTietPhieuNhap;
-import entity.ChiTietSanPham;
-import entity.PhieuNhap;
-import entity.SanPham;
-
 public class ChiTietPhieuNhap_GUI extends JFrame implements ActionListener, MouseListener {
 
     private static final long serialVersionUID = 1L;
 
-    // Thông tin phiếu nhập
     private JTextField txtMaPN;
     private JTextField txtNhaCungCap;
     private JTextField txtNhanVien;
     private JTextField txtNgayNhap;
 
-    // Thông tin sản phẩm
     private JComboBox<String> cboSanPham;
     private JComboBox<String> cboChiTietSanPham;
     private JTextField txtSoLuong;
     private JTextField txtDonGiaNhap;
     private JTextField txtThanhTien;
 
-    // Nút chức năng
     private JButton btnThem;
     private JButton btnXoaRong;
     private JButton btnXoa;
     private JButton btnSua;
 
-    // Bảng và tổng tiền
+
     private JTextField txtTongTien;
     private JTable table;
     private DefaultTableModel tableModel;
 
-    // DAO và dữ liệu
     private ChiTietPhieuNhap_DAO ctpn_dao;
     private SanPham_DAO sp_dao;
     private ChiTietSanPham_DAO ctsp_dao;
@@ -132,7 +126,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements ActionListener, Mous
 
     private void buildUI() {
 
-        // ================= PHẦN NORTH =================
         JPanel pnlNorth;
         add(pnlNorth = new JPanel(), BorderLayout.NORTH);
 
