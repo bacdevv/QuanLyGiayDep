@@ -303,7 +303,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                 pn.getNhaCungCap() != null ? pn.getNhaCungCap().getMaNCC() : "",
                 pn.getNhanVien() != null ? pn.getNhanVien().getMaNhanVien() : "",
                 ngayStr,
-                DinhDangTien.hienThi(tong)
+                new java.text.DecimalFormat("#,##0.##", java.text.DecimalFormatSymbols.getInstance(java.util.Locale.forLanguageTag("vi-VN"))).format(tong)
             });
         }
     }
