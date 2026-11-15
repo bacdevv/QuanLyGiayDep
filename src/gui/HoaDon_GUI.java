@@ -55,8 +55,8 @@ public class HoaDon_GUI extends JFrame
     private JTextField txtTimMaCTSP, txtTimTenSP;
     private JTextField txtMaCTSP, txtSoLuong, txtDonGia;
 
-    private JComboBox<String> cboNhanVien;
-    private ArrayList<NhanVien> dsNhanVien = new ArrayList<>();
+    private JTextField txtNhanVien;
+    private NhanVien nhanVienDangNhap;
     private BigDecimal tongTienDangTinh = BigDecimal.ZERO;
     private JTextField txtKhachHang, txtSoDienThoai;
     private JButton btnThemKhachHang;
@@ -73,8 +73,18 @@ public class HoaDon_GUI extends JFrame
 
     private HoaDon_DAO hd_dao;
     private boolean daLuu = false;
+    private java.util.function.Consumer<String> moChiTiet;
+
+    public void setMoChiTiet(java.util.function.Consumer<String> moChiTiet) {
+        this.moChiTiet = moChiTiet;
+    }
 
     public HoaDon_GUI() {
+        this(null);
+    }
+
+    public HoaDon_GUI(NhanVien nhanVien) {
+        this.nhanVienDangNhap = nhanVien;
         hd_dao = new HoaDon_DAO();
         setTitle("Quản lý giày dép - Hóa đơn");
         setSize(1500, 880);
@@ -85,7 +95,6 @@ public class HoaDon_GUI extends JFrame
         buildUI();
         try {
             ConnectDB.getInstance().connect();
-            docDuLieuNhanVien();
             docDuLieuSanPham();
         } catch (SQLException e) {
             thongBao("Lỗi tải dữ liệu: " + e.getMessage());
@@ -116,7 +125,7 @@ public class HoaDon_GUI extends JFrame
             txt.setFont(font);
         }
         cboThanhToan.setFont(font);
-        cboNhanVien.setFont(font);
+        txtNhanVien.setFont(font);
         for (JButton btn : new JButton[] { btnThemKhachHang, btnTim,
                 btnLamMoiSanPham, btnThem, btnSuaSoLuong, btnXoa,
                 btnTaoHD, btnLamMoiHD, btnXuatHD })
@@ -129,24 +138,10 @@ public class HoaDon_GUI extends JFrame
         dinhDangNhan(getContentPane());
     }
 
-    // Tam thoi chon nhan vien tu SQL cho den khi nhom tich hop dang nhap.
-    private void docDuLieuNhanVien() {
-        cboNhanVien.removeAllItems();
-        dsNhanVien.clear();
-        for (NhanVien nv : new NhanVien_DAO().gettalltbNhanVien()) {
-            if (nv.isHoatDong()) {
-                dsNhanVien.add(nv);
-                cboNhanVien.addItem(nv.getTenNhanVien());
-            }
-        }
-    }
-
     private NhanVien layNhanVien() {
-        int viTri = cboNhanVien.getSelectedIndex();
-        if (viTri < 0 || viTri >= dsNhanVien.size()) {
-            throw new IllegalArgumentException("Chưa có nhân viên hoạt động để lập phiếu");
-        }
-        return dsNhanVien.get(viTri);
+        if (nhanVienDangNhap == null)
+            throw new IllegalArgumentException("Cần đăng nhập trước khi lập phiếu");
+        return nhanVienDangNhap;
     }
 
     private void buildUI() {
@@ -179,7 +174,9 @@ public class HoaDon_GUI extends JFrame
         pnlThongTin.add(txtNgayLap = new JTextField());
 
         pnlThongTin.add(new JLabel("Nhân viên:"));
-        pnlThongTin.add(cboNhanVien = new JComboBox<>());
+        pnlThongTin.add(txtNhanVien = new JTextField(
+                nhanVienDangNhap == null ? "Chưa đăng nhập" : nhanVienDangNhap.getTenNhanVien()));
+        txtNhanVien.setEditable(false);
 
         pnlThongTin.add(new JLabel("Số điện thoại KH:"));
         JPanel pnlKhachHang = new JPanel(new BorderLayout(5, 0));
@@ -617,7 +614,7 @@ public class HoaDon_GUI extends JFrame
         txtTienThue.setText(DinhDangTien.hienThi(tienThue));
         txtTongTien.setText(DinhDangTien.hienThi(tongTien));
         if (!daLuu)
-            btnTaoHD.setEnabled(cboNhanVien.getSelectedIndex() >= 0
+            btnTaoHD.setEnabled(nhanVienDangNhap != null
                     && txtMaHD.getText().matches("HD[0-9]{6}")
                     && tongTien.compareTo(DinhDangTien.GIOI_HAN_SQL) <= 0);
     }
@@ -670,7 +667,6 @@ public class HoaDon_GUI extends JFrame
         txtSoDienThoai.setEditable(false);
         btnThemKhachHang.setEnabled(false);
         cboThanhToan.setEnabled(false);
-        cboNhanVien.setEnabled(false);
         JOptionPane.showMessageDialog(this, "Tạo hóa đơn thành công: " + maMoi);
         docDuLieuSanPham();
     }
@@ -701,7 +697,6 @@ public class HoaDon_GUI extends JFrame
         btnXuatHD.setEnabled(false);
         txtThue.setEditable(false);
         cboThanhToan.setEnabled(true);
-        cboNhanVien.setEnabled(true);
         try {
             txtMaHD.setText(hd_dao.taoMaHoaDonMoi());
         } catch (SQLException e) {
@@ -715,7 +710,8 @@ public class HoaDon_GUI extends JFrame
     private void xuatHoaDon() {
         if (!daLuu)
             throw new IllegalArgumentException("Cần lưu hóa đơn trước");
-        new ChiTietHoaDon_GUI(txtMaHD.getText()).setVisible(true);
+        if (moChiTiet != null) moChiTiet.accept(txtMaHD.getText());
+        else new ChiTietHoaDon_GUI(txtMaHD.getText()).setVisible(true);
     }
 
     // ====== XU LY SU KIEN BUTTON ======
@@ -820,6 +816,6 @@ public class HoaDon_GUI extends JFrame
     }
 
     public static void main(String[] args) {
-        new HoaDon_GUI().setVisible(true);
+        Main.main(args);
     }
 }

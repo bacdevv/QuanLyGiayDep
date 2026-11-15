@@ -1,4 +1,4 @@
-﻿package gui;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -38,7 +38,6 @@ public class SanPham_GUI extends JFrame implements ActionListener {
         private JComboBox<String> cboDanhMuc;
         private JButton btnThem;
         private JButton btnSua;
-        private JButton btnXoa;
         private JButton btnLamMoi;
         private JButton btnTim;
         private JTextField txtTimMaSP;
@@ -133,10 +132,12 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                 }
 
                 txtmaSP = new JTextField(20);
+                txtmaSP.setEditable(false);
                 txttenSP = new JTextField(20);
                 txtGiaBan = new JTextField(18);
                 cboTrangThai = new JComboBox<>(
                                 new String[] { "-- Chọn trạng thái --", "Đang kinh doanh", "Ngừng kinh doanh" });
+                cboTrangThai.setSelectedIndex(1);
 
                 cboThuongHieu = new JComboBox<>(new String[] {
                                 "-- Chọn thương hiệu --"
@@ -183,14 +184,11 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 btnThem = new JButton("Thêm");
                 btnSua = new JButton("Sửa");
-                btnXoa = new JButton("Xoá");
                 btnSua.setEnabled(false);
-                btnXoa.setEnabled(false);
                 btnLamMoi = new JButton("Làm mới");
 
                 pNut.add(btnThem);
                 pNut.add(btnSua);
-                pNut.add(btnXoa);
                 pNut.add(btnLamMoi);
 
                 txtThongBao = new JTextField();
@@ -258,7 +256,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                                         int row = table.getSelectedRow();
                                         btnChiTietSanPham.setEnabled(row >= 0);
                                         btnSua.setEnabled(row >= 0);
-                                        btnXoa.setEnabled(row >= 0);
+                                        btnThem.setEnabled(row < 0);
                                         fillForm(row);
                                 }
                         }
@@ -271,16 +269,38 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 btnThem.addActionListener(this);
                 btnSua.addActionListener(this);
-                btnXoa.addActionListener(this);
                 btnLamMoi.addActionListener(this);
                 btnTim.addActionListener(this);
+                txtTimMaSP.addActionListener(this);
+                txtTimTenSP.addActionListener(this);
                 btnThuongHieu.addActionListener(this);
                 btnDanhMuc.addActionListener(this);
                 btnChiTietSanPham.addActionListener(this);
                 cboLocDanhMuc.addActionListener(this);
                 cboLocTrangThai.addActionListener(this);
                 updateCombobox();
+                clearTextField();
 
+        }
+
+        // Nap lai danh muc / thuong hieu sau khi them, sua, xoa.
+        public void updateCombobox() {
+                cboLocDanhMuc.removeActionListener(this);
+                listTH = th_dao.getalltbThuongHieu();
+                listDM = dm_dao.getalltbDanhMuc();
+                cboThuongHieu.removeAllItems();
+                cboDanhMuc.removeAllItems();
+                cboLocDanhMuc.removeAllItems();
+                cboThuongHieu.addItem("-- Chọn thương hiệu --");
+                cboDanhMuc.addItem("-- Chọn danh mục --");
+                cboLocDanhMuc.addItem("-- Tất cả danh mục --");
+                for (ThuongHieu th : listTH)
+                        cboThuongHieu.addItem(th.getTenThuongHieu());
+                for (DanhMuc dm : listDM) {
+                        cboDanhMuc.addItem(dm.getTenDanhMuc());
+                        cboLocDanhMuc.addItem(dm.getTenDanhMuc());
+                }
+                cboLocDanhMuc.addActionListener(this);
         }
 
         public static void main(String[] args) {
@@ -302,8 +322,12 @@ public class SanPham_GUI extends JFrame implements ActionListener {
         }
 
         private void fillForm(int row) {
-                if (row < 0)
+                if (row < 0) {
+                        txtmaSP.setText(taoMaTuDong());
+                        txtmaSP.setEditable(false);
+                        cboTrangThai.setSelectedIndex(1);
                         return;
+                }
                 txtmaSP.setText(table.getValueAt(row, 0).toString());
                 txttenSP.setText(table.getValueAt(row, 1).toString());
                 cboThuongHieu.setSelectedItem(table.getValueAt(row, 2).toString());
@@ -407,7 +431,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         gui.setSanPham(maSP, tenSP);
                         gui.setLocationRelativeTo(this);
                         gui.setVisible(true);
-                } else if (o.equals(btnTim)) {
+                } else if (o.equals(btnTim) || o.equals(txtTimMaSP) || o.equals(txtTimTenSP)) {
 
                         cboLocDanhMuc.removeActionListener(this);
                         cboLocTrangThai.removeActionListener(this);
@@ -445,29 +469,6 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         } else if (!tenSP.isEmpty()) {
                                 txtTimTenSP.requestFocusInWindow();
                                 txtTimTenSP.selectAll();
-                        }
-                } else if (o.equals(btnXoa)) {
-                        int row = table.getSelectedRow();
-                        if (row < 0) {
-                                return;
-                        }
-                        String maSP = model.getValueAt(row, 0).toString();
-                        int BD = JOptionPane.showConfirmDialog(this,
-                                        "Bạn có chắc chắn muốn xóa sản phẩm này?",
-                                        "Xác nhận xóa sản phẩm", JOptionPane.YES_NO_OPTION,
-                                        JOptionPane.WARNING_MESSAGE);
-                        if (BD == JOptionPane.YES_OPTION) {
-                                boolean TC = sp_dao.delete(maSP);
-                                if (TC) {
-                                        model.removeRow(row);
-                                        clearTextField();
-                                        JOptionPane.showMessageDialog(this, "Đã xóa sản phẩm " + maSP + ".",
-                                                        "Xóa thành công", JOptionPane.INFORMATION_MESSAGE);
-                                } else {
-                                        JOptionPane.showMessageDialog(this,
-                                                        "Không thể xóa sản phẩm.\nSản phẩm có thể đang được sử dụng hoặc dữ liệu đã thay đổi.\nVui lòng kiểm tra và thử lại.",
-                                                        "Không thể xóa sản phẩm", JOptionPane.WARNING_MESSAGE);
-                                }
                         }
                 } else if (o.equals(btnSua)) {
                         int row = table.getSelectedRow();
@@ -523,32 +524,22 @@ public class SanPham_GUI extends JFrame implements ActionListener {
         private void clearInputFields() {
                 table.clearSelection();
                 txtThongBao.setText("");
-                txtmaSP.setText("");
+                txtmaSP.setText(taoMaTuDong());
                 txttenSP.setText("");
                 cboDanhMuc.setSelectedIndex(0);
                 cboThuongHieu.setSelectedIndex(0);
                 txtGiaBan.setText("");
-                cboTrangThai.setSelectedIndex(0);
-                txtmaSP.setEditable(true);
+                cboTrangThai.setSelectedIndex(1);
+                txtmaSP.setEditable(false);
         }
 
         private boolean valiDate() {
                 txtThongBao.setText("");
-                String maSP = txtmaSP.getText().trim();
+
                 String tenSP = txttenSP.getText().trim();
                 String gia = txtGiaBan.getText().trim();
 
                 // SQL: maSP VARCHAR(20), tenSP NVARCHAR(300).
-                if (maSP.isEmpty()) {
-                        txtThongBao.setText("Mã sản phẩm không được để trống.");
-                        txtmaSP.requestFocusInWindow();
-                        return false;
-                }
-                if (maSP.length() > 20) {
-                        txtThongBao.setText("Mã sản phẩm có độ dài tối đa 20 ký tự.");
-                        txtmaSP.requestFocusInWindow();
-                        return false;
-                }
                 if (tenSP.isEmpty()) {
                         txtThongBao.setText("Tên sản phẩm không được để trống.");
                         txttenSP.requestFocusInWindow();
@@ -605,40 +596,20 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                 return new SanPham(maSP, danhMuc, thuongHieu, tenSP, hoatDong, giaBan);
         }
 
-        public void updateCombobox() {
-                Object thuongHieuDaChon = cboThuongHieu.getSelectedItem();
-                Object danhMucDaChon = cboDanhMuc.getSelectedItem();
-                Object danhMucLocDaChon = cboLocDanhMuc.getSelectedItem();
-                cboLocDanhMuc.removeActionListener(this);
-                listTH = th_dao.getalltbThuongHieu();
-                String[] thuongHieu = new String[listTH.size() + 1];
-                thuongHieu[0] = "-- Chọn thương hiệu --";
-
-                int i = 1;
-                for (ThuongHieu th : listTH) {
-                        thuongHieu[i] = th.getTenThuongHieu();
-                        i++;
+        private String taoMaTuDong() {
+                int soLonNhat = 0;
+                for (SanPham item : sp_dao.getallSanPham()) {
+                        String ma = item.getMaSP();
+                        if (ma != null && ma.matches("SP[0-9]{1,8}")) {
+                                int so = Integer.parseInt(ma.substring(2));
+                                if (so > soLonNhat) {
+                                        soLonNhat = so;
+                                }
+                        }
                 }
-                cboThuongHieu.setModel(
-                                new DefaultComboBoxModel<String>(thuongHieu));
-
-                listDM = dm_dao.getalltbDanhMuc();
-                String[] danhMuc = new String[listDM.size() + 1];
-                danhMuc[0] = "-- Chọn danh mục --";
-
-                i = 1;
-                for (DanhMuc dm : listDM) {
-                        danhMuc[i] = dm.getTenDanhMuc();
-                        i++;
+                if (soLonNhat == 99999999) {
+                        return "";
                 }
-                cboDanhMuc.setModel(
-                                new DefaultComboBoxModel<String>(danhMuc));
-                String[] danhMucLoc = danhMuc.clone();
-                danhMucLoc[0] = "-- Tất cả danh mục --";
-                cboLocDanhMuc.setModel(new DefaultComboBoxModel<String>(danhMucLoc));
-                cboThuongHieu.setSelectedItem(thuongHieuDaChon);
-                cboDanhMuc.setSelectedItem(danhMucDaChon);
-                cboLocDanhMuc.setSelectedItem(danhMucLocDaChon);
-                cboLocDanhMuc.addActionListener(this);
+                return "SP" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
         }
 }

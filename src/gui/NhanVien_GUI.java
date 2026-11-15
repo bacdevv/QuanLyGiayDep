@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -15,9 +16,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import connectDB.ConnectDB;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
+
+import dao.TaiKhoan_DAO;
+import entity.NhanVien;
 
 public class NhanVien_GUI extends JFrame implements ActionListener {
 
@@ -28,7 +36,26 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
     private JButton btnDangNhap;
     private JButton btnThoat;
 
+    private TaiKhoan_DAO tk_dao;
+
     public NhanVien_GUI() {
+
+        // Khoi tao DAO
+        tk_dao = new TaiKhoan_DAO();
+
+        try {
+            ConnectDB.getInstance().connect();
+            Connection con = ConnectDB.getConnection();
+
+            if (con != null) {
+                System.out.println("KET NOI DATABASE THANH CONG!");
+            } else {
+                System.out.println("KET NOI DATABASE THAT BAI!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         setTitle("Quản lý giày dép");
         setSize(600, 480);
@@ -61,7 +88,7 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         JPanel pGiua = new JPanel();
         pGiua.setLayout(new BoxLayout(pGiua, BoxLayout.Y_AXIS));
 
-        // Tên đăng nhập
+        // Ten dang nhap
         JLabel lblTenDN = new JLabel("Tên đăng nhập");
         lblTenDN.setFont(new Font("Arial", Font.BOLD, 16));
 
@@ -71,7 +98,7 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
         txtTenDN.setPreferredSize(new Dimension(500, 38));
         ptxt1.add(txtTenDN);
 
-        // Mật khẩu
+        // Mat khau
         JLabel lblMatKhau = new JLabel("Mật khẩu");
         lblMatKhau.setFont(new Font("Arial", Font.BOLD, 16));
 
@@ -82,11 +109,11 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
 
         ptxt2.add(txtMatKhau);
 
-        // Hiển thị mật khẩu
+        // Hien thi mat khau
         chkHienMatKhau = new JCheckBox("Hiển thị mật khẩu");
         chkHienMatKhau.setFont(new Font("Arial", Font.PLAIN, 15));
 
-        // Thêm thành phần vào panel giữa
+        // Them thanh phan vao panel giua
         pGiua.add(lblTenDN);
         pGiua.add(Box.createVerticalStrut(8));
         pGiua.add(ptxt1);
@@ -114,7 +141,7 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
 
         p.add(pCuoi, BorderLayout.SOUTH);
 
-        // Đăng ký sự kiện
+        // Dang ky su kien
         btnDangNhap.addActionListener(this);
         btnThoat.addActionListener(this);
         chkHienMatKhau.addActionListener(this);
@@ -125,12 +152,62 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        // Xu ly hien thi mat khau
         if (e.getSource() == chkHienMatKhau) {
 
             if (chkHienMatKhau.isSelected()) {
                 txtMatKhau.setEchoChar((char) 0);
             } else {
                 txtMatKhau.setEchoChar('•');
+            }
+        }
+
+        // Xu ly nut dang nhap
+        if (e.getSource() == btnDangNhap) {
+
+            String tenDangNhap = txtTenDN.getText().trim();
+
+            String matKhau = new String(txtMatKhau.getPassword());
+
+            // Kiem tra thong tin nhap
+            if (tenDangNhap.isEmpty() || matKhau.isEmpty()) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
+
+                return;
+            }
+
+            try {
+                NhanVien nv = tk_dao.dangNhap(tenDangNhap, matKhau);
+                if (nv != null) {
+                    JOptionPane.showMessageDialog(this, "Đăng nhập thành công: " + nv.getTenNhanVien());
+                    new Main(nv).setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Sai tài khoản/mật khẩu hoặc nhân viên đã nghỉ!");
+                    txtMatKhau.setText("");
+                    txtMatKhau.requestFocus();
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi SQL Server: " + ex.getMessage());
+            }
+        }
+
+        // Xu ly nut thoat
+        if (e.getSource() == btnThoat) {
+
+            int chon = JOptionPane.showConfirmDialog(
+                    this,
+                    "Bạn có chắc chắn muốn thoát?",
+                    "Xác nhận",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (chon == JOptionPane.YES_OPTION) {
+                System.exit(0);
             }
         }
     }

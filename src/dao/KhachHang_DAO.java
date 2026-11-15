@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import connectDB.ConnectDB;
 import entity.KhachHang;
-import entity.NhanVien;
 
 public class KhachHang_DAO {
 

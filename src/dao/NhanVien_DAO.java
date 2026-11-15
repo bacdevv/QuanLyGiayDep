@@ -27,7 +27,7 @@ public class NhanVien_DAO {
                 String maNV = rs.getString(1);
                 String tenNV = rs.getString(2);
                 String soDienThoai = rs.getString(3);
-                boolean hoatDong = rs.getBoolean(5);
+                boolean hoatDong = rs.getBoolean(4);
                 NhanVien nv = new NhanVien(maNV, tenNV, soDienThoai, hoatDong);
                 dsnv.add(nv);
 
