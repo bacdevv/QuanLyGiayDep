@@ -1,5 +1,7 @@
 package gui;
 
+import connectDB.ConnectDB;
+import entity.NhanVien;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Font;
@@ -12,7 +14,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Supplier;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -27,11 +28,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import connectDB.ConnectDB;
-import entity.NhanVien;
-
 // Main la cua so chinh. Moi GUI cu duoc dua vao tab, khong can sua giao dien cua nhom.
 public class Main extends JFrame {
+
     private final NhanVien nhanVien;
     private final JTabbedPane tabChinh = new JTabbedPane();
     private JTabbedPane tabBanHang, tabDoiTra;
@@ -76,8 +75,9 @@ public class Main extends JFrame {
         tabChinh.addTab("Sản phẩm", taoTabSanPham());
         tabChinh.addTab("Nhân viên", taoTabNhanVien());
         tabChinh.addChangeListener(e -> {
-            if (tabChinh.getSelectedIndex() == 0)
+            if (tabChinh.getSelectedIndex() == 0) {
                 napThongKe();
+            }
             if (tabChinh.getSelectedComponent() instanceof JTabbedPane) {
                 napTab((JTabbedPane) tabChinh.getSelectedComponent());
             }
@@ -98,8 +98,8 @@ public class Main extends JFrame {
         tren.add(btnTaiLai, BorderLayout.EAST);
         trang.add(tren, BorderLayout.NORTH);
 
-        String[] ten = { "Nhân viên hoạt động", "Số lượng tồn kho", "Đơn hàng đã bán",
-                "Doanh thu", "Đơn đổi/trả" };
+        String[] ten = {"Nhân viên hoạt động", "Số lượng tồn kho", "Đơn hàng đã bán",
+            "Doanh thu", "Đơn đổi/trả"};
         JPanel bang = new JPanel(new GridLayout(2, 3, 15, 15));
         for (int i = 0; i < ten.length; i++) {
             JPanel o = new JPanel(new BorderLayout(4, 8));
@@ -116,14 +116,15 @@ public class Main extends JFrame {
     }
 
     private void napThongKe() {
-        if (Boolean.getBoolean("app.preview"))
+        if (Boolean.getBoolean("app.preview")) {
             return;
+        }
         String[] sql = {
-                "SELECT COUNT(*) FROM NhanVien WHERE hoatDong = 1",
-                "SELECT COALESCE(SUM(soLuongTon),0) FROM ChiTietSanPham",
-                "SELECT COUNT(*) FROM HoaDon",
-                "SELECT COALESCE(SUM(tongTien),0) FROM HoaDon",
-                "SELECT COUNT(*) FROM PhieuDoiTra" };
+            "SELECT COUNT(*) FROM NhanVien WHERE hoatDong = 1",
+            "SELECT COALESCE(SUM(soLuongTon),0) FROM ChiTietSanPham",
+            "SELECT COUNT(*) FROM HoaDon",
+            "SELECT COALESCE(SUM(tongTien),0) FROM HoaDon",
+            "SELECT COUNT(*) FROM PhieuDoiTra"};
         try {
             ConnectDB.getInstance().connect();
             Connection con = ConnectDB.getConnection();
@@ -139,8 +140,9 @@ public class Main extends JFrame {
                 }
             }
         } catch (SQLException e) {
-            for (JLabel label : chiSo)
+            for (JLabel label : chiSo) {
                 label.setText("–");
+            }
             lblTrangThai.setText("Chưa kết nối SQL Server: " + e.getMessage());
         }
     }
@@ -175,10 +177,11 @@ public class Main extends JFrame {
         JPanel trang = new JPanel(new BorderLayout(5, 5));
         JPanel tim = new JPanel();
         JTextField txt = new JTextField(18);
-        if (hoaDon)
-            txtMaHD = txt;
-        else
+        if (hoaDon) {
+            txtMaHD = txt; 
+        }else {
             txtMaPDT = txt;
+        }
         JButton btnXem = new JButton("Xem chi tiết");
         tim.add(new JLabel(nhan));
         tim.add(txt);
@@ -191,8 +194,9 @@ public class Main extends JFrame {
                 return;
             }
             JPanel noiDung = hoaDon ? noiDungHoaDon : noiDungDoiTra;
-            if (noiDung.getComponentCount() > 1)
+            if (noiDung.getComponentCount() > 1) {
                 noiDung.remove(1);
+            }
             JFrame gui = hoaDon ? new ChiTietHoaDon_GUI(ma) : new ChiTietDoiTra_GUI(ma);
             noiDung.add(duaVaoTab(gui), BorderLayout.CENTER);
             noiDung.revalidate();
@@ -220,7 +224,7 @@ public class Main extends JFrame {
     private JTabbedPane taoTabNhapHang() {
         JTabbedPane tabs = new JTabbedPane();
         themTrang(tabs, "Phiếu nhập", PhieuNhap_GUI::new);
-        themTrang(tabs, "Chi tiết phiếu nhập", ChiTietPhieuNhap_GUI::new);
+
         themTrang(tabs, "Nhà cung cấp", NhaCungCap_GUI::new);
         tabs.addChangeListener(e -> napTab(tabs));
         return tabs;
@@ -229,9 +233,7 @@ public class Main extends JFrame {
     private JTabbedPane taoTabSanPham() {
         JTabbedPane tabs = new JTabbedPane();
         themTrang(tabs, "Sản phẩm", SanPham_GUI::new);
-        themTrang(tabs, "Chi tiết sản phẩm", ChiTietSanPham_GUI::new);
-        themTrang(tabs, "Thương hiệu", ThuongHieu_GUI::new);
-        themTrang(tabs, "Danh mục", DanhMuc_GUI::new);
+       
         tabs.addChangeListener(e -> napTab(tabs));
         return tabs;
     }
@@ -239,19 +241,18 @@ public class Main extends JFrame {
     private JPanel taoTabNhanVien() {
         JPanel trang = new JPanel(new BorderLayout(5, 5));
         DefaultTableModel model = new DefaultTableModel(
-                new String[] { "Mã nhân viên", "Tên nhân viên", "SĐT", "Hoạt động" }, 0);
+                new String[]{"Mã nhân viên", "Tên nhân viên", "SĐT", "Hoạt động"}, 0);
         JTable bang = new JTable(model);
         JButton btnTai = new JButton("Tải danh sách nhân viên");
         btnTai.addActionListener(e -> {
             model.setRowCount(0);
             try {
                 ConnectDB.getInstance().connect();
-                try (Statement st = ConnectDB.getConnection().createStatement();
-                        ResultSet rs = st.executeQuery("SELECT * FROM NhanVien")) {
+                try (Statement st = ConnectDB.getConnection().createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM NhanVien")) {
                     while (rs.next()) {
-                        model.addRow(new Object[] { rs.getString("maNhanVien"),
-                                rs.getString("tenNhanVien"), rs.getString("soDienThoai"),
-                                rs.getBoolean("hoatDong") ? "Có" : "Không" });
+                        model.addRow(new Object[]{rs.getString("maNhanVien"),
+                            rs.getString("tenNhanVien"), rs.getString("soDienThoai"),
+                            rs.getBoolean("hoatDong") ? "Có" : "Không"});
                     }
                 }
             } catch (SQLException ex) {
@@ -272,12 +273,14 @@ public class Main extends JFrame {
 
     @SuppressWarnings("unchecked")
     private void napTab(JTabbedPane tabs) {
-        if (!(tabs.getSelectedComponent() instanceof JPanel))
+        if (!(tabs.getSelectedComponent() instanceof JPanel)) {
             return;
+        }
         JPanel trang = (JPanel) tabs.getSelectedComponent();
         Supplier<JFrame> taoGUI = (Supplier<JFrame>) trang.getClientProperty("taoGUI");
-        if (taoGUI == null)
+        if (taoGUI == null) {
             return;
+        }
         trang.putClientProperty("taoGUI", null);
         try {
             trang.add(duaVaoTab(taoGUI.get()), BorderLayout.CENTER);
@@ -298,8 +301,9 @@ public class Main extends JFrame {
 
     @Override
     public void dispose() {
-        for (JFrame gui : cacGiaoDien)
+        for (JFrame gui : cacGiaoDien) {
             gui.dispose();
+        }
         super.dispose();
     }
 
