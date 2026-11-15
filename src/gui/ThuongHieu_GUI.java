@@ -23,6 +23,8 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
 
     private JTextField txtMaThuongHieu;
     private JTextField txtTenThuongHieu;
+    private JTextField txtTimMa;
+    private JTextField txtTimTen;
     private JButton btnTim;
     private JButton btnThem;
     private JButton btnSua;
@@ -68,6 +70,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
         JLabel lblMaThuongHieu = new JLabel("Mã thương hiệu: ");
         JLabel lblTenThuongHieu = new JLabel("Tên thương hiệu: ");
         txtMaThuongHieu = new JTextField(20);
+        txtMaThuongHieu.setEditable(false);
         txtTenThuongHieu = new JTextField(20);
         bThongTin.add(lblMaThuongHieu);
         bThongTin.add(txtMaThuongHieu);
@@ -76,9 +79,19 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
         bThongTin.add(txtTenThuongHieu);
         bThongTin.add(Box.createHorizontalStrut(15));
         btnTim = new JButton("Tìm");
-        bThongTin.add(btnTim);
+        Box bTimKiem = Box.createHorizontalBox();
+        txtTimMa = new JTextField(12);
+        txtTimTen = new JTextField(18);
+        bTimKiem.add(new JLabel("Tìm mã: "));
+        bTimKiem.add(txtTimMa);
+        bTimKiem.add(Box.createHorizontalStrut(15));
+        bTimKiem.add(new JLabel("Tìm tên: "));
+        bTimKiem.add(txtTimTen);
+        bTimKiem.add(Box.createHorizontalStrut(15));
+        bTimKiem.add(btnTim);
         bThongTin.setPreferredSize(new Dimension(0, 28));
-        pTren.add(bThongTin, BorderLayout.SOUTH);
+        pTren.add(bThongTin, BorderLayout.CENTER);
+        pTren.add(bTimKiem, BorderLayout.SOUTH);
         p.add(pTren, BorderLayout.NORTH);
 
         String[] cot = { "Mã thương hiệu", "Tên thương hiệu" };
@@ -104,6 +117,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
                     boolean daChon = table.getSelectedRow() >= 0;
                     btnSua.setEnabled(daChon);
                     btnXoa.setEnabled(daChon);
+                    btnThem.setEnabled(!daChon);
                     fillForm(table.getSelectedRow());
                 }
             }
@@ -121,6 +135,9 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
         btnLamMoi.addActionListener(this);
 
         btnTim.addActionListener(this);
+        txtTimMa.addActionListener(this);
+        txtTimTen.addActionListener(this);
+        clearTextField();
 
     }
 
@@ -213,9 +230,9 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
                             "Không thể cập nhật thương hiệu", JOptionPane.WARNING_MESSAGE);
                 }
             }
-        } else if (o.equals(btnTim)) {
-            String ma = txtMaThuongHieu.getText().trim();
-            String ten = txtTenThuongHieu.getText().trim();
+        } else if (o.equals(btnTim) || o.equals(txtTimMa) || o.equals(txtTimTen)) {
+            String ma = txtTimMa.getText().trim();
+            String ten = txtTimTen.getText().trim();
 
             List<ThuongHieu> list = th_dao.getalltbThuongHieu();
             model.setRowCount(0);
@@ -236,6 +253,8 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
 
     private void fillForm(int row) {
         if (row < 0) {
+            txtMaThuongHieu.setText(taoMaTuDong());
+            txtMaThuongHieu.setEditable(false);
             return;
         }
         txtMaThuongHieu.setText(model.getValueAt(row, 0).toString());
@@ -245,28 +264,18 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
 
     public void clearTextField() {
         table.clearSelection();
-        txtMaThuongHieu.setText("");
+        txtTimMa.setText("");
+        txtTimTen.setText("");
+        txtMaThuongHieu.setText(taoMaTuDong());
         txtTenThuongHieu.setText("");
-        txtMaThuongHieu.setEditable(true);
-        txtMaThuongHieu.requestFocus();
+        txtMaThuongHieu.setEditable(false);
+        txtTenThuongHieu.requestFocusInWindow();
     }
 
     public boolean valiData() {
-        String maThuongHieu = txtMaThuongHieu.getText().trim();
+
         String tenThuongHieu = txtTenThuongHieu.getText().trim();
 
-        if (maThuongHieu.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Mã thương hiệu không được để trống.",
-                    "Thiếu mã thương hiệu", JOptionPane.WARNING_MESSAGE);
-            txtMaThuongHieu.requestFocus();
-            return false;
-        }
-
-        if (maThuongHieu.length() > 20) {
-            JOptionPane.showMessageDialog(this, "Mã thương hiệu không được quá 20 ký tự.");
-            txtMaThuongHieu.requestFocusInWindow();
-            return false;
-        }
 
         if (tenThuongHieu.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Tên thương hiệu không được để trống.",
@@ -288,5 +297,22 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
         String maThuongHieu = txtMaThuongHieu.getText().trim();
         String tenThuongHieu = txtTenThuongHieu.getText().trim();
         return new ThuongHieu(maThuongHieu, tenThuongHieu);
+    }
+
+    private String taoMaTuDong() {
+        int soLonNhat = 0;
+        for (ThuongHieu item : th_dao.getalltbThuongHieu()) {
+            String ma = item.getMaThuongHieu();
+            if (ma != null && ma.matches("TH[0-9]{1,8}")) {
+                int so = Integer.parseInt(ma.substring(2));
+                if (so > soLonNhat) {
+                    soLonNhat = so;
+                }
+            }
+        }
+        if (soLonNhat == 99999999) {
+            return "";
+        }
+        return "TH" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
     }
 }

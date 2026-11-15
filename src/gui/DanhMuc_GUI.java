@@ -23,6 +23,8 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
 
     private JTextField txtMaDanhMuc;
     private JTextField txtTenDanhMuc;
+    private JTextField txtTimMa;
+    private JTextField txtTimTen;
     private JButton btnTim;
     private JButton btnThem;
     private JButton btnSua;
@@ -68,6 +70,7 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
         JLabel lblMaDanhMuc = new JLabel("Mã danh mục: ");
         JLabel lblTenDanhMuc = new JLabel("Tên danh mục: ");
         txtMaDanhMuc = new JTextField(15);
+        txtMaDanhMuc.setEditable(false);
         txtTenDanhMuc = new JTextField(20);
         bThongTin.add(lblMaDanhMuc);
         bThongTin.add(txtMaDanhMuc);
@@ -76,9 +79,19 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
         bThongTin.add(txtTenDanhMuc);
         bThongTin.add(Box.createHorizontalStrut(15));
         btnTim = new JButton("Tìm");
-        bThongTin.add(btnTim);
+        Box bTimKiem = Box.createHorizontalBox();
+        txtTimMa = new JTextField(12);
+        txtTimTen = new JTextField(18);
+        bTimKiem.add(new JLabel("Tìm mã: "));
+        bTimKiem.add(txtTimMa);
+        bTimKiem.add(Box.createHorizontalStrut(15));
+        bTimKiem.add(new JLabel("Tìm tên: "));
+        bTimKiem.add(txtTimTen);
+        bTimKiem.add(Box.createHorizontalStrut(15));
+        bTimKiem.add(btnTim);
         bThongTin.setPreferredSize(new Dimension(0, 28));
-        pTren.add(bThongTin, BorderLayout.SOUTH);
+        pTren.add(bThongTin, BorderLayout.CENTER);
+        pTren.add(bTimKiem, BorderLayout.SOUTH);
         p.add(pTren, BorderLayout.NORTH);
 
         String[] cot = { "Mã danh mục", "Tên danh mục" };
@@ -104,6 +117,7 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
                     boolean daChon = table.getSelectedRow() >= 0;
                     btnSua.setEnabled(daChon);
                     btnXoa.setEnabled(daChon);
+                    btnThem.setEnabled(!daChon);
                     fillForm(table.getSelectedRow());
                 }
             }
@@ -118,10 +132,13 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
         p.add(pNut, BorderLayout.SOUTH);
 
         btnTim.addActionListener(this);
+        txtTimMa.addActionListener(this);
+        txtTimTen.addActionListener(this);
         btnThem.addActionListener(this);
         btnSua.addActionListener(this);
         btnXoa.addActionListener(this);
         btnLamMoi.addActionListener(this);
+        clearTextField();
 
     }
 
@@ -214,9 +231,9 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
                             "Không thể cập nhật danh mục", JOptionPane.WARNING_MESSAGE);
                 }
             }
-        } else if (o.equals(btnTim)) {
-            String ma = txtMaDanhMuc.getText().trim();
-            String ten = txtTenDanhMuc.getText().trim();
+        } else if (o.equals(btnTim) || o.equals(txtTimMa) || o.equals(txtTimTen)) {
+            String ma = txtTimMa.getText().trim();
+            String ten = txtTimTen.getText().trim();
 
             List<DanhMuc> list = dm_dao.getalltbDanhMuc();
             model.setRowCount(0);
@@ -236,6 +253,8 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
 
     private void fillForm(int row) {
         if (row < 0) {
+            txtMaDanhMuc.setText(taoMaTuDong());
+            txtMaDanhMuc.setEditable(false);
             return;
         }
         txtMaDanhMuc.setText(model.getValueAt(row, 0).toString());
@@ -245,28 +264,18 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
 
     public void clearTextField() {
         table.clearSelection();
-        txtMaDanhMuc.setText("");
+        txtTimMa.setText("");
+        txtTimTen.setText("");
+        txtMaDanhMuc.setText(taoMaTuDong());
         txtTenDanhMuc.setText("");
-        txtMaDanhMuc.setEditable(true);
-        txtMaDanhMuc.requestFocus();
+        txtMaDanhMuc.setEditable(false);
+        txtTenDanhMuc.requestFocusInWindow();
     }
 
     public boolean valiData() {
-        String maDanhMuc = txtMaDanhMuc.getText().trim();
+
         String tenDanhMuc = txtTenDanhMuc.getText().trim();
 
-        if (maDanhMuc.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Mã danh mục không được để trống.",
-                    "Thiếu mã danh mục", JOptionPane.WARNING_MESSAGE);
-            txtMaDanhMuc.requestFocus();
-            return false;
-        }
-
-        if (maDanhMuc.length() > 20) {
-            JOptionPane.showMessageDialog(this, "Mã danh mục không được quá 20 ký tự.");
-            txtMaDanhMuc.requestFocusInWindow();
-            return false;
-        }
 
         if (tenDanhMuc.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Tên danh mục không được để trống.",
@@ -288,5 +297,22 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
         String maDanhMuc = txtMaDanhMuc.getText().trim();
         String tenDanhMuc = txtTenDanhMuc.getText().trim();
         return new DanhMuc(maDanhMuc, tenDanhMuc);
+    }
+
+    private String taoMaTuDong() {
+        int soLonNhat = 0;
+        for (DanhMuc item : dm_dao.getalltbDanhMuc()) {
+            String ma = item.getMaDanhMuc();
+            if (ma != null && ma.matches("DM[0-9]{1,8}")) {
+                int so = Integer.parseInt(ma.substring(2));
+                if (so > soLonNhat) {
+                    soLonNhat = so;
+                }
+            }
+        }
+        if (soLonNhat == 99999999) {
+            return "";
+        }
+        return "DM" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
     }
 }
