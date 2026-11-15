@@ -291,7 +291,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         pnlCenter.add(pnlThongTin, BorderLayout.CENTER);
 
-        // ================= CÁC NÚT =================
         JPanel pnlButton = new JPanel();
 
         btnThem = new JButton("Thêm");
@@ -308,7 +307,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         pnlCenter.add(pnlButton, BorderLayout.SOUTH);
 
-        // ================= SOUTH =================
         JPanel pnlSouth = new JPanel(new BorderLayout());
 
         add(pnlSouth, BorderLayout.SOUTH);
@@ -363,7 +361,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         pnlSouth.setPreferredSize(new Dimension(0, 280));
 
-        // ================= SỰ KIỆN =================
         btnThem.addActionListener(e -> themChiTiet());
         btnXoaRong.addActionListener(e -> lamRong());
         btnSua.addActionListener(e -> suaChiTiet());
@@ -651,7 +648,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         txtTongTien.setText(tong.toPlainString());
     }
 
-    // ================= THÊM CHI TIẾT =================
     private void themChiTiet() {
 
         String maPN = txtMaPN.getText().trim();
@@ -738,57 +734,43 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         if (ctpn_dao.kiemTraTonTai(maPN, ctsp.getMaCTSP())) {
 
-            int hoi = JOptionPane.showConfirmDialog(
-                    this,
-                    "Chi tiết sản phẩm đã tồn tại. Bạn có muốn cộng dồn số lượng không?",
-                    "Xác nhận",
-                    JOptionPane.YES_NO_OPTION
+            int soLuongCu = 0;
+
+            for (ChiTietPhieuNhap item : dsChiTiet) {
+
+                if (item.getChiTietSanPham().getMaCTSP()
+                        .equals(ctsp.getMaCTSP())) {
+
+                    soLuongCu = item.getSoLuong();
+
+                    break;
+                }
+            }
+
+            int soLuongMoi = soLuongCu + soLuong;
+
+            ChiTietPhieuNhap ct = new ChiTietPhieuNhap(
+                    phieuNhapHienTai,
+                    ctsp,
+                    soLuongMoi,
+                    donGiaNhap
             );
 
-            if (hoi == JOptionPane.YES_OPTION) {
+            if (ctpn_dao.capNhatChiTietPhieuNhap(ct, soLuongCu)) {
 
-                int soLuongCu = 0;
+                docDuLieuVaoBang(maPN);
 
-                for (ChiTietPhieuNhap item : dsChiTiet) {
-
-                    if (item.getChiTietSanPham().getMaCTSP()
-                            .equals(ctsp.getMaCTSP())) {
-
-                        soLuongCu = item.getSoLuong();
-
-                        break;
-                    }
+                if (parentGUI != null) {
+                    parentGUI.Docdldatatable();
                 }
 
-                int soLuongMoi = soLuongCu + soLuong;
+            } else {
 
-                ChiTietPhieuNhap ct = new ChiTietPhieuNhap(
-                        phieuNhapHienTai,
-                        ctsp,
-                        soLuongMoi,
-                        donGiaNhap
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Cập nhật thất bại!"
                 );
 
-                if (ctpn_dao.capNhatChiTietPhieuNhap(ct, soLuongCu)) {
-
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Cập nhật cộng dồn số lượng thành công!"
-                    );
-
-                    docDuLieuVaoBang(maPN);
-
-                    if (parentGUI != null) {
-                        parentGUI.Docdldatatable();
-                    }
-
-                } else {
-
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Cập nhật thất bại!"
-                    );
-                }
             }
 
             return;
@@ -802,11 +784,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         );
 
         if (ctpn_dao.themChiTietPhieuNhap(ctMoi)) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Thêm sản phẩm vào phiếu nhập thành công!"
-            );
 
             docDuLieuVaoBang(maPN);
 
@@ -984,7 +961,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         tinhThanhTien();
     }
 
-   
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -1177,7 +1153,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         }
     }
 
-    
     public static void main(String[] args) {
 
         new ChiTietPhieuNhap_GUI().setVisible(true);
