@@ -51,6 +51,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
     private JTextField txtMaPN;
     private JTextField txtNhaCungCap;
+    private JTextField txtTenNhaCungCap;
     private JTextField txtNhanVien;
     private JTextField txtNgayNhap;
 
@@ -115,6 +116,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
     public ChiTietPhieuNhap_GUI(PhieuNhap phieuNhap) {
         this();
+
         setPhieuNhap(phieuNhap);
     }
 
@@ -131,14 +133,23 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
     public void setPhieuNhap(PhieuNhap phieuNhap) {
 
         this.phieuNhapHienTai = phieuNhap;
+        System.out.println("Mã PN: " + phieuNhap.getMaPN());
 
+        System.out.println("NCC: " + phieuNhap.getNhaCungCap());
         if (phieuNhap != null) {
 
             txtMaPN.setText(phieuNhap.getMaPN());
 
+            // Hiển thị mã nhà cung cấp
             txtNhaCungCap.setText(
                     phieuNhap.getNhaCungCap() != null
                     ? phieuNhap.getNhaCungCap().getMaNCC() : ""
+            );
+
+            // Hiển thị tên nhà cung cấp
+            txtTenNhaCungCap.setText(
+                    phieuNhap.getNhaCungCap() != null
+                    ? phieuNhap.getNhaCungCap().getTenNCC() : ""
             );
 
             txtNhanVien.setText(
@@ -171,44 +182,54 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         pnlNorth.setLayout(null);
 
         JLabel lblMaPN = new JLabel("Mã phiếu nhập:");
-        JLabel lblNhaCungCap = new JLabel("Nhà cung cấp:");
+        JLabel lblNhaCungCap = new JLabel("Mã NCC:");
+        JLabel lblTenNCC = new JLabel("Tên nhà cung cấp:");
         JLabel lblNhanVien = new JLabel("Nhân viên lập:");
         JLabel lblNgayNhap = new JLabel("Ngày nhập:");
 
         txtMaPN = new JTextField();
         txtNhaCungCap = new JTextField();
+        txtTenNhaCungCap = new JTextField();
         txtNhanVien = new JTextField();
         txtNgayNhap = new JTextField();
 
         pnlNorth.add(lblMaPN);
         pnlNorth.add(lblNhaCungCap);
+        pnlNorth.add(lblTenNCC);
         pnlNorth.add(lblNhanVien);
         pnlNorth.add(lblNgayNhap);
 
         pnlNorth.add(txtMaPN);
         pnlNorth.add(txtNhaCungCap);
+        pnlNorth.add(txtTenNhaCungCap);
         pnlNorth.add(txtNhanVien);
         pnlNorth.add(txtNgayNhap);
 
+        // Không cho phép chỉnh sửa thông tin phiếu nhập
         txtMaPN.setEditable(false);
         txtNhaCungCap.setEditable(false);
+        txtTenNhaCungCap.setEditable(false);
         txtNhanVien.setEditable(false);
         txtNgayNhap.setEditable(false);
 
-        int w1 = 120;
         int h = 25;
 
-        lblMaPN.setBounds(20, 25, w1, h);
-        txtMaPN.setBounds(145, 25, 230, h);
+        // Dòng 1
+        lblMaPN.setBounds(20, 25, 105, h);
+        txtMaPN.setBounds(130, 25, 155, h);
 
-        lblNhaCungCap.setBounds(480, 25, w1, h);
-        txtNhaCungCap.setBounds(600, 25, 280, h);
+        lblNhaCungCap.setBounds(305, 25, 65, h);
+        txtNhaCungCap.setBounds(375, 25, 120, h);
 
-        lblNhanVien.setBounds(20, 65, w1, h);
-        txtNhanVien.setBounds(145, 65, 230, h);
+        lblTenNCC.setBounds(510, 25, 125, h);
+        txtTenNhaCungCap.setBounds(640, 25, 315, h);
 
-        lblNgayNhap.setBounds(480, 65, w1, h);
-        txtNgayNhap.setBounds(600, 65, 200, h);
+        // Dòng 2
+        lblNhanVien.setBounds(20, 65, 105, h);
+        txtNhanVien.setBounds(130, 65, 200, h);
+
+        lblNgayNhap.setBounds(480, 65, 100, h);
+        txtNgayNhap.setBounds(585, 65, 200, h);
 
         JPanel pnlCenter = new JPanel(new BorderLayout());
         add(pnlCenter, BorderLayout.CENTER);
@@ -543,6 +564,23 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         tableModel.setRowCount(0);
         dsChiTiet = ctpn_dao.layChiTietTheoMaPN(maPN);
 
+        // Lấy mã và tên nhà cung cấp từ DAO
+        if (!dsChiTiet.isEmpty()) {
+
+            PhieuNhap pn = dsChiTiet.get(0).getPhieuNhap();
+
+            if (pn != null && pn.getNhaCungCap() != null) {
+
+                txtNhaCungCap.setText(
+                        pn.getNhaCungCap().getMaNCC()
+                );
+
+                txtTenNhaCungCap.setText(
+                        pn.getNhaCungCap().getTenNCC()
+                );
+            }
+        }
+
         BigDecimal tong = BigDecimal.ZERO;
 
         for (ChiTietPhieuNhap ct : dsChiTiet) {
@@ -720,6 +758,11 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         try {
             donGiaNhap = new BigDecimal(txtDonGiaNhap.getText().trim());
+
+            if (donGiaNhap.compareTo(BigDecimal.ZERO) < 0) {
+                JOptionPane.showMessageDialog(this, "Đơn giá nhập không hợp lệ!");
+                return;
+            }
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Đơn giá nhập không hợp lệ!");
