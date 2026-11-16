@@ -48,6 +48,35 @@ public class PhieuDoiTra_GUI extends JFrame
         implements ActionListener, MouseListener {
     private static final long serialVersionUID = 1L;
 
+    // Dinh dang so tien ngay trong giao dien (VD: 1.250.000,5).
+    private static String hienThiTien(BigDecimal tien) {
+        if (tien == null)
+            return "";
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(
+                java.util.Locale.forLanguageTag("vi-VN"));
+        java.text.DecimalFormat format = new java.text.DecimalFormat("#,##0.##", symbols);
+        format.setRoundingMode(RoundingMode.HALF_UP);
+        return format.format(tien);
+    }
+
+    // Hien thi cot tien can le phai, khong doi gia tri BigDecimal trong bang.
+    private static void dinhDangCotTien(JTable bang, int... cot) {
+        javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void setValue(Object value) {
+                if (value instanceof BigDecimal)
+                    setText(hienThiTien((BigDecimal) value));
+                else
+                    super.setValue(value);
+            }
+        };
+        renderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        for (int i : cot)
+            bang.getColumnModel().getColumn(i).setCellRenderer(renderer);
+    }
+
     private JTextField txtMaPDT, txtHoaDonGoc, txtHoaDonMoi, txtNgayLap;
     private JTextField txtSoDienThoai, txtKhachHang;
     private JTextArea txtLyDo;
@@ -58,7 +87,7 @@ public class PhieuDoiTra_GUI extends JFrame
     private JButton btnNapHoaDon, btnLuu, btnLamMoi, btnXemChiTiet;
     private JTable tableHangDaMua;
     private DefaultTableModel modelHangDaMua;
-    private JTextField txtMaCTSP, txtSoLuong, txtSoLuongNhapLai;
+    private JTextField txtMaCTSP, txtSoLuong, txtSoLuongNhapLai, txtSizeMoi;
     private JButton btnThem, btnSua, btnXoa;
     private JTable tableChiTietDoiTra;
     private DefaultTableModel modelChiTietDoiTra;
@@ -154,8 +183,9 @@ public class PhieuDoiTra_GUI extends JFrame
         pnlThongTin.add(new JLabel("Trạng thái:"));
         pnlThongTin.add(cboTrangThai = new JComboBox<>(
                 new String[] { "Trả hàng", "Đổi size" }));
-        pnlThongTin.add(new JLabel("Hóa đơn mới (nếu đổi):"));
+        pnlThongTin.add(new JLabel("Hóa đơn mới (tự sinh):"));
         pnlThongTin.add(txtHoaDonMoi = new JTextField());
+        txtHoaDonMoi.setEditable(false);
         pnlThongTin.add(new JLabel("Nhân viên:"));
         pnlThongTin.add(txtNhanVien = new JTextField(
                 nhanVienDangNhap == null ? "Chưa đăng nhập" : nhanVienDangNhap.getTenNhanVien()));
@@ -178,17 +208,20 @@ public class PhieuDoiTra_GUI extends JFrame
 
         JPanel pnlChiTiet = new JPanel(new BorderLayout(5, 5));
         pnlChiTiet.setBorder(BorderFactory.createTitledBorder("Chi tiết đổi trả"));
-        JPanel pnlNhap = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel pnlNhap = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlNhap.add(new JLabel("Mã CTSP:"));
         pnlNhap.add(txtMaCTSP = new JTextField());
         pnlNhap.add(new JLabel("Số lượng trả:"));
         pnlNhap.add(txtSoLuong = new JTextField("1"));
         pnlNhap.add(new JLabel("Số lượng nhập lại kho:"));
         pnlNhap.add(txtSoLuongNhapLai = new JTextField("1"));
+        pnlNhap.add(new JLabel("Size mới (khi đổi):"));
+        pnlNhap.add(txtSizeMoi = new JTextField());
+        txtSizeMoi.setEditable(false);
         txtMaCTSP.setEditable(false);
         pnlChiTiet.add(pnlNhap, BorderLayout.NORTH);
         String[] cotChiTiet = { "Mã CTSP", "Tên sản phẩm", "Kích cỡ",
-                "Màu sắc", "Số lượng trả", "Số nhập lại" };
+                "Màu sắc", "Số lượng trả", "Số nhập lại", "Size mới" };
         modelChiTietDoiTra = new DefaultTableModel(cotChiTiet, 0);
         tableChiTietDoiTra = new JTable(modelChiTietDoiTra);
         tableChiTietDoiTra.setDefaultEditor(Object.class, null);
@@ -230,11 +263,12 @@ public class PhieuDoiTra_GUI extends JFrame
         modelHangDaMua = new DefaultTableModel(cotMua, 0);
         tableHangDaMua = new JTable(modelHangDaMua);
         tableHangDaMua.setDefaultEditor(Object.class, null);
-        DinhDangTien.dinhDangCotTien(tableHangDaMua, 7);
+        dinhDangCotTien(tableHangDaMua, 7);
         pnlHangDaMua.add(new JScrollPane(tableHangDaMua), BorderLayout.CENTER);
         pnlChinh.add(pnlHangDaMua);
 
         btnNapHoaDon.addActionListener(this);
+        txtHoaDonGoc.addActionListener(e -> btnNapHoaDon.doClick());
         btnThem.addActionListener(this);
         btnSua.addActionListener(this);
         btnXoa.addActionListener(this);
@@ -291,8 +325,6 @@ public class PhieuDoiTra_GUI extends JFrame
         ArrayList<HangDaMua> ds = dt_dao.getHangDaMua(maHD);
         if (ds.isEmpty())
             throw new IllegalArgumentException("Hóa đơn không có chi tiết");
-        if (hd.getKhachHang() == null)
-            throw new IllegalArgumentException("Hóa đơn gốc chưa có khách hàng, cần xử lý dữ liệu cũ");
         hoaDonGoc = hd;
         modelHangDaMua.setRowCount(0);
         modelChiTietDoiTra.setRowCount(0);
@@ -303,12 +335,16 @@ public class PhieuDoiTra_GUI extends JFrame
             });
         }
         txtThueGoc.setText(hd.getThue().toPlainString());
-        KhachHang kh = hd_dao.getKhachHangTheoMaKH(hd.getKhachHang().getMaKH());
-        if (kh == null || kh.getSoDienThoai() == null
-                || !kh.getSoDienThoai().matches("0[0-9]{9}"))
-            throw new IllegalArgumentException("Khách hàng trên hóa đơn gốc không có SĐT hợp lệ");
-        txtSoDienThoai.setText(kh.getSoDienThoai());
-        txtKhachHang.setText(kh.getTenKH());
+        if (hd.getKhachHang() == null) {
+            txtSoDienThoai.setText("");
+            txtKhachHang.setText("Khách lẻ");
+        } else {
+            KhachHang kh = hd_dao.getKhachHangTheoMaKH(hd.getKhachHang().getMaKH());
+            if (kh == null)
+                throw new SQLException("Khách hàng của hóa đơn gốc không còn tồn tại");
+            txtSoDienThoai.setText(kh.getSoDienThoai() == null ? "" : kh.getSoDienThoai());
+            txtKhachHang.setText(kh.getTenKH());
+        }
         tinhLaiTien();
         boolean quaHan = LocalDateTime.now().isAfter(hd.getNgayLap().plusDays(7));
         btnLuu.setEnabled(!quaHan);
@@ -369,10 +405,15 @@ public class PhieuDoiTra_GUI extends JFrame
         if (soLuong > conLai)
             throw new IllegalArgumentException(
                     "Chỉ còn được trả " + conLai + " sản phẩm");
+        boolean doi = "Đổi size".equals(cboTrangThai.getSelectedItem());
+        String sizeMoi = doi ? txtSizeMoi.getText().trim() : "";
+        if (doi && (sizeMoi.isEmpty() || sizeMoi.equalsIgnoreCase(
+                modelHangDaMua.getValueAt(hang, 2).toString())))
+            throw new IllegalArgumentException("Phải nhập size mới khác size đã mua");
         Object[] values = {
                 maCTSP, modelHangDaMua.getValueAt(hang, 1),
                 modelHangDaMua.getValueAt(hang, 2), modelHangDaMua.getValueAt(hang, 3),
-                soLuong, nhapLai
+                soLuong, nhapLai, sizeMoi
         };
         if (sua) {
             for (int i = 0; i < values.length; i++) {
@@ -407,13 +448,13 @@ public class PhieuDoiTra_GUI extends JFrame
         BigDecimal thue = hoaDonGoc == null ? BigDecimal.ZERO : hoaDonGoc.getThue();
         BigDecimal tienThue = tienHang.multiply(thue).divide(
                 new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-        txtTienHangHoan.setText(DinhDangTien.hienThi(tienHang));
+        txtTienHangHoan.setText(hienThiTien(tienHang));
         txtTienThueHoan.setText("Đổi size".equals(cboTrangThai.getSelectedItem())
                 ? "0"
-                : DinhDangTien.hienThi(tienThue));
+                : hienThiTien(tienThue));
         txtTongTienHoan.setText("Đổi size".equals(cboTrangThai.getSelectedItem())
                 ? "0"
-                : DinhDangTien.hienThi(tienHang.add(tienThue)));
+                : hienThiTien(tienHang.add(tienThue)));
     }
 
     private void luuPhieu() throws SQLException {
@@ -431,16 +472,19 @@ public class PhieuDoiTra_GUI extends JFrame
             throw new IllegalArgumentException("Lý do bắt buộc, tối đa 300 ký tự");
         }
         String sdt = txtSoDienThoai.getText().trim();
-        if (!sdt.matches("0[0-9]{9}"))
-            throw new IllegalArgumentException("Bắt buộc nhập SĐT khách hàng hợp lệ");
-        KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
-        if (kh == null || hoaDonGoc.getKhachHang() == null
-                || !kh.getMaKH().equals(hoaDonGoc.getKhachHang().getMaKH()))
-            throw new IllegalArgumentException("SĐT không khớp khách hàng của hóa đơn gốc");
+        if (hoaDonGoc.getKhachHang() == null) {
+            if (!sdt.isEmpty())
+                throw new IllegalArgumentException("Hóa đơn khách lẻ không có số điện thoại");
+        } else {
+            if (!sdt.matches("0[0-9]{9}"))
+                throw new IllegalArgumentException("SĐT không hợp lệ");
+            KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
+            if (kh == null || !kh.getMaKH().equals(hoaDonGoc.getKhachHang().getMaKH()))
+                throw new IllegalArgumentException("SĐT không khớp hóa đơn gốc");
+        }
 
         boolean doi = "Đổi size".equals(cboTrangThai.getSelectedItem());
-        String maHDMoi = txtHoaDonMoi.getText().trim();
-        HoaDon hoaDonMoi = doi ? new HoaDon(maHDMoi) : null;
+        HoaDon hoaDonMoi = null; // DAO tự tạo khi đổi size.
         PhieuDoiTra phieu = new PhieuDoiTra(null, hoaDonGoc, hoaDonMoi,
                 layNhanVien(), LocalDateTime.now(), lyDo,
                 (String) cboTrangThai.getSelectedItem());
@@ -451,8 +495,19 @@ public class PhieuDoiTra_GUI extends JFrame
                     (int) modelChiTietDoiTra.getValueAt(i, 4),
                     (int) modelChiTietDoiTra.getValueAt(i, 5)));
         }
-        String maMoi = dt_dao.create(phieu, ds);
+        java.util.Map<String, String> sizeMoi = new java.util.HashMap<>();
+        if (doi) {
+            for (int i = 0; i < modelChiTietDoiTra.getRowCount(); i++) {
+                sizeMoi.put(modelChiTietDoiTra.getValueAt(i, 0).toString(),
+                        modelChiTietDoiTra.getValueAt(i, 6).toString());
+            }
+        }
+        String maMoi = dt_dao.create(phieu, ds, sizeMoi);
         txtMaPDT.setText(maMoi);
+        PhieuDoiTra daTao = dt_dao.getPhieuTheoMaPDT(maMoi);
+        txtHoaDonMoi.setText(daTao.getHoaDonMoi() == null
+                ? ""
+                : daTao.getHoaDonMoi().getMaHD());
         daLuu = true;
         btnLuu.setEnabled(false);
         btnThem.setEnabled(false);
@@ -462,6 +517,7 @@ public class PhieuDoiTra_GUI extends JFrame
         cboTrangThai.setEnabled(false);
         txtHoaDonGoc.setEditable(false);
         txtHoaDonMoi.setEditable(false);
+        txtSizeMoi.setEditable(false);
         txtSoDienThoai.setEditable(false);
         txtLyDo.setEditable(false);
         JOptionPane.showMessageDialog(this, "Lưu phiếu thành công: " + maMoi);
@@ -478,10 +534,16 @@ public class PhieuDoiTra_GUI extends JFrame
         daLuu = false;
         hoaDonGoc = null;
         khachHangTheoSDT = null;
-        txtMaPDT.setText("Tự sinh khi lưu");
+        try {
+            txtMaPDT.setText(dt_dao.taoMaPhieuDoiTraMoi());
+        } catch (SQLException e) {
+            txtMaPDT.setText("Chưa lấy được mã");
+        }
         txtHoaDonGoc.setText("");
         txtHoaDonGoc.setEditable(true);
         txtHoaDonMoi.setText("");
+        txtSizeMoi.setText("");
+        txtSizeMoi.setEditable(false);
         txtNgayLap.setText(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
         txtSoDienThoai.setEditable(true);
@@ -495,6 +557,7 @@ public class PhieuDoiTra_GUI extends JFrame
         txtMaCTSP.setText("");
         txtSoLuong.setText("1");
         txtSoLuongNhapLai.setText("1");
+        txtSizeMoi.setText("");
         modelHangDaMua.setRowCount(0);
         modelChiTietDoiTra.setRowCount(0);
         btnLuu.setEnabled(true);
@@ -522,13 +585,21 @@ public class PhieuDoiTra_GUI extends JFrame
             else if (o == btnLamMoi)
                 lamMoi();
             else if (o == btnXemChiTiet) {
-                if (moChiTiet != null) moChiTiet.accept(txtMaPDT.getText());
-                else new ChiTietDoiTra_GUI(txtMaPDT.getText()).setVisible(true);
+                if (moChiTiet != null)
+                    moChiTiet.accept(txtMaPDT.getText());
+                else
+                    new ChiTietDoiTra_GUI(txtMaPDT.getText()).setVisible(true);
             } else if (o == cboTrangThai) {
                 boolean doi = "Đổi size".equals(cboTrangThai.getSelectedItem());
-                txtHoaDonMoi.setEditable(doi && !daLuu);
-                if (!doi && !daLuu)
-                    txtHoaDonMoi.setText("");
+                if (!daLuu) {
+                    // Hiện trước mã hóa đơn thay thế khi chọn đổi size.
+                    txtHoaDonMoi.setText(doi ? hd_dao.taoMaHoaDonMoi() : "");
+                }
+                txtSizeMoi.setEditable(doi && !daLuu);
+                if (!daLuu) {
+                    modelChiTietDoiTra.setRowCount(0);
+                    txtSizeMoi.setText("");
+                }
                 tinhLaiTien();
             }
         } catch (Exception ex) {
@@ -553,6 +624,7 @@ public class PhieuDoiTra_GUI extends JFrame
                 : m.getValueAt(row, 4).toString());
         txtSoLuongNhapLai.setText(table == tableHangDaMua ? "1"
                 : m.getValueAt(row, 5).toString());
+        txtSizeMoi.setText(table == tableHangDaMua ? "" : m.getValueAt(row, 6).toString());
     }
 
     public static void main(String[] args) {

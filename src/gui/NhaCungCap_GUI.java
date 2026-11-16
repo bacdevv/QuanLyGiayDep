@@ -1,5 +1,6 @@
 package gui;
-import  connectDB.ConnectDB;
+
+import connectDB.ConnectDB;
 import dao.NhaCungCap_DAO;
 import entity.NhaCungCap;
 import java.awt.BorderLayout;
@@ -100,7 +101,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         txtTenNCC = new JTextField();
         txtSoDienThoai = new JTextField();
         chkHoatDong = new JCheckBox("Đang hoạt động");
-
+        chkHoatDong.setSelected(true);
         pnlNorth.add(lblTenNCC);
         pnlNorth.add(lblSoDienThoai);
         pnlNorth.add(txtTenNCC);
@@ -216,6 +217,9 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         btnThem.addActionListener(this);
         btnXoaRong.addActionListener(this);
         btnTimKiem.addActionListener(this);
+        txtTimKiem.addActionListener(e -> {
+            btnTimKiem.doClick();
+        });
         btnSua.addActionListener(this);
         btnLuu.addActionListener(this);
         btnLoc.addActionListener(this);
@@ -262,6 +266,19 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
 
             String ten = txtTenNCC.getText().trim();
             String sdt = txtSoDienThoai.getText().trim();
+
+            if (!ten.matches("^[\\p{L}]+(?:\\s+[\\p{L}]+)*$")) {
+                JOptionPane.showMessageDialog(this,
+                        "Tên nhà cung cấp chỉ được chứa chữ cái và khoảng trắng!");
+                txtTenNCC.requestFocus();
+                return;
+            }
+            if (!sdt.matches("^0[0-9]{9}$")) {
+                JOptionPane.showMessageDialog(this,
+                        "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0!");
+                txtSoDienThoai.requestFocus();
+                return;
+            }
 
             if (ten.isEmpty() || sdt.isEmpty()) {
 
@@ -442,6 +459,12 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
                 return;
             }
             String maNCC = tableModel.getValueAt(r, 0).toString();
+            String giaTri = table.getValueAt(r, table.getColumnCount() - 1).toString();
+            if (giaTri.equals("Ngừng hoạt động")) {
+                JOptionPane.showMessageDialog(this,
+                        "nhà cung cấp này đã ngưng hoạt động vui lòng chọn nhà cung cấp khác");
+                return;
+            }
             moPhieuNhap(maNCC);
         }
     }
@@ -475,7 +498,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
             }
         }
 
-        return String.format("NCC%04d", max + 1);
+        return String.format("NCC%08d", max + 1);
     }
 
     public void docDuLieuDdsvaobang() {
