@@ -46,6 +46,47 @@ public class HoaDon_GUI extends JFrame
         implements ActionListener, MouseListener {
 
     private static final long serialVersionUID = 1L;
+
+    // Dinh dang so tien ngay trong giao dien (VD: 1.250.000,5).
+    private static String hienThiTien(BigDecimal tien) {
+        if (tien == null) return "";
+        java.text.DecimalFormatSymbols symbols =
+                new java.text.DecimalFormatSymbols(java.util.Locale.forLanguageTag("vi-VN"));
+        java.text.DecimalFormat format = new java.text.DecimalFormat("#,##0.##", symbols);
+        format.setRoundingMode(RoundingMode.HALF_UP);
+        return format.format(tien);
+    }
+
+    // Hien thi cot tien can le phai, khong doi gia tri BigDecimal trong bang.
+    private static void dinhDangCotTien(JTable bang, int... cot) {
+        javax.swing.table.DefaultTableCellRenderer renderer =
+                new javax.swing.table.DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void setValue(Object value) {
+                if (value instanceof BigDecimal)
+                    setText(hienThiTien((BigDecimal) value));
+                else super.setValue(value);
+            }
+        };
+        renderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        for (int i : cot)
+            bang.getColumnModel().getColumn(i).setCellRenderer(renderer);
+    }
+
+    // Gioi han theo SQL DECIMAL(18,2).
+    private static final BigDecimal GIOI_HAN_SQL = new BigDecimal("9999999999999999.99");
+
+    private static void kiemTraGioiHanTien(BigDecimal tien, String ten) {
+        if (tien == null || tien.signum() < 0
+                || tien.compareTo(GIOI_HAN_SQL) > 0
+                || tien.stripTrailingZeros().scale() > 2) {
+            throw new IllegalArgumentException(ten
+                    + " phải từ 0 đến " + hienThiTien(GIOI_HAN_SQL)
+                    + " và có tối đa 2 chữ số thập phân (SQL DECIMAL(18,2)).");
+        }
+    }
+
     // Thue GTGT co dinh cho hoa don moi.
     private static final BigDecimal THUE_SUAT = HoaDon_DAO.THUE_SUAT;
 
@@ -229,7 +270,7 @@ public class HoaDon_GUI extends JFrame
         tableChiTietHoaDon = new JTable(modelChiTietHoaDon);
         tableChiTietHoaDon.setDefaultEditor(
                 Object.class, null);
-        DinhDangTien.dinhDangCotTien(tableChiTietHoaDon, 5, 6);
+        dinhDangCotTien(tableChiTietHoaDon, 5, 6);
 
         pnlChiTiet.add(
                 new JScrollPane(tableChiTietHoaDon),
@@ -330,7 +371,7 @@ public class HoaDon_GUI extends JFrame
 
         tableSanPham = new JTable(modelSanPham);
         tableSanPham.setDefaultEditor(Object.class, null);
-        DinhDangTien.dinhDangCotTien(tableSanPham, 4);
+        dinhDangCotTien(tableSanPham, 4);
 
         pnlSanPham.add(new JScrollPane(tableSanPham),
                 BorderLayout.CENTER);
@@ -340,6 +381,8 @@ public class HoaDon_GUI extends JFrame
         // ====== DANG KY SU KIEN ======
         btnThemKhachHang.addActionListener(this);
         btnTim.addActionListener(this);
+        txtTimMaCTSP.addActionListener(e -> btnTim.doClick());
+        txtTimTenSP.addActionListener(e -> btnTim.doClick());
         btnLamMoiSanPham.addActionListener(this);
         btnThem.addActionListener(this);
         btnSuaSoLuong.addActionListener(this);
@@ -380,6 +423,10 @@ public class HoaDon_GUI extends JFrame
         txtKhachHang.setText("");
 
         String sdt = txtSoDienThoai.getText().trim();
+        if (sdt.isEmpty()) {
+            txtKhachHang.setText("Khách lẻ");
+            return;
+        }
         if (!sdt.matches("0[0-9]{9}"))
             return;
         try {
@@ -502,7 +549,7 @@ public class HoaDon_GUI extends JFrame
                             "Không đủ tồn kho. Còn: " + tonKho);
                 }
 
-                DinhDangTien.kiemTraGioiHan(donGia.multiply(
+                kiemTraGioiHanTien(donGia.multiply(
                         BigDecimal.valueOf(slMoi)), "Thành tiền");
                 modelChiTietHoaDon.setValueAt(slMoi, i, 4);
                 modelChiTietHoaDon.setValueAt(
@@ -522,7 +569,7 @@ public class HoaDon_GUI extends JFrame
 
         BigDecimal thanhTien = donGia.multiply(
                 BigDecimal.valueOf(soLuong));
-        DinhDangTien.kiemTraGioiHan(thanhTien, "Thành tiền");
+        kiemTraGioiHanTien(thanhTien, "Thành tiền");
 
         modelChiTietHoaDon.addRow(new Object[] {
                 maCTSP, tenSP, kichCo, mauSac,
@@ -562,7 +609,7 @@ public class HoaDon_GUI extends JFrame
 
         BigDecimal donGia = (BigDecimal) modelChiTietHoaDon.getValueAt(row, 5);
 
-        DinhDangTien.kiemTraGioiHan(donGia.multiply(
+        kiemTraGioiHanTien(donGia.multiply(
                 BigDecimal.valueOf(soLuong)), "Thành tiền");
         modelChiTietHoaDon.setValueAt(soLuong, row, 4);
         modelChiTietHoaDon.setValueAt(
@@ -610,13 +657,12 @@ public class HoaDon_GUI extends JFrame
         BigDecimal tongTien = tienHang.add(tienThue);
 
         tongTienDangTinh = tongTien;
-        txtTienHang.setText(DinhDangTien.hienThi(tienHang));
-        txtTienThue.setText(DinhDangTien.hienThi(tienThue));
-        txtTongTien.setText(DinhDangTien.hienThi(tongTien));
+        txtTienHang.setText(hienThiTien(tienHang));
+        txtTienThue.setText(hienThiTien(tienThue));
+        txtTongTien.setText(hienThiTien(tongTien));
         if (!daLuu)
             btnTaoHD.setEnabled(nhanVienDangNhap != null
-                    && txtMaHD.getText().matches("HD[0-9]{6}")
-                    && tongTien.compareTo(DinhDangTien.GIOI_HAN_SQL) <= 0);
+                    && tongTien.compareTo(GIOI_HAN_SQL) <= 0);
     }
 
     // ====== TAO HOA DON ======
@@ -626,17 +672,19 @@ public class HoaDon_GUI extends JFrame
             throw new IllegalArgumentException("Hóa đơn đã lưu");
         if (modelChiTietHoaDon.getRowCount() == 0)
             throw new IllegalArgumentException("Hóa đơn chưa có sản phẩm");
-        if (!txtMaHD.getText().matches("HD[0-9]{6}"))
-            throw new IllegalArgumentException("Chưa cấp được mã hóa đơn");
-        DinhDangTien.kiemTraGioiHan(tongTienDangTinh, "Tổng tiền");
+        kiemTraGioiHanTien(tongTienDangTinh, "Tổng tiền");
 
         String sdt = txtSoDienThoai.getText().trim();
-        if (!sdt.matches("0[0-9]{9}"))
-            throw new IllegalArgumentException("Bắt buộc nhập SĐT khách hàng hợp lệ");
-        KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
-        if (kh == null)
-            throw new IllegalArgumentException("Khách mới: nhấn Thêm KH và lưu trước khi thanh toán");
-        khachHangDangChon = kh;
+        if (sdt.isEmpty()) {
+            khachHangDangChon = null;
+        } else {
+            if (!sdt.matches("0[0-9]{9}"))
+                throw new IllegalArgumentException("SĐT phải đủ 10 chữ số, bắt đầu bằng 0");
+            KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
+            if (kh == null)
+                throw new IllegalArgumentException("Khách mới: nhấn Thêm KH và lưu trước khi thanh toán");
+            khachHangDangChon = kh;
+        }
 
         BigDecimal thue = THUE_SUAT;
         BigDecimal tong = tongTienDangTinh;
@@ -650,7 +698,7 @@ public class HoaDon_GUI extends JFrame
             String maCTSP = modelChiTietHoaDon.getValueAt(i, 0).toString();
             int soLuong = (int) modelChiTietHoaDon.getValueAt(i, 4);
             BigDecimal gia = (BigDecimal) modelChiTietHoaDon.getValueAt(i, 5);
-            DinhDangTien.kiemTraGioiHan(gia, "Đơn giá");
+            kiemTraGioiHanTien(gia, "Đơn giá");
             ds.add(new ChiTietHoaDon(null, new ChiTietSanPham(maCTSP), soLuong, gia));
         }
         String maMoi = hd_dao.create(hd, ds);
@@ -673,7 +721,11 @@ public class HoaDon_GUI extends JFrame
 
     private void lamMoiHoaDon() {
         daLuu = false;
-        txtMaHD.setText("Đang cấp mã...");
+        try {
+            txtMaHD.setText(hd_dao.taoMaHoaDonMoi());
+        } catch (SQLException e) {
+            txtMaHD.setText("Chưa lấy được mã");
+        }
         txtNgayLap.setText(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
         modelChiTietHoaDon.setRowCount(0);
@@ -684,7 +736,7 @@ public class HoaDon_GUI extends JFrame
         txtSoDienThoai.setEditable(true);
         txtSoDienThoai.setText("");
         khachHangDangChon = null;
-        txtKhachHang.setText("");
+        txtKhachHang.setText("Khách lẻ");
         txtKhachHang.setEditable(false);
         btnThemKhachHang.setEnabled(false);
         btnThemKhachHang.setText("Thêm KH");
@@ -697,13 +749,6 @@ public class HoaDon_GUI extends JFrame
         btnXuatHD.setEnabled(false);
         txtThue.setEditable(false);
         cboThanhToan.setEnabled(true);
-        try {
-            txtMaHD.setText(hd_dao.taoMaHoaDonMoi());
-        } catch (SQLException e) {
-            txtMaHD.setText("Lỗi cấp mã");
-            JOptionPane.showMessageDialog(this, e.getMessage(),
-                    "Không thể tạo hóa đơn", JOptionPane.ERROR_MESSAGE);
-        }
         tinhLaiTien();
     }
 
@@ -772,7 +817,7 @@ public class HoaDon_GUI extends JFrame
                         modelSanPham.getValueAt(row, 0)
                                 .toString());
 
-                txtDonGia.setText(DinhDangTien.hienThi(
+                txtDonGia.setText(hienThiTien(
                         (BigDecimal) modelSanPham.getValueAt(row, 4)));
 
                 txtSoLuong.setText("1");
@@ -793,7 +838,7 @@ public class HoaDon_GUI extends JFrame
                         modelChiTietHoaDon.getValueAt(row, 4)
                                 .toString());
 
-                txtDonGia.setText(DinhDangTien.hienThi(
+                txtDonGia.setText(hienThiTien(
                         (BigDecimal) modelChiTietHoaDon.getValueAt(row, 5)));
             }
         }

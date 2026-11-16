@@ -431,7 +431,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                 pn.getNhanVien() != null
                 ? pn.getNhanVien().getMaNhanVien() : "",
                 ngayStr,
-                DinhDangTien.hienThi(tong)
+                new java.text.DecimalFormat("#,##0.##", java.text.DecimalFormatSymbols.getInstance(java.util.Locale.forLanguageTag("vi-VN"))).format(tong)
             });
         }
     }
@@ -627,7 +627,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             }
         }
 
-        return String.format("PN%04d", max + 1);
+        return String.format("PN%08d", max + 1);
     }
 
     public void xuatrafileXML() {

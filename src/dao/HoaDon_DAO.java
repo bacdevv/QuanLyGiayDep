@@ -135,51 +135,87 @@ public class HoaDon_DAO {
         }
     }
 
-    public KhachHang themKhachHang(String sdt, String tenKH) throws SQLException {
-        if (!sdt.matches("0[0-9]{9}") || tenKH == null || tenKH.trim().isEmpty())
-            throw new SQLException("Số điện thoại hoặc tên KH không hợp lệ");
-        if (getKhachHangTheoSoDienThoai(sdt) != null)
-            throw new SQLException("Số điện thoại đã tồn tại");
-        String ma;
-        try (PreparedStatement stmt = getConnection().prepareStatement(
-                "SELECT COALESCE(MAX(TRY_CONVERT(INT,SUBSTRING(maKH,3,18))),0)+1 FROM KhachHang");
-                ResultSet rs = stmt.executeQuery()) {
-            rs.next();
-            ma = String.format("KH%06d", rs.getInt(1));
+    // Chi cap ma khi INSERT. Khóa ứng dụng SQL bảo vệ khi hai nhân viên lưu đồng thời.
+    private String capMa(Connection con, String bang, String cot, String tienTo) throws SQLException {
+        String khoa = "QLGD_" + bang + "_Ma";
+        try (PreparedStatement st = con.prepareStatement(
+                "DECLARE @ketqua INT; EXEC @ketqua = sp_getapplock "
+                + "@Resource=?, @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=10000; "
+                + "SELECT @ketqua")) {
+            st.setString(1, khoa);
+            try (ResultSet rs = st.executeQuery()) {
+                if (!rs.next() || rs.getInt(1) < 0)
+                    throw new SQLException("Không thể khóa bộ đếm mã " + tienTo);
+            }
         }
-        try (PreparedStatement stmt = getConnection().prepareStatement(
-                "INSERT INTO KhachHang(maKH,tenKH,soDienThoai) VALUES (?,?,?)")) {
-            stmt.setString(1, ma);
-            stmt.setNString(2, tenKH.trim());
-            stmt.setString(3, sdt);
-            stmt.executeUpdate();
+        String sql = "SELECT COALESCE(MAX(TRY_CONVERT(INT,SUBSTRING(" + cot
+                + ",3,18))),0)+1 FROM " + bang + " WHERE " + cot + " LIKE ?";
+        try (PreparedStatement st = con.prepareStatement(sql)) {
+            st.setString(1, tienTo + "%");
+            try (ResultSet rs = st.executeQuery()) {
+                rs.next();
+                int so = rs.getInt(1);
+                if (so < 1 || so > 99999999)
+                    throw new SQLException("Đã hết mã " + tienTo + " gồm 8 chữ số");
+                return String.format("%s%08d", tienTo, so);
+            }
         }
-        return new KhachHang(ma, tenKH.trim(), sdt);
     }
 
+    public KhachHang themKhachHang(String sdt, String tenKH) throws SQLException {
+        if (sdt == null || !sdt.matches("0[0-9]{9}") || tenKH == null || tenKH.trim().isEmpty())
+            throw new SQLException("Số điện thoại hoặc tên khách hàng không hợp lệ");
+        Connection con = getConnection();
+        boolean auto = con.getAutoCommit();
+        try {
+            con.setAutoCommit(false);
+            String ma = capMa(con, "KhachHang", "maKH", "KH");
+            if (getKhachHangTheoSoDienThoai(sdt) != null)
+                throw new SQLException("Số điện thoại đã tồn tại");
+            try (PreparedStatement st = con.prepareStatement(
+                    "INSERT INTO KhachHang(maKH,tenKH,soDienThoai) VALUES (?,?,?)")) {
+                st.setString(1, ma);
+                st.setNString(2, tenKH.trim());
+                st.setString(3, sdt);
+                st.executeUpdate();
+            }
+            con.commit();
+            return new KhachHang(ma, tenKH.trim(), sdt);
+        } catch (SQLException | RuntimeException e) {
+            con.rollback();
+            throw e;
+        } finally { con.setAutoCommit(auto); }
+    }
+
+    // Hiển thị trước mã dự kiến; mã chính thức vẫn được cấp khi lưu.
     public String taoMaHoaDonMoi() throws SQLException {
-        try (PreparedStatement stmt = getConnection().prepareStatement(
-                "SELECT COALESCE(MAX(TRY_CONVERT(INT,SUBSTRING(maHD,3,18))),0)+1 FROM HoaDon");
-                ResultSet rs = stmt.executeQuery()) {
+        String sql = "SELECT COALESCE(MAX(TRY_CONVERT(INT, SUBSTRING(maHD,3,18))),0)+1 "
+                + "FROM HoaDon WHERE maHD LIKE 'HD%'";
+        try (PreparedStatement st = getConnection().prepareStatement(sql);
+                ResultSet rs = st.executeQuery()) {
             rs.next();
-            return String.format("HD%06d", rs.getInt(1));
+            int so = rs.getInt(1);
+            if (so < 1 || so > 99999999)
+                throw new SQLException("Đã hết mã HD gồm 8 chữ số");
+            return String.format("HD%08d", so);
         }
     }
 
     // Luu hoa don, chi tiet va tru kho. Neu mot buoc loi thi rollback.
     public String create(HoaDon hd, ArrayList<ChiTietHoaDon> ds) throws SQLException {
-        if (hd == null || hd.getNhanVien() == null || hd.getMaHD() == null || hd.getNgayLap() == null
+        if (hd == null || hd.getNhanVien() == null || hd.getNgayLap() == null
                 || ds == null || ds.isEmpty())
             throw new SQLException("Thiếu dữ liệu hóa đơn");
         Connection con = getConnection();
         boolean auto = con.getAutoCommit();
         try {
             con.setAutoCommit(false);
+            String maHD = capMa(con, "HoaDon", "maHD", "HD");
             hd.tinhTongTien(ds);
             String sql = "INSERT INTO HoaDon(maHD,maNhanVien,maKH,ngayLap,phuongThucThanhToan,thue,tongTien) "
                     + "VALUES (?,?,?,?,?,?,?)";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
-                stmt.setString(1, hd.getMaHD());
+                stmt.setString(1, maHD);
                 stmt.setString(2, hd.getNhanVien().getMaNhanVien());
                 if (hd.getKhachHang() == null) stmt.setNull(3, Types.VARCHAR);
                 else stmt.setString(3, hd.getKhachHang().getMaKH());
@@ -204,13 +240,13 @@ public class HoaDon_DAO {
                     stmt.setInt(3, ct.getSoLuong());
                     if (stmt.executeUpdate() != 1)
                         throw new SQLException("Sản phẩm không đủ tồn kho");
-                    ChiTietHoaDon luu = new ChiTietHoaDon(new HoaDon(hd.getMaHD()),
+                    ChiTietHoaDon luu = new ChiTietHoaDon(new HoaDon(maHD),
                             ct.getChiTietSanPham(), ct.getSoLuong(), ct.getDonGia());
                     ctDao.create(con, luu);
                 }
             }
             con.commit();
-            return hd.getMaHD();
+            return maHD;
         } catch (SQLException | RuntimeException e) {
             con.rollback();
             throw e;

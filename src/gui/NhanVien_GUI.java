@@ -143,6 +143,8 @@ public class NhanVien_GUI extends JFrame implements ActionListener {
 
         // Dang ky su kien
         btnDangNhap.addActionListener(this);
+        // Enter ở ô tên đăng nhập hoặc mật khẩu đều đăng nhập.
+        getRootPane().setDefaultButton(btnDangNhap);
         btnThoat.addActionListener(this);
         chkHienMatKhau.addActionListener(this);
 

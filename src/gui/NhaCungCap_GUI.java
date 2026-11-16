@@ -498,7 +498,7 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
             }
         }
 
-        return String.format("NCC%04d", max + 1);
+        return String.format("NCC%08d", max + 1);
     }
 
     public void docDuLieuDdsvaobang() {
