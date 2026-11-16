@@ -199,7 +199,6 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         table = new JTable(model);
         table.setRowHeight(25);
         table.setDefaultEditor(Object.class, null);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         btnSua.setEnabled(false);
         btnXoa.setEnabled(false);
@@ -499,12 +498,6 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         String kichCo = txtKichCo.getText().trim();
         String mauSac = txtMauSac.getText().trim();
 
-        if (txtMaSP.getText().trim().isEmpty()) {
-            txtThongBao.setText("Vui lòng mở chi tiết từ một sản phẩm trước khi thêm.");
-            return false;
-        }
-
-
         if (kichCo.isEmpty()) {
             txtThongBao.setText("Kích cỡ không được để trống.");
             txtKichCo.requestFocusInWindow();
@@ -536,21 +529,27 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         return true;
     }
 
-
     private String taoMaTuDong() {
         int soLonNhat = 0;
-        for (ChiTietSanPham item : ctsp_dao.getalltbChiTietSanPham()) {
-            String ma = item.getMaCTSP();
-            if (ma != null && ma.matches("CT[0-9]{1,8}")) {
-                int so = Integer.parseInt(ma.substring(2));
-                if (so > soLonNhat) {
-                    soLonNhat = so;
-                }
+        for (ChiTietSanPham ctsp : ctsp_dao.getalltbChiTietSanPham()) {
+            int so = Integer.parseInt(ctsp.getMaCTSP().substring(2));
+            if (so > soLonNhat) {
+                soLonNhat = so;
             }
         }
-        if (soLonNhat == 99999999) {
+        if (soLonNhat >= 99999999) {
+            btnThem.setEnabled(false);
+
             return "";
         }
-        return "CT" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
+        int soTiepTheo = soLonNhat + 1;
+        String phanSo = String.valueOf(soTiepTheo);
+
+        while (phanSo.length() < 8) {
+            phanSo = "0" + phanSo;
+        }
+
+        return "CT" + phanSo;
     }
+
 }

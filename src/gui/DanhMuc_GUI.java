@@ -61,7 +61,7 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
         add(p);
 
         JPanel pTren = new JPanel(new BorderLayout(0, 10));
-        JLabel lblTieuDe = new JLabel("DANH MỤC", SwingConstants.CENTER);
+        JLabel lblTieuDe = new JLabel("QUẢN LÝ DANH MỤC", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Tahoma", Font.BOLD, 28));
         lblTieuDe.setForeground(Color.DARK_GRAY);
         pTren.add(lblTieuDe, BorderLayout.NORTH);
@@ -109,7 +109,6 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
         btnXoa = new JButton("Xóa");
         btnSua.setEnabled(false);
         btnXoa.setEnabled(false);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -276,7 +275,6 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
 
         String tenDanhMuc = txtTenDanhMuc.getText().trim();
 
-
         if (tenDanhMuc.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Tên danh mục không được để trống.",
                     "Thiếu tên danh mục", JOptionPane.WARNING_MESSAGE);
@@ -301,18 +299,25 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
 
     private String taoMaTuDong() {
         int soLonNhat = 0;
-        for (DanhMuc item : dm_dao.getalltbDanhMuc()) {
-            String ma = item.getMaDanhMuc();
-            if (ma != null && ma.matches("DM[0-9]{1,8}")) {
-                int so = Integer.parseInt(ma.substring(2));
-                if (so > soLonNhat) {
-                    soLonNhat = so;
-                }
+        for (DanhMuc dm : dm_dao.getalltbDanhMuc()) {
+            int so = Integer.parseInt(dm.getMaDanhMuc().substring(2));
+            if (so > soLonNhat) {
+                soLonNhat = so;
             }
         }
-        if (soLonNhat == 99999999) {
+        if (soLonNhat >= 99999999) {
+            btnThem.setEnabled(false);
+
             return "";
         }
-        return "DM" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
+        int soTiepTheo = soLonNhat + 1;
+        String phanSo = String.valueOf(soTiepTheo);
+
+        while (phanSo.length() < 8) {
+            phanSo = "0" + phanSo;
+        }
+
+        return "DM" + phanSo;
     }
+
 }

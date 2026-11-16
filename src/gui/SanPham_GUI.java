@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,7 +79,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 JPanel pTren = new JPanel();
 
-                JLabel lblTieuDe = new JLabel("SẢN PHẨM");
+                JLabel lblTieuDe = new JLabel("QUẢN LÝ SẢN PHẨM");
                 lblTieuDe.setFont(new Font("Tahoma", Font.BOLD, 28));
                 lblTieuDe.setForeground(Color.DARK_GRAY);
 
@@ -94,7 +95,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                 JPanel pBenPhai = new JPanel(new BorderLayout(0, 10));
                 pNhap.add(pBenPhai, BorderLayout.CENTER);
 
-                JPanel pQuanLy = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+                JPanel pQuanLy = new JPanel(new FlowLayout(FlowLayout.RIGHT));
                 btnThuongHieu = new JButton("Thương hiệu");
                 btnDanhMuc = new JButton("Danh mục");
                 btnChiTietSanPham = new JButton("Chi tiết sản phẩm");
@@ -283,7 +284,6 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
         }
 
-        // Nap lai danh muc / thuong hieu sau khi them, sua, xoa.
         public void updateCombobox() {
                 cboLocDanhMuc.removeActionListener(this);
                 listTH = th_dao.getalltbThuongHieu();
@@ -393,6 +393,11 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                                         });
                                         clearTextField();
                                         txtThongBao.setText("Thêm sản phẩm thành công.");
+                                        ChiTietSanPham_GUI gui = new ChiTietSanPham_GUI();
+                                        gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                        gui.setSanPham(sp.getMaSP(), sp.getTenSP());
+                                        gui.setLocationRelativeTo(this);
+                                        gui.setVisible(true);
                                 } else {
                                         txtThongBao.setText(
                                                         "Chưa thêm được sản phẩm. Mã có thể đã tồn tại hoặc kết nối dữ liệu gặp lỗi.");
@@ -539,7 +544,6 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                 String tenSP = txttenSP.getText().trim();
                 String gia = txtGiaBan.getText().trim();
 
-                // SQL: maSP VARCHAR(20), tenSP NVARCHAR(300).
                 if (tenSP.isEmpty()) {
                         txtThongBao.setText("Tên sản phẩm không được để trống.");
                         txttenSP.requestFocusInWindow();
@@ -560,13 +564,13 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         cboDanhMuc.requestFocusInWindow();
                         return false;
                 }
-                // Nhập giá bằng chữ số, có thể có phần thập phân sau dấu chấm.
+
                 if (!gia.matches("[0-9]+(\\.[0-9]{1,2})?")) {
                         txtThongBao.setText("Giá bán phải lớn hơn hoặc bằng 0 và là số hợp lệ . Ví dụ: 250000.50.");
                         txtGiaBan.requestFocusInWindow();
                         return false;
                 }
-                // SQL: giaBan DECIMAL(18,2), CHECK (giaBan >= 0).
+
                 if (new BigDecimal(gia).compareTo(new BigDecimal("9999999999999999.99")) > 0) {
                         txtThongBao.setText("Giá bán không được vượt quá 9999999999999999.99.");
                         txtGiaBan.requestFocusInWindow();
@@ -598,18 +602,24 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
         private String taoMaTuDong() {
                 int soLonNhat = 0;
-                for (SanPham item : sp_dao.getallSanPham()) {
-                        String ma = item.getMaSP();
-                        if (ma != null && ma.matches("SP[0-9]{1,8}")) {
-                                int so = Integer.parseInt(ma.substring(2));
-                                if (so > soLonNhat) {
-                                        soLonNhat = so;
-                                }
+                for (SanPham sp : sp_dao.getallSanPham()) {
+                        int so = Integer.parseInt(sp.getMaSP().substring(2));
+                        if (so > soLonNhat) {
+                                soLonNhat = so;
                         }
                 }
-                if (soLonNhat == 99999999) {
+                if (soLonNhat >= 99999999) {
+                        btnThem.setEnabled(false);
                         return "";
                 }
-                return "SP" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
+                int soTiepTheo = soLonNhat + 1;
+                String phanSo = String.valueOf(soTiepTheo);
+
+                while (phanSo.length() < 8) {
+                        phanSo = "0" + phanSo;
+                }
+
+                return "SP" + phanSo;
         }
+
 }
