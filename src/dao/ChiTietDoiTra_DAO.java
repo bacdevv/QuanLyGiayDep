@@ -39,7 +39,7 @@ public class ChiTietDoiTra_DAO {
         SanPham sp = new SanPham(rs.getString("maSP"), null, null,
                 rs.getString("tenSP"), rs.getBoolean("spHoatDong"), rs.getBigDecimal("giaBan"));
         ChiTietSanPham ctsp = new ChiTietSanPham(rs.getString("maCTSP"), sp,
-                rs.getString("kichCo"), rs.getString("mauSac"),
+                rs.getDouble("kichCo"), rs.getString("mauSac"),
                 rs.getInt("soLuongTon"), rs.getBoolean("ctHoatDong"));
         return new ChiTietDoiTra(new PhieuDoiTra(rs.getString("maPDT")), ctsp,
                 rs.getInt("soLuong"), rs.getInt("soLuongNhapLai"));
@@ -49,7 +49,8 @@ public class ChiTietDoiTra_DAO {
         ArrayList<ChiTietDoiTra> ds = new ArrayList<>();
         try (PreparedStatement stmt = getConnection().prepareStatement(sqlDoc());
                 ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) ds.add(docChiTiet(rs));
+            while (rs.next())
+                ds.add(docChiTiet(rs));
         }
         return ds;
     }
@@ -60,7 +61,8 @@ public class ChiTietDoiTra_DAO {
                 sqlDoc() + "WHERE dt.maPDT = ? ORDER BY dt.maCTSP")) {
             stmt.setString(1, maPDT);
             try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) ds.add(docChiTiet(rs));
+                while (rs.next())
+                    ds.add(docChiTiet(rs));
             }
         }
         return ds;

@@ -26,7 +26,7 @@ public class ChiTietSanPham_DAO {
                     while (rs.next()) {
                         String maCTSP = rs.getString("maCTSP");
                         SanPham sp = new SanPham(rs.getString("maSP"));
-                        String kichCo = rs.getString("kichCo");
+                        double kichCo = rs.getDouble("kichCo");
                         String mauSac = rs.getString("mauSac");
                         int soLuongTon = rs.getInt("soLuongTon");
                         boolean hoatDong = rs.getBoolean("hoatDong");
@@ -47,13 +47,14 @@ public class ChiTietSanPham_DAO {
             ConnectDB.getInstance().connect();
             Connection con = ConnectDB.getConnection();
             String sql = "INSERT INTO ChiTietSanPham (maCTSP, maSP, kichCo, mauSac, soLuongTon, hoatDong) "
-                    + "VALUES (?, ?, ?, ?, 0, ?)";
+                    + "VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setString(1, ctsp.getMaCTSP());
                 stmt.setString(2, ctsp.getSanPham().getMaSP());
-                stmt.setString(3, ctsp.getKichCo());
+                stmt.setDouble(3, ctsp.getKichCo());
                 stmt.setNString(4, ctsp.getMauSac());
-                stmt.setBoolean(5, ctsp.isHoatDong());
+                stmt.setInt(5, ctsp.getSoLuongTon());
+                stmt.setBoolean(6, ctsp.isHoatDong());
                 n = stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -75,7 +76,7 @@ public class ChiTietSanPham_DAO {
                     while (rs.next()) {
                         String maCTSP = rs.getString("maCTSP");
                         SanPham sp = new SanPham(rs.getString("maSP"));
-                        String kichCo = rs.getString("kichCo");
+                        double kichCo = rs.getDouble("kichCo");
                         String mauSac = rs.getString("mauSac");
                         int soLuongTon = rs.getInt("soLuongTon");
                         boolean hoatDong = rs.getBoolean("hoatDong");
@@ -103,7 +104,7 @@ public class ChiTietSanPham_DAO {
                     while (rs.next()) {
                         String maCTSP = rs.getString("maCTSP");
                         SanPham sp = new SanPham(rs.getString("maSP"));
-                        String kichCo = rs.getString("kichCo");
+                        double kichCo = rs.getDouble("kichCo");
                         String mauSac = rs.getString("mauSac");
                         int soLuongTon = rs.getInt("soLuongTon");
                         boolean hoatDong = rs.getBoolean("hoatDong");
@@ -126,7 +127,7 @@ public class ChiTietSanPham_DAO {
             String sql = "UPDATE ChiTietSanPham SET kichCo = ?, mauSac = ?, hoatDong = ? "
                     + "WHERE maCTSP = ? AND maSP = ?";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
-                stmt.setString(1, ctsp.getKichCo());
+                stmt.setDouble(1, ctsp.getKichCo());
                 stmt.setNString(2, ctsp.getMauSac());
                 stmt.setBoolean(3, ctsp.isHoatDong());
                 stmt.setString(4, ctsp.getMaCTSP());

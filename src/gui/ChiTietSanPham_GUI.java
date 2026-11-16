@@ -18,6 +18,7 @@ import javax.swing.table.DefaultTableModel;
 
 import connectDB.ConnectDB;
 import dao.ChiTietSanPham_DAO;
+import dao.SanPham_DAO;
 
 import entity.ChiTietSanPham;
 import entity.SanPham;
@@ -44,6 +45,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
     private JTable table;
 
     private ChiTietSanPham_DAO ctsp_dao;
+    private SanPham_GUI sanPhamGUI;
 
     public ChiTietSanPham_GUI() {
 
@@ -293,6 +295,9 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
                     });
 
                     clearTextField();
+                    if (sanPhamGUI != null) {
+                        sanPhamGUI.DocDuLieuDatabaseVaoTable();
+                    }
                     JOptionPane.showMessageDialog(this,
                             "Thêm chi tiết sản phẩm thành công.",
                             "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -349,6 +354,9 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
                 if (ctsp_dao.delete(maCTSP, txtMaSP.getText())) {
                     model.removeRow(row);
                     clearTextField();
+                    if (sanPhamGUI != null) {
+                        sanPhamGUI.DocDuLieuDatabaseVaoTable();
+                    }
                     JOptionPane.showMessageDialog(this,
                             "Xóa chi tiết sản phẩm thành công.",
                             "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -373,12 +381,26 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
                     return;
                 }
 
+                double size;
+                try {
+                    size = Double.parseDouble(kichCo);
+                    if (!Double.isFinite(size) || size <= 0) {
+                        txtThongBao.setText("Kích cỡ cần lọc phải lớn hơn 0.");
+                        txtKichCo.requestFocusInWindow();
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    txtThongBao.setText("Kích cỡ phải là số. Ví dụ: 37 hoặc 37.5.");
+                    txtKichCo.requestFocusInWindow();
+                    return;
+                }
+
                 DocDuLieuDatabaseVaoTable();
 
                 for (int i = 0; i < model.getRowCount(); i++) {
-                    String kichCoTrongBang = model.getValueAt(i, 2).toString();
+                    double kichCoTrongBang = Double.parseDouble(model.getValueAt(i, 2).toString());
 
-                    if (!kichCoTrongBang.equalsIgnoreCase(kichCo)) {
+                    if (Double.compare(kichCoTrongBang, size) != 0) {
                         model.removeRow(i);
                         i--;
                     }
@@ -437,6 +459,10 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         clearTextField();
     }
 
+    public void setSanPhamGUI(SanPham_GUI sanPhamGUI) {
+        this.sanPhamGUI = sanPhamGUI;
+    }
+
     public void DocDuLieuDatabaseVaoTable() {
         model.setRowCount(0);
 
@@ -454,12 +480,14 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
     private void fillForm(int row) {
         if (row < 0) {
             txtMaCTSP.setText(taoMaTuDong());
-            txtTonKho.setText("");
+            txtTonKho.setText("0");
+            txtTonKho.setEditable(false);
             txtMaCTSP.setEditable(false);
             return;
         }
         txtMaCTSP.setText(model.getValueAt(row, 0).toString());
         txtTonKho.setText(model.getValueAt(row, 4).toString());
+        txtTonKho.setEditable(false);
         txtKichCo.setText(model.getValueAt(row, 2).toString());
         txtMauSac.setText(model.getValueAt(row, 3).toString());
         cboTrangThai.setSelectedItem(model.getValueAt(row, 5));
@@ -479,12 +507,13 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
         cboTrangThai.setSelectedIndex(0);
         txtMaCTSP.setText(taoMaTuDong());
         txtTonKho.setText("0");
+        txtTonKho.setEditable(false);
     }
 
     private ChiTietSanPham reverChiTietSanPham() {
         String maCTSP = txtMaCTSP.getText().trim();
         SanPham sp = new SanPham(txtMaSP.getText().trim());
-        String kichCo = txtKichCo.getText().trim();
+        double kichCo = Double.parseDouble(txtKichCo.getText().trim());
         String mauSac = txtMauSac.getText().trim();
         String tonKho = txtTonKho.getText().trim();
         int soLuongTon = tonKho.isEmpty() ? 0 : Integer.parseInt(tonKho);
@@ -503,8 +532,15 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
             txtKichCo.requestFocusInWindow();
             return false;
         }
-        if (kichCo.length() > 10) {
-            txtThongBao.setText("Kích cỡ không được quá 10 ký tự.");
+        if (!kichCo.matches("-?[0-9]+(\\.[0-9]+)?")) {
+            txtThongBao.setText("Kích cỡ phải là số. Ví dụ: 37 hoặc 37.5.");
+            txtKichCo.requestFocusInWindow();
+            return false;
+        }
+
+        double size = Double.parseDouble(kichCo);
+        if (size <= 0) {
+            txtThongBao.setText("Kích cỡ phải lớn hơn 0.");
             txtKichCo.requestFocusInWindow();
             return false;
         }
@@ -514,8 +550,13 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
             txtMauSac.requestFocusInWindow();
             return false;
         }
-        if (mauSac.length() > 50) {
-            txtThongBao.setText("Màu sắc không được quá 50 ký tự.");
+        if (mauSac.matches(".*[0-9].*")) {
+            txtThongBao.setText("Màu sắc không được chứa chữ số.");
+            txtMauSac.requestFocusInWindow();
+            return false;
+        }
+        if (mauSac.length() > 30) {
+            txtThongBao.setText("Màu sắc không được quá 30 ký tự.");
             txtMauSac.requestFocusInWindow();
             return false;
         }
@@ -532,7 +573,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
     private String taoMaTuDong() {
         int soLonNhat = 0;
         for (ChiTietSanPham ctsp : ctsp_dao.getalltbChiTietSanPham()) {
-            int so = Integer.parseInt(ctsp.getMaCTSP().substring(2));
+            int so = Integer.parseInt(ctsp.getMaCTSP().substring(5));
             if (so > soLonNhat) {
                 soLonNhat = so;
             }
@@ -549,7 +590,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
             phanSo = "0" + phanSo;
         }
 
-        return "CT" + phanSo;
+        return "CTSP-" + phanSo;
     }
 
 }

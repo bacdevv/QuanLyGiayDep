@@ -396,6 +396,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                                         ChiTietSanPham_GUI gui = new ChiTietSanPham_GUI();
                                         gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                                         gui.setSanPham(sp.getMaSP(), sp.getTenSP());
+                                        gui.setSanPhamGUI(this);
                                         gui.setLocationRelativeTo(this);
                                         gui.setVisible(true);
                                 } else {
@@ -434,6 +435,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         ChiTietSanPham_GUI gui = new ChiTietSanPham_GUI();
                         gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         gui.setSanPham(maSP, tenSP);
+                        gui.setSanPhamGUI(this);
                         gui.setLocationRelativeTo(this);
                         gui.setVisible(true);
                 } else if (o.equals(btnTim) || o.equals(txtTimMaSP) || o.equals(txtTimTenSP)) {
@@ -549,8 +551,8 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         txttenSP.requestFocusInWindow();
                         return false;
                 }
-                if (tenSP.length() > 300) {
-                        txtThongBao.setText("Tên sản phẩm có độ dài tối đa 300 ký tự.");
+                if (tenSP.length() > 200) {
+                        txtThongBao.setText("Tên sản phẩm có độ dài tối đa 200 ký tự.");
                         txttenSP.requestFocusInWindow();
                         return false;
                 }
@@ -565,13 +567,20 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         return false;
                 }
 
-                if (!gia.matches("[0-9]+(\\.[0-9]{1,2})?")) {
-                        txtThongBao.setText("Giá bán phải lớn hơn hoặc bằng 0 và là số hợp lệ . Ví dụ: 250000.50.");
+                if (!gia.matches("-?[0-9]+(\\.[0-9]{1,2})?")) {
+                        txtThongBao.setText("Giá bán phải là số hợp lệ. Ví dụ: 250000.50.");
                         txtGiaBan.requestFocusInWindow();
                         return false;
                 }
 
-                if (new BigDecimal(gia).compareTo(new BigDecimal("9999999999999999.99")) > 0) {
+                BigDecimal giaBan = new BigDecimal(gia);
+                if (giaBan.compareTo(BigDecimal.ZERO) <= 0) {
+                        txtThongBao.setText("Giá bán phải là số dương (lớn hơn 0).");
+                        txtGiaBan.requestFocusInWindow();
+                        return false;
+                }
+
+                if (giaBan.compareTo(new BigDecimal("9999999999999999.99")) > 0) {
                         txtThongBao.setText("Giá bán không được vượt quá 9999999999999999.99.");
                         txtGiaBan.requestFocusInWindow();
                         return false;
@@ -603,7 +612,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
         private String taoMaTuDong() {
                 int soLonNhat = 0;
                 for (SanPham sp : sp_dao.getallSanPham()) {
-                        int so = Integer.parseInt(sp.getMaSP().substring(2));
+                        int so = Integer.parseInt(sp.getMaSP().substring(3));
                         if (so > soLonNhat) {
                                 soLonNhat = so;
                         }
@@ -619,7 +628,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         phanSo = "0" + phanSo;
                 }
 
-                return "SP" + phanSo;
+                return "SP-" + phanSo;
         }
 
 }

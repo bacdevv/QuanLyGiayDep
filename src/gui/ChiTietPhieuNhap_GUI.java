@@ -435,7 +435,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements ActionListener, Mous
             String tenSP = (ctsp != null && ctsp.getSanPham() != null)
                     ? ctsp.getSanPham().getTenSP() : "";
 
-            String kichCo = ctsp != null ? ctsp.getKichCo() : "";
+            String kichCo = ctsp != null ? String.valueOf(ctsp.getKichCo()) : "";
             String mauSac = ctsp != null ? ctsp.getMauSac() : "";
 
             BigDecimal thanhTien = ct.tinhThanhTien();

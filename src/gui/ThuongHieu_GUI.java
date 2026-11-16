@@ -283,8 +283,9 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
             return false;
         }
 
-        if (tenThuongHieu.length() > 100) {
-            JOptionPane.showMessageDialog(this, "Tên thương hiệu không được quá 100 ký tự.");
+        if (tenThuongHieu.length() > 200) {
+            JOptionPane.showMessageDialog(this,
+                    "Tên thương hiệu không được quá 200 ký tự.");
             txtTenThuongHieu.requestFocusInWindow();
             return false;
         }
@@ -301,7 +302,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
     private String taoMaTuDong() {
         int soLonNhat = 0;
         for (ThuongHieu th : th_dao.getalltbThuongHieu()) {
-            int so = Integer.parseInt(th.getMaThuongHieu().substring(2));
+            int so = Integer.parseInt(th.getMaThuongHieu().substring(3));
             if (so > soLonNhat) {
                 soLonNhat = so;
             }
@@ -318,7 +319,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
             phanSo = "0" + phanSo;
         }
 
-        return "TH" + phanSo;
+        return "TH-" + phanSo;
     }
 
 }
