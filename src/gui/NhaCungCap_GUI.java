@@ -217,6 +217,9 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
         btnThem.addActionListener(this);
         btnXoaRong.addActionListener(this);
         btnTimKiem.addActionListener(this);
+        txtTimKiem.addActionListener(e -> {
+            btnTimKiem.doClick();
+        });
         btnSua.addActionListener(this);
         btnLuu.addActionListener(this);
         btnLoc.addActionListener(this);

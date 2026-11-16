@@ -5,6 +5,7 @@ import entity.NhanVien;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -23,7 +24,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
@@ -34,10 +34,11 @@ public class Main extends JFrame {
     private final NhanVien nhanVien;
     private final JTabbedPane tabChinh = new JTabbedPane();
     private JTabbedPane tabBanHang, tabDoiTra;
-    private JPanel noiDungHoaDon, noiDungDoiTra;
-    private JTextField txtMaHD, txtMaPDT;
+    private ChiTietHoaDon_GUI danhSachHoaDonGUI;
+    private ChiTietDoiTra_GUI danhSachDoiTraGUI;
     private final JLabel[] chiSo = new JLabel[5];
     private JLabel lblTrangThai;
+    private DefaultTableModel modelSanPhamBanChay;
     private final ArrayList<JFrame> cacGiaoDien = new ArrayList<>();
 
     public Main(NhanVien nhanVien) {
@@ -73,7 +74,6 @@ public class Main extends JFrame {
         tabChinh.addTab("Đổi / Trả", tabDoiTra = taoTabDoiTra());
         tabChinh.addTab("Nhập hàng", taoTabNhapHang());
         tabChinh.addTab("Sản phẩm", taoTabSanPham());
-        tabChinh.addTab("Nhân viên", taoTabNhanVien());
         tabChinh.addChangeListener(e -> {
             if (tabChinh.getSelectedIndex() == 0) {
                 napThongKe();
@@ -98,8 +98,8 @@ public class Main extends JFrame {
         tren.add(btnTaiLai, BorderLayout.EAST);
         trang.add(tren, BorderLayout.NORTH);
 
-        String[] ten = {"Nhân viên hoạt động", "Số lượng tồn kho", "Đơn hàng đã bán",
-            "Doanh thu", "Đơn đổi/trả"};
+        String[] ten = { "Nhân viên hoạt động", "Số lượng tồn kho", "Đơn hàng đã bán",
+                "Doanh thu", "Đơn đổi/trả" };
         JPanel bang = new JPanel(new GridLayout(2, 3, 15, 15));
         for (int i = 0; i < ten.length; i++) {
             JPanel o = new JPanel(new BorderLayout(4, 8));
@@ -109,7 +109,25 @@ public class Main extends JFrame {
             o.add(chiSo[i], BorderLayout.CENTER);
             bang.add(o);
         }
-        trang.add(bang, BorderLayout.CENTER);
+        // Bảng xếp hạng trực tiếp trong tab Thống kê, không tạo class mới.
+        modelSanPhamBanChay = new DefaultTableModel(
+                new String[] { "Hạng", "Mã sản phẩm", "Tên sản phẩm", "Số lượng bán ròng" }, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable bangBanChay = new JTable(modelSanPhamBanChay);
+        bangBanChay.setRowHeight(28);
+        bangBanChay.setAutoCreateRowSorter(true);
+        JPanel pnlBanChay = new JPanel(new BorderLayout());
+        pnlBanChay.setBorder(BorderFactory.createTitledBorder("TOP 10 SẢN PHẨM BÁN CHẠY"));
+        pnlBanChay.add(new JScrollPane(bangBanChay), BorderLayout.CENTER);
+        pnlBanChay.setPreferredSize(new Dimension(0, 270));
+        JPanel noiDung = new JPanel(new BorderLayout(0, 15));
+        noiDung.add(bang, BorderLayout.CENTER);
+        noiDung.add(pnlBanChay, BorderLayout.SOUTH);
+        trang.add(noiDung, BorderLayout.CENTER);
         lblTrangThai = new JLabel("Số liệu lấy trực tiếp từ SQL Server");
         trang.add(lblTrangThai, BorderLayout.SOUTH);
         return trang;
@@ -120,11 +138,11 @@ public class Main extends JFrame {
             return;
         }
         String[] sql = {
-            "SELECT COUNT(*) FROM NhanVien WHERE hoatDong = 1",
-            "SELECT COALESCE(SUM(soLuongTon),0) FROM ChiTietSanPham",
-            "SELECT COUNT(*) FROM HoaDon",
-            "SELECT COALESCE(SUM(tongTien),0) FROM HoaDon",
-            "SELECT COUNT(*) FROM PhieuDoiTra"};
+                "SELECT COUNT(*) FROM NhanVien WHERE hoatDong = 1",
+                "SELECT COALESCE(SUM(soLuongTon),0) FROM ChiTietSanPham",
+                "SELECT COUNT(*) FROM HoaDon",
+                "SELECT COALESCE(SUM(tongTien),0) FROM HoaDon",
+                "SELECT COUNT(*) FROM PhieuDoiTra" };
         try {
             ConnectDB.getInstance().connect();
             Connection con = ConnectDB.getConnection();
@@ -139,11 +157,36 @@ public class Main extends JFrame {
                     }
                 }
             }
+            // Gộp tất cả size/màu của cùng một sản phẩm. Hóa đơn đổi size
+            // đã cộng vào doanh số, nên trừ các dòng đã đổi/trả để không đếm đôi.
+            String sqlBanChay = "SELECT TOP (10) sp.maSP, sp.tenSP, "
+                    + "SUM(x.soLuong) AS soLuongBanRong "
+                    + "FROM ("
+                    + " SELECT ctsp.maSP, CAST(cthd.soLuong AS BIGINT) AS soLuong "
+                    + " FROM ChiTietHoaDon cthd "
+                    + " JOIN ChiTietSanPham ctsp ON cthd.maCTSP = ctsp.maCTSP "
+                    + " UNION ALL "
+                    + " SELECT ctsp.maSP, -CAST(ctdt.soLuong AS BIGINT) AS soLuong "
+                    + " FROM ChiTietDoiTra ctdt "
+                    + " JOIN ChiTietSanPham ctsp ON ctdt.maCTSP = ctsp.maCTSP "
+                    + ") x JOIN SanPham sp ON x.maSP = sp.maSP "
+                    + "GROUP BY sp.maSP, sp.tenSP "
+                    + "HAVING SUM(x.soLuong) > 0 "
+                    + "ORDER BY soLuongBanRong DESC, sp.maSP";
+            modelSanPhamBanChay.setRowCount(0);
+            try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sqlBanChay)) {
+                int hang = 1;
+                while (rs.next()) {
+                    modelSanPhamBanChay.addRow(new Object[] { hang++, rs.getString("maSP"),
+                            rs.getString("tenSP"), rs.getLong("soLuongBanRong") });
+                }
+            }
         } catch (SQLException e) {
             for (JLabel label : chiSo) {
                 label.setText("–");
             }
-            lblTrangThai.setText("Chưa kết nối SQL Server: " + e.getMessage());
+            modelSanPhamBanChay.setRowCount(0);
+            lblTrangThai.setText("Chưa tải được thống kê từ SQL Server: " + e.getMessage());
         }
     }
 
@@ -154,9 +197,16 @@ public class Main extends JFrame {
             gui.setMoChiTiet(this::hienChiTietHoaDon);
             return gui;
         });
-        noiDungHoaDon = taoTrangChiTiet("Mã hóa đơn:", true);
-        tabs.addTab("Chi tiết hóa đơn", noiDungHoaDon);
-        tabs.addChangeListener(e -> napTab(tabs));
+        // Tab nay la danh sach truc tiep, khong can nhap ma HD de mo.
+        themTrang(tabs, "Danh sách hóa đơn", () -> {
+            danhSachHoaDonGUI = new ChiTietHoaDon_GUI();
+            return danhSachHoaDonGUI;
+        });
+        tabs.addChangeListener(e -> {
+            napTab(tabs);
+            if (tabs.getSelectedIndex() == 1 && danhSachHoaDonGUI != null)
+                danhSachHoaDonGUI.taiLaiDanhSach();
+        });
         return tabs;
     }
 
@@ -167,58 +217,31 @@ public class Main extends JFrame {
             gui.setMoChiTiet(this::hienChiTietDoiTra);
             return gui;
         });
-        noiDungDoiTra = taoTrangChiTiet("Mã phiếu đổi/trả:", false);
-        tabs.addTab("Chi tiết đổi/trả", noiDungDoiTra);
-        tabs.addChangeListener(e -> napTab(tabs));
-        return tabs;
-    }
-
-    private JPanel taoTrangChiTiet(String nhan, boolean hoaDon) {
-        JPanel trang = new JPanel(new BorderLayout(5, 5));
-        JPanel tim = new JPanel();
-        JTextField txt = new JTextField(18);
-        if (hoaDon) {
-            txtMaHD = txt; 
-        }else {
-            txtMaPDT = txt;
-        }
-        JButton btnXem = new JButton("Xem chi tiết");
-        tim.add(new JLabel(nhan));
-        tim.add(txt);
-        tim.add(btnXem);
-        trang.add(tim, BorderLayout.NORTH);
-        btnXem.addActionListener(e -> {
-            String ma = txt.getText().trim();
-            if (ma.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã chứng từ");
-                return;
-            }
-            JPanel noiDung = hoaDon ? noiDungHoaDon : noiDungDoiTra;
-            if (noiDung.getComponentCount() > 1) {
-                noiDung.remove(1);
-            }
-            JFrame gui = hoaDon ? new ChiTietHoaDon_GUI(ma) : new ChiTietDoiTra_GUI(ma);
-            noiDung.add(duaVaoTab(gui), BorderLayout.CENTER);
-            noiDung.revalidate();
-            noiDung.repaint();
+        // Tab nay la danh sach truc tiep, khong can nhap ma PDT de mo.
+        themTrang(tabs, "Danh sách đổi trả", () -> {
+            danhSachDoiTraGUI = new ChiTietDoiTra_GUI();
+            return danhSachDoiTraGUI;
         });
-        return trang;
+        tabs.addChangeListener(e -> {
+            napTab(tabs);
+            if (tabs.getSelectedIndex() == 1 && danhSachDoiTraGUI != null)
+                danhSachDoiTraGUI.taiLaiDanhSach();
+        });
+        return tabs;
     }
 
     public void hienChiTietHoaDon(String maHD) {
         tabChinh.setSelectedComponent(tabBanHang);
         tabBanHang.setSelectedIndex(1);
-        txtMaHD.setText(maHD);
-        JButton btn = (JButton) ((JPanel) noiDungHoaDon.getComponent(0)).getComponent(2);
-        btn.doClick();
+        if (danhSachHoaDonGUI != null)
+            danhSachHoaDonGUI.chonChungTu(maHD);
     }
 
     public void hienChiTietDoiTra(String maPDT) {
         tabChinh.setSelectedComponent(tabDoiTra);
         tabDoiTra.setSelectedIndex(1);
-        txtMaPDT.setText(maPDT);
-        JButton btn = (JButton) ((JPanel) noiDungDoiTra.getComponent(0)).getComponent(2);
-        btn.doClick();
+        if (danhSachDoiTraGUI != null)
+            danhSachDoiTraGUI.chonChungTu(maPDT);
     }
 
     private JTabbedPane taoTabNhapHang() {
@@ -233,35 +256,9 @@ public class Main extends JFrame {
     private JTabbedPane taoTabSanPham() {
         JTabbedPane tabs = new JTabbedPane();
         themTrang(tabs, "Sản phẩm", SanPham_GUI::new);
-       
+
         tabs.addChangeListener(e -> napTab(tabs));
         return tabs;
-    }
-
-    private JPanel taoTabNhanVien() {
-        JPanel trang = new JPanel(new BorderLayout(5, 5));
-        DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Mã nhân viên", "Tên nhân viên", "SĐT", "Hoạt động"}, 0);
-        JTable bang = new JTable(model);
-        JButton btnTai = new JButton("Tải danh sách nhân viên");
-        btnTai.addActionListener(e -> {
-            model.setRowCount(0);
-            try {
-                ConnectDB.getInstance().connect();
-                try (Statement st = ConnectDB.getConnection().createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM NhanVien")) {
-                    while (rs.next()) {
-                        model.addRow(new Object[]{rs.getString("maNhanVien"),
-                            rs.getString("tenNhanVien"), rs.getString("soDienThoai"),
-                            rs.getBoolean("hoatDong") ? "Có" : "Không"});
-                    }
-                }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        });
-        trang.add(btnTai, BorderLayout.NORTH);
-        trang.add(new JScrollPane(bang), BorderLayout.CENTER);
-        return trang;
     }
 
     // Tao tab rong truoc, chi khoi tao GUI khi nhan tab: tranh tai SQL dong loat.

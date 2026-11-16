@@ -61,7 +61,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
         add(p);
 
         JPanel pTren = new JPanel(new BorderLayout(0, 10));
-        JLabel lblTieuDe = new JLabel("THƯƠNG HIỆU", SwingConstants.CENTER);
+        JLabel lblTieuDe = new JLabel("QUẢN LÝ THƯƠNG HIỆU", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Tahoma", Font.BOLD, 28));
         lblTieuDe.setForeground(Color.DARK_GRAY);
         pTren.add(lblTieuDe);
@@ -109,7 +109,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
         btnXoa = new JButton("Xóa");
         btnSua.setEnabled(false);
         btnXoa.setEnabled(false);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -276,7 +276,6 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
 
         String tenThuongHieu = txtTenThuongHieu.getText().trim();
 
-
         if (tenThuongHieu.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Tên thương hiệu không được để trống.",
                     "Thiếu tên thương hiệu", JOptionPane.WARNING_MESSAGE);
@@ -301,18 +300,25 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
 
     private String taoMaTuDong() {
         int soLonNhat = 0;
-        for (ThuongHieu item : th_dao.getalltbThuongHieu()) {
-            String ma = item.getMaThuongHieu();
-            if (ma != null && ma.matches("TH[0-9]{1,8}")) {
-                int so = Integer.parseInt(ma.substring(2));
-                if (so > soLonNhat) {
-                    soLonNhat = so;
-                }
+        for (ThuongHieu th : th_dao.getalltbThuongHieu()) {
+            int so = Integer.parseInt(th.getMaThuongHieu().substring(2));
+            if (so > soLonNhat) {
+                soLonNhat = so;
             }
         }
-        if (soLonNhat == 99999999) {
+        if (soLonNhat >= 99999999) {
+            btnThem.setEnabled(false);
+
             return "";
         }
-        return "TH" + String.format(java.util.Locale.ROOT, "%08d", soLonNhat + 1);
+        int soTiepTheo = soLonNhat + 1;
+        String phanSo = String.valueOf(soTiepTheo);
+
+        while (phanSo.length() < 8) {
+            phanSo = "0" + phanSo;
+        }
+
+        return "TH" + phanSo;
     }
+
 }
