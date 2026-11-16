@@ -11,6 +11,7 @@ import entity.ChiTietSanPham;
 import entity.SanPham;
 
 public class ChiTietSanPham_DAO {
+
     public ChiTietSanPham_DAO() {
     }
 

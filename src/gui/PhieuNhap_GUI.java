@@ -57,10 +57,9 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
     private JTextField txtNhanVien;
     private JTextField txtTenNhanVien;
+    private JTextField txtTenNCC;
     private JTextField txtNgayNhap;
     private JTextField txtMaPN;
-
-    // Ô tìm kiếm mã nhà cung cấp
     private JTextField txtTimMaNCC;
 
     private JButton btnThem;
@@ -83,10 +82,8 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
     private ChiTietPhieuNhap_GUI chiTietGUI;
 
-    // Danh sách nhà cung cấp ban đầu
     private ArrayList<NhaCungCap> dsNCC = new ArrayList<>();
 
-    // ================= CONSTRUCTOR =================
     public PhieuNhap_GUI() {
 
         setTitle("Quản lý phiếu nhập");
@@ -103,7 +100,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         setNhaCungCap(maNCC);
     }
 
-    // ================= CHỌN NHÀ CUNG CẤP =================
     public void setNhaCungCap(String maNCC) {
 
         if (maNCC == null) {
@@ -112,7 +108,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
         String trimmed = maNCC.trim();
 
-        // Nếu mã NCC chưa có trong ComboBox thì thêm vào
         for (int i = 0; i < cboNhaCungCap.getItemCount(); i++) {
 
             if (cboNhaCungCap.getItemAt(i).equalsIgnoreCase(trimmed)) {
@@ -125,7 +120,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         cboNhaCungCap.setSelectedItem(trimmed);
     }
 
-    // ================= GIAO DIỆN =================
     private void buildUI() {
 
         pn_dao = new PhieuNhap_DAO();
@@ -143,21 +137,19 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             e.printStackTrace();
         }
 
-        // ================= NORTH =================
         JPanel pnlNorth = new JPanel();
 
         add(pnlNorth, BorderLayout.NORTH);
 
-        pnlNorth.setPreferredSize(new Dimension(0, 165));
-
+        pnlNorth.setPreferredSize(new Dimension(0, 205));
         pnlNorth.setBorder(
                 BorderFactory.createTitledBorder("Thông tin phiếu nhập")
         );
-
         pnlNorth.setLayout(null);
 
-        JLabel lblNhaCungCap = new JLabel("Nhà cung cấp:");
+        JLabel lblNhaCungCap = new JLabel("Mã NCC:");
         JLabel lblTimMaNCC = new JLabel("Tìm mã NCC:");
+        JLabel lblTenNCC = new JLabel("Tên nhà cung cấp:");
 
         JLabel lblNhanVien = new JLabel("Mã nhân viên:");
         JLabel lblTenNhanVien = new JLabel("Tên nhân viên:");
@@ -167,39 +159,36 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
         pnlNorth.add(lblNhaCungCap);
         pnlNorth.add(lblTimMaNCC);
+        pnlNorth.add(lblTenNCC);
         pnlNorth.add(lblNhanVien);
         pnlNorth.add(lblTenNhanVien);
         pnlNorth.add(lblNgayNhap);
         pnlNorth.add(lblMaPN);
 
-        // ================= COMBOBOX NHÀ CUNG CẤP =================
         cboNhaCungCap = new JComboBox<>();
 
-        // Lấy toàn bộ nhà cung cấp từ database
         dsNCC = ncc_dao.getalltbNhacc();
 
-        for (NhaCungCap ncc : dsNCC) {
-
-            cboNhaCungCap.addItem(ncc.getMaNCC());
+        if (dsNCC != null) {
+            for (NhaCungCap ncc : dsNCC) {
+                cboNhaCungCap.addItem(ncc.getMaNCC());
+            }
         }
 
         pnlNorth.add(cboNhaCungCap);
 
-        // ================= TEXTFIELD TÌM MÃ NCC =================
         txtTimMaNCC = new JTextField();
-
         pnlNorth.add(txtTimMaNCC);
 
-        // ================= MÃ NHÂN VIÊN =================
+        txtTenNCC = new JTextField();
+        txtTenNCC.setEditable(false);
+        pnlNorth.add(txtTenNCC);
+
         txtNhanVien = new JTextField("NV0001");
-
         txtNhanVien.setEditable(false);
-
         pnlNorth.add(txtNhanVien);
 
-        // ================= TÊN NHÂN VIÊN =================
         txtTenNhanVien = new JTextField();
-
         txtTenNhanVien.setEditable(false);
 
         try {
@@ -209,13 +198,11 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             );
 
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         pnlNorth.add(txtTenNhanVien);
 
-        // ================= NGÀY NHẬP =================
         txtNgayNhap = new JTextField();
 
         txtNgayNhap.setText(
@@ -226,16 +213,12 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
         pnlNorth.add(txtNgayNhap);
 
-        // ================= MÃ PHIẾU NHẬP =================
         txtMaPN = new JTextField();
-
         txtMaPN.setText(taoMaPN());
-
         txtMaPN.setEditable(false);
 
         pnlNorth.add(txtMaPN);
 
-        // ================= SET BOUNDS =================
         int labelW = 110;
         int fieldW = 250;
         int h = 28;
@@ -248,6 +231,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         int y1 = 15;
         int y2 = 55;
         int y3 = 95;
+        int y4 = 135;
 
         lblNhaCungCap.setBounds(x1, y1, labelW, h);
         cboNhaCungCap.setBounds(x2, y1, fieldW, h);
@@ -255,24 +239,24 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         lblTimMaNCC.setBounds(x3, y1, labelW, h);
         txtTimMaNCC.setBounds(x4, y1, fieldW, h);
 
-        lblNhanVien.setBounds(x1, y2, labelW, h);
-        txtNhanVien.setBounds(x2, y2, fieldW, h);
+        lblTenNCC.setBounds(x1, y2, labelW, h);
+        txtTenNCC.setBounds(x2, y2, fieldW, h);
 
-        lblTenNhanVien.setBounds(x3, y2, labelW, h);
-        txtTenNhanVien.setBounds(x4, y2, fieldW, h);
+        lblNhanVien.setBounds(x3, y2, labelW, h);
+        txtNhanVien.setBounds(x4, y2, fieldW, h);
 
-        lblNgayNhap.setBounds(x1, y3, labelW, h);
-        txtNgayNhap.setBounds(x2, y3, fieldW, h);
+        lblTenNhanVien.setBounds(x1, y3, labelW, h);
+        txtTenNhanVien.setBounds(x2, y3, fieldW, h);
 
-        lblMaPN.setBounds(x3, y3, labelW, h);
-        txtMaPN.setBounds(x4, y3, fieldW, h);
+        lblNgayNhap.setBounds(x3, y3, labelW, h);
+        txtNgayNhap.setBounds(x4, y3, fieldW, h);
 
-        // ================= CENTER =================
+        lblMaPN.setBounds(x1, y4, labelW, h);
+        txtMaPN.setBounds(x2, y4, fieldW, h);
+
         JPanel pnlCenter = new JPanel(new BorderLayout());
-
         add(pnlCenter, BorderLayout.CENTER);
 
-        // ================= CÁC NÚT =================
         JPanel pnlButton = new JPanel();
 
         btnThem = new JButton("Thêm");
@@ -287,7 +271,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         pnlButton.add(btnLuu);
         pnlButton.add(btnXemChiTiet);
 
-        // ================= TÌM KIẾM BẢNG =================
         JPanel pnlTimKiem = new JPanel();
 
         pnlTimKiem.add(new JLabel("Tìm theo:"));
@@ -303,7 +286,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         cboTimKiem.setPreferredSize(new Dimension(160, 25));
 
         txtTimKiem = new JTextField(15);
-
         btnTimKiem = new JButton("Tìm kiếm");
 
         pnlTimKiem.add(cboTimKiem);
@@ -313,7 +295,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         pnlCenter.add(pnlButton, BorderLayout.NORTH);
         pnlCenter.add(pnlTimKiem, BorderLayout.CENTER);
 
-        // ================= TABLE =================
         String[] headers = {
             "Mã PN",
             "Mã NCC",
@@ -337,7 +318,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         table = new JTable(tableModel);
 
         sorter = new TableRowSorter<>(tableModel);
-
         table.setRowSorter(sorter);
 
         JScrollPane scroll = new JScrollPane(
@@ -353,15 +333,12 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         table.setRowHeight(25);
 
         add(scroll, BorderLayout.SOUTH);
-
         scroll.setPreferredSize(new Dimension(0, 350));
 
-        // Đọc dữ liệu vào bảng
         Docdldatatable();
 
         table.addMouseListener(this);
 
-        // ================= EVENTS =================
         btnTimKiem.addActionListener(this);
         btnLuu.addActionListener(this);
         btnThem.addActionListener(this);
@@ -371,68 +348,83 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
         txtTimKiem.addActionListener(e -> timKiem());
 
-        // Tìm kiếm NCC realtime giống ChiTietPhieuNhap_GUI
         ganSuKienTimKiem(txtTimMaNCC);
 
+        cboNhaCungCap.addActionListener(e -> capNhatTenNCC());
+
+        capNhatTenNCC();
     }
 
-    // ================= GẮN SỰ KIỆN TÌM KIẾM =================
     private void ganSuKienTimKiem(JTextField txt) {
 
         txt.getDocument().addDocumentListener(new DocumentListener() {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-
                 timKiemNCC();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-
                 timKiemNCC();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-
                 timKiemNCC();
             }
         });
     }
 
-    // ================= TÌM KIẾM NCC =================
     private void timKiemNCC() {
 
         String maNCCCanTim = txtTimMaNCC.getText()
                 .trim()
                 .toLowerCase();
 
-        // Xóa danh sách cũ trong ComboBox
         cboNhaCungCap.removeAllItems();
 
-        // Duyệt danh sách nhà cung cấp ban đầu
         for (NhaCungCap ncc : dsNCC) {
 
-            String maNCC = ncc.getMaNCC() != null
-                    ? ncc.getMaNCC().toLowerCase()
-                    : "";
+            if (ncc.getMaNCC() == null) {
+                continue;
+            }
 
-            // Kiểm tra mã NCC có chứa từ khóa hay không
+            String maNCC = ncc.getMaNCC().toLowerCase();
+
             if (maNCC.contains(maNCCCanTim)) {
-
                 cboNhaCungCap.addItem(ncc.getMaNCC());
             }
         }
 
-        // Nếu có kết quả thì chọn phần tử đầu tiên
         if (cboNhaCungCap.getItemCount() > 0) {
-
             cboNhaCungCap.setSelectedIndex(0);
+        } else {
+            txtTenNCC.setText("");
         }
     }
 
-    // ================= ĐỌC DỮ LIỆU =================
+    private void capNhatTenNCC() {
+
+        String maNCC = (String) cboNhaCungCap.getSelectedItem();
+
+        txtTenNCC.setText("");
+
+        if (maNCC == null) {
+            return;
+        }
+
+        for (NhaCungCap ncc : dsNCC) {
+
+            if (ncc.getMaNCC() != null
+                    && ncc.getMaNCC().equalsIgnoreCase(maNCC)) {
+
+                txtTenNCC.setText(ncc.getTenNCC());
+                return;
+            }
+        }
+    }
+
     public void Docdldatatable() {
 
         tableModel.setRowCount(0);
@@ -466,13 +458,11 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         }
     }
 
-    // ================= TÌM KIẾM BẢNG =================
     public void timKiem() {
 
         String tuKhoa = txtTimKiem.getText().trim();
 
         if (tuKhoa.isEmpty()) {
-
             sorter.setRowFilter(null);
             return;
         }
@@ -521,18 +511,15 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         }
     }
 
-    // ================= ACTION =================
     @Override
     public void actionPerformed(ActionEvent e) {
 
         Object o = e.getSource();
 
         if (o.equals(btnTimKiem)) {
-
             timKiem();
         }
 
-        // ================= THÊM PHIẾU NHẬP =================
         if (o.equals(btnThem)) {
 
             if (kiemTraNgayNhap()) {
@@ -544,7 +531,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                 }
 
                 String mncc = (String) cboNhaCungCap.getSelectedItem();
-
                 String mv = txtNhanVien.getText().trim();
 
                 if (mncc == null || mncc.isEmpty()) {
@@ -562,7 +548,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                 }
 
                 NhaCungCap ncc = new NhaCungCap(mncc);
-
                 NhanVien nv = new NhanVien(mv);
 
                 String ngaynhap = txtNgayNhap.getText().trim();
@@ -619,7 +604,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             }
         }
 
-        // ================= XEM CHI TIẾT =================
         if (o.equals(btnXemChiTiet)) {
 
             int r = table.getSelectedRow();
@@ -637,7 +621,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             moChiTietPhieuTheoDong(r);
         }
 
-        // ================= LÀM RỖNG =================
         if (o.equals(btnXoaRong)) {
 
             txtNgayNhap.setText(
@@ -648,8 +631,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
             txtMaPN.setText(taoMaPN());
 
-            // Xóa nội dung tìm kiếm NCC
-            // DocumentListener sẽ tự động hiển thị lại toàn bộ NCC
             txtTimMaNCC.setText("");
 
             if (cboNhaCungCap.getItemCount() > 0) {
@@ -657,19 +638,14 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             }
 
             txtTimKiem.setText("");
-
             sorter.setRowFilter(null);
-
             table.clearSelection();
         }
 
-        // ================= XUẤT XML =================
         if (o.equals(btnLuu)) {
-
             xuatrafileXML();
         }
 
-        // ================= XÓA PHIẾU NHẬP =================
         if (o.equals(btnXoa)) {
 
             try {
@@ -732,7 +708,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         }
     }
 
-    // ================= TẠO MÃ PHIẾU NHẬP =================
     private String taoMaPN() {
 
         List<PhieuNhap> lis = pn_dao.layphieunhap();
@@ -754,7 +729,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                     }
 
                 } catch (NumberFormatException e) {
-                    // Bỏ qua mã không đúng định dạng
                 }
             }
         }
@@ -762,13 +736,11 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         return String.format("PN%08d", max + 1);
     }
 
-    // ================= MỞ CHI TIẾT =================
     public void moChiTietPhieu(PhieuNhap pn) {
 
         if (chiTietGUI == null || !chiTietGUI.isDisplayable()) {
 
             chiTietGUI = new ChiTietPhieuNhap_GUI(pn, this);
-
             chiTietGUI.setVisible(true);
 
         } else {
@@ -781,7 +753,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         }
     }
 
-    // ================= MỞ CHI TIẾT THEO DÒNG =================
     public void moChiTietPhieuTheoDong(int r) {
 
         if (r < 0 || r >= table.getRowCount()) {
@@ -826,7 +797,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         moChiTietPhieu(pn);
     }
 
-    // ================= XUẤT XML =================
     public void xuatrafileXML() {
 
         JFileChooser chooser = new JFileChooser();
@@ -911,7 +881,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             );
 
             DOMSource source = new DOMSource(doc);
-
             StreamResult result = new StreamResult(file);
 
             transformer.transform(source, result);
@@ -948,7 +917,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         parent.appendChild(element);
     }
 
-    // ================= KIỂM TRA NGÀY NHẬP =================
     public boolean kiemTraNgayNhap() {
 
         String ngay = txtNgayNhap.getText().trim();
@@ -991,7 +959,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         }
     }
 
-    // ================= MOUSE LISTENER =================
     @Override
     public void mouseClicked(MouseEvent e) {
     }
@@ -1012,7 +979,6 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     public void mouseReleased(MouseEvent e) {
     }
 
-    // ================= MAIN =================
     public static void main(String[] args) {
 
         new PhieuNhap_GUI().setVisible(true);
