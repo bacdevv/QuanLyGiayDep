@@ -54,7 +54,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
     private JTextField txtNhanVien;
     private JTextField txtNgayNhap;
 
-    // 4 ô tìm kiếm
     private JTextField txtTimMaSP;
     private JTextField txtTimMaCTSP;
     private JTextField txtTimMauSac;
@@ -87,13 +86,8 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
     private PhieuNhap_GUI parentGUI;
 
     private ArrayList<SanPham> dsSanPham = new ArrayList<>();
-
-    // Danh sách sản phẩm sau khi tìm kiếm
     private ArrayList<SanPham> dsSanPhamTimKiem = new ArrayList<>();
-
-    // Danh sách chi tiết sản phẩm sau khi tìm kiếm
     private ArrayList<ChiTietSanPham> dsCTSPTheoSP = new ArrayList<>();
-
     private ArrayList<ChiTietPhieuNhap> dsChiTiet = new ArrayList<>();
 
     public ChiTietPhieuNhap_GUI() {
@@ -168,20 +162,12 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         }
     }
 
-    // ================= GIAO DIỆN =================
     private void buildUI() {
 
-        // ================= NORTH =================
         JPanel pnlNorth = new JPanel();
-
         add(pnlNorth, BorderLayout.NORTH);
-
         pnlNorth.setPreferredSize(new Dimension(0, 125));
-
-        pnlNorth.setBorder(
-                BorderFactory.createTitledBorder("Thông tin phiếu nhập")
-        );
-
+        pnlNorth.setBorder(BorderFactory.createTitledBorder("Thông tin phiếu nhập"));
         pnlNorth.setLayout(null);
 
         JLabel lblMaPN = new JLabel("Mã phiếu nhập:");
@@ -224,17 +210,11 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         lblNgayNhap.setBounds(480, 65, w1, h);
         txtNgayNhap.setBounds(600, 65, 200, h);
 
-        // ================= CENTER =================
         JPanel pnlCenter = new JPanel(new BorderLayout());
-
         add(pnlCenter, BorderLayout.CENTER);
 
-        // ================= 4 Ô TÌM KIẾM =================
         JPanel pnlTimKiem = new JPanel(new GridLayout(2, 4, 10, 5));
-
-        pnlTimKiem.setBorder(
-                BorderFactory.createTitledBorder("Tìm kiếm sản phẩm")
-        );
+        pnlTimKiem.setBorder(BorderFactory.createTitledBorder("Tìm kiếm sản phẩm"));
 
         pnlTimKiem.add(new JLabel("Mã sản phẩm:"));
         pnlTimKiem.add(new JLabel("Mã chi tiết sản phẩm:"));
@@ -253,12 +233,8 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         pnlCenter.add(pnlTimKiem, BorderLayout.NORTH);
 
-        // ================= THÔNG TIN SẢN PHẨM =================
         JPanel pnlThongTin = new JPanel(new GridLayout(3, 4, 10, 12));
-
-        pnlThongTin.setBorder(
-                BorderFactory.createTitledBorder("Thông tin sản phẩm nhập")
-        );
+        pnlThongTin.setBorder(BorderFactory.createTitledBorder("Thông tin sản phẩm nhập"));
 
         pnlThongTin.add(new JLabel("Sản phẩm:"));
 
@@ -309,7 +285,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         pnlCenter.add(pnlButton, BorderLayout.SOUTH);
 
         JPanel pnlSouth = new JPanel(new BorderLayout());
-
         add(pnlSouth, BorderLayout.SOUTH);
 
         String[] headers = {
@@ -323,7 +298,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         };
 
         tableModel = new DefaultTableModel(headers, 0) {
-
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -333,7 +307,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         };
 
         table = new JTable(tableModel);
-
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowHeight(22);
 
@@ -343,23 +316,17 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
 
-        scroll.setBorder(
-                BorderFactory.createTitledBorder("Danh sách chi tiết phiếu nhập")
-        );
-
+        scroll.setBorder(BorderFactory.createTitledBorder("Danh sách chi tiết phiếu nhập"));
         pnlSouth.add(scroll, BorderLayout.CENTER);
 
         JPanel pnlTongTien = new JPanel();
-
         pnlTongTien.add(new JLabel("Tổng tiền phiếu nhập:"));
 
         txtTongTien = new JTextField(15);
         txtTongTien.setEditable(false);
-
         pnlTongTien.add(txtTongTien);
 
         pnlSouth.add(pnlTongTien, BorderLayout.SOUTH);
-
         pnlSouth.setPreferredSize(new Dimension(0, 280));
 
         btnThem.addActionListener(e -> themChiTiet());
@@ -369,16 +336,13 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         btnXuatDanhSach.addActionListener(e -> xuatrafileXML());
 
         table.addMouseListener(this);
-
         cboSanPham.addActionListener(e -> onSanPhamChanged());
 
-        // Tìm kiếm theo 4 ô
         ganSuKienTimKiem(txtTimMaSP);
         ganSuKienTimKiem(txtTimMaCTSP);
         ganSuKienTimKiem(txtTimMauSac);
         ganSuKienTimKiem(txtTimKichCo);
 
-        // Tự động tính thành tiền
         DocumentListener tinhTienListener = new DocumentListener() {
 
             @Override
@@ -401,7 +365,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         txtDonGiaNhap.getDocument().addDocumentListener(tinhTienListener);
     }
 
-    // ================= GẮN SỰ KIỆN TÌM KIẾM =================
     private void ganSuKienTimKiem(JTextField txt) {
 
         txt.getDocument().addDocumentListener(new DocumentListener() {
@@ -423,15 +386,11 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         });
     }
 
-    // ================= KHỞI TẠO DỮ LIỆU =================
     private void khoiTaoDuLieu() {
-
         dsSanPham = sp_dao.getallSanPham();
-
         timKiemSanPham();
     }
 
-    // ================= TÌM KIẾM SẢN PHẨM =================
     private void timKiemSanPham() {
 
         String maSPCanTim = txtTimMaSP.getText().trim().toLowerCase();
@@ -440,7 +399,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         String kichCoCanTim = txtTimKichCo.getText().trim().toLowerCase();
 
         dsSanPhamTimKiem.clear();
-
         cboSanPham.removeAllItems();
 
         for (SanPham sp : dsSanPham) {
@@ -448,7 +406,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             String maSP = sp.getMaSP() != null
                     ? sp.getMaSP().toLowerCase() : "";
 
-            // Điều kiện mã sản phẩm
             if (!maSP.contains(maSPCanTim)) {
                 continue;
             }
@@ -466,52 +423,35 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 String mauSac = ct.getMauSac() != null
                         ? ct.getMauSac().toLowerCase() : "";
 
-                String kichCo = ct.getKichCo() != null
-                        ? ct.getKichCo().toLowerCase() : "";
+                String kichCo = String.valueOf(ct.getKichCo()).toLowerCase();
 
-                // Kiểm tra đồng thời 3 điều kiện chi tiết sản phẩm
                 boolean dungMaCTSP = maCTSP.contains(maCTSPCanTim);
-
                 boolean dungMauSac = mauSac.contains(mauSacCanTim);
-
                 boolean dungKichCo = kichCo.contains(kichCoCanTim);
 
                 if (dungMaCTSP && dungMauSac && dungKichCo) {
-
                     coChiTietPhuHop = true;
                     break;
                 }
             }
 
             if (coChiTietPhuHop) {
-
                 dsSanPhamTimKiem.add(sp);
-
-                cboSanPham.addItem(
-                        sp.getMaSP() + " - " + sp.getTenSP()
-                );
+                cboSanPham.addItem(sp.getMaSP() + " - " + sp.getTenSP());
             }
         }
 
         if (cboSanPham.getItemCount() > 0) {
-
             cboSanPham.setSelectedIndex(0);
-
             onSanPhamChanged();
-
         } else {
-
             dsCTSPTheoSP.clear();
-
             cboChiTietSanPham.removeAllItems();
-
             txtDonGiaNhap.setText("0");
-
             txtThanhTien.setText("0");
         }
     }
 
-    // ================= CHỌN SẢN PHẨM =================
     private void onSanPhamChanged() {
 
         int idx = cboSanPham.getSelectedIndex();
@@ -526,7 +466,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 = ctsp_dao.getChiTietSanPhamTheoMaSP(sp.getMaSP());
 
         dsCTSPTheoSP.clear();
-
         cboChiTietSanPham.removeAllItems();
 
         String maCTSPCanTim = txtTimMaCTSP.getText().trim().toLowerCase();
@@ -541,13 +480,10 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             String mauSac = ct.getMauSac() != null
                     ? ct.getMauSac().toLowerCase() : "";
 
-            String kichCo = ct.getKichCo() != null
-                    ? ct.getKichCo().toLowerCase() : "";
+            String kichCo = String.valueOf(ct.getKichCo()).toLowerCase();
 
             boolean dungMaCTSP = maCTSP.contains(maCTSPCanTim);
-
             boolean dungMauSac = mauSac.contains(mauSacCanTim);
-
             boolean dungKichCo = kichCo.contains(kichCoCanTim);
 
             if (dungMaCTSP && dungMauSac && dungKichCo) {
@@ -563,7 +499,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             }
         }
 
-        // Gợi ý đơn giá nhập bằng 70% giá bán
         if (sp.getGiaBan() != null) {
 
             BigDecimal donGiaGoiY = sp.getGiaBan()
@@ -573,34 +508,26 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             txtDonGiaNhap.setText(donGiaGoiY.toPlainString());
 
         } else {
-
             txtDonGiaNhap.setText("0");
         }
 
         tinhThanhTien();
     }
 
-    // ================= TÍNH THÀNH TIỀN =================
     private void tinhThanhTien() {
 
         try {
-
             String slStr = txtSoLuong.getText().trim();
-
             String dgStr = txtDonGiaNhap.getText().trim();
 
             if (!slStr.isEmpty() && !dgStr.isEmpty()) {
 
                 int sl = Integer.parseInt(slStr);
-
                 BigDecimal dg = new BigDecimal(dgStr);
 
                 if (sl >= 0 && dg.compareTo(BigDecimal.ZERO) >= 0) {
-
                     BigDecimal tt = dg.multiply(BigDecimal.valueOf(sl));
-
                     txtThanhTien.setText(tt.toPlainString());
-
                     return;
                 }
             }
@@ -611,11 +538,9 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         txtThanhTien.setText("");
     }
 
-    // ================= ĐỌC DỮ LIỆU VÀO BẢNG =================
     public void docDuLieuVaoBang(String maPN) {
 
         tableModel.setRowCount(0);
-
         dsChiTiet = ctpn_dao.layChiTietTheoMaPN(maPN);
 
         BigDecimal tong = BigDecimal.ZERO;
@@ -627,12 +552,12 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             String tenSP = (ctsp != null && ctsp.getSanPham() != null)
                     ? ctsp.getSanPham().getTenSP() : "";
 
-            String kichCo = ctsp != null ? ctsp.getKichCo() : "";
+            String kichCo = ctsp != null
+                    ? String.valueOf(ctsp.getKichCo()) : "";
 
             String mauSac = ctsp != null ? ctsp.getMauSac() : "";
 
             BigDecimal thanhTien = ct.tinhThanhTien();
-
             tong = tong.add(thanhTien);
 
             tableModel.addRow(new Object[]{
@@ -650,6 +575,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
     }
 
     private String dinhDangTien(BigDecimal tien) {
+
         if (tien == null) {
             tien = BigDecimal.ZERO;
         }
@@ -663,24 +589,14 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         String maPN = txtMaPN.getText().trim();
 
         if (maPN.isEmpty()) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Chưa có thông tin mã phiếu nhập!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Chưa có thông tin mã phiếu nhập!");
             return;
         }
 
         int ctspIdx = cboChiTietSanPham.getSelectedIndex();
 
         if (ctspIdx < 0 || ctspIdx >= dsCTSPTheoSP.size()) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Vui lòng chọn chi tiết sản phẩm cần nhập!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn chi tiết sản phẩm cần nhập!");
             return;
         }
 
@@ -689,52 +605,30 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         int soLuong;
 
         try {
-
             soLuong = Integer.parseInt(txtSoLuong.getText().trim());
 
             if (soLuong <= 0) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Số lượng nhập phải lớn hơn 0!"
-                );
-
+                JOptionPane.showMessageDialog(this, "Số lượng nhập phải lớn hơn 0!");
                 return;
             }
 
         } catch (NumberFormatException ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Số lượng phải là số nguyên dương hợp lệ!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Số lượng phải là số nguyên dương hợp lệ!");
             return;
         }
 
         BigDecimal donGiaNhap;
 
         try {
-
             donGiaNhap = new BigDecimal(txtDonGiaNhap.getText().trim());
 
             if (donGiaNhap.compareTo(BigDecimal.ZERO) < 0) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Đơn giá nhập không hợp lệ!"
-                );
-
+                JOptionPane.showMessageDialog(this, "Đơn giá nhập không hợp lệ!");
                 return;
             }
 
         } catch (Exception ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Đơn giá nhập không hợp lệ!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Đơn giá nhập không hợp lệ!");
             return;
         }
 
@@ -747,12 +641,8 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             int soLuongCu = 0;
 
             for (ChiTietPhieuNhap item : dsChiTiet) {
-
-                if (item.getChiTietSanPham().getMaCTSP()
-                        .equals(ctsp.getMaCTSP())) {
-
+                if (item.getChiTietSanPham().getMaCTSP().equals(ctsp.getMaCTSP())) {
                     soLuongCu = item.getSoLuong();
-
                     break;
                 }
             }
@@ -767,7 +657,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             );
 
             if (ctpn_dao.capNhatChiTietPhieuNhap(ct, soLuongCu)) {
-
                 docDuLieuVaoBang(maPN);
 
                 if (parentGUI != null) {
@@ -775,12 +664,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 }
 
             } else {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Cập nhật thất bại!"
-                );
-
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
             }
 
             return;
@@ -794,7 +678,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         );
 
         if (ctpn_dao.themChiTietPhieuNhap(ctMoi)) {
-
             docDuLieuVaoBang(maPN);
 
             if (parentGUI != null) {
@@ -802,78 +685,48 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             }
 
         } else {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Thêm chi tiết phiếu nhập thất bại!"
-            );
+            JOptionPane.showMessageDialog(this, "Thêm chi tiết phiếu nhập thất bại!");
         }
     }
 
-    // ================= SỬA CHI TIẾT =================
     private void suaChiTiet() {
 
         int r = table.getSelectedRow();
 
         if (r == -1) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Vui lòng chọn dòng chi tiết cần sửa!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng chi tiết cần sửa!");
             return;
         }
 
         String maPN = txtMaPN.getText().trim();
-
         String maCTSP = tableModel.getValueAt(r, 0).toString();
 
         int soLuong;
 
         try {
-
             soLuong = Integer.parseInt(txtSoLuong.getText().trim());
 
             if (soLuong <= 0) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Số lượng phải lớn hơn 0!"
-                );
-
+                JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
                 return;
             }
 
         } catch (NumberFormatException ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Số lượng không hợp lệ!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Số lượng không hợp lệ!");
             return;
         }
 
         BigDecimal donGiaNhap;
 
         try {
-
             donGiaNhap = new BigDecimal(txtDonGiaNhap.getText().trim());
 
         } catch (Exception ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Đơn giá nhập không hợp lệ!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Đơn giá nhập không hợp lệ!");
             return;
         }
 
-        int soLuongCu = Integer.parseInt(
-                tableModel.getValueAt(r, 4).toString()
-        );
+        int soLuongCu = Integer.parseInt(tableModel.getValueAt(r, 4).toString());
 
         ChiTietPhieuNhap ct = new ChiTietPhieuNhap(
                 new PhieuNhap(maPN),
@@ -884,11 +737,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         if (ctpn_dao.capNhatChiTietPhieuNhap(ct, soLuongCu)) {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Cập nhật chi tiết phiếu nhập thành công!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Cập nhật chi tiết phiếu nhập thành công!");
             docDuLieuVaoBang(maPN);
 
             if (parentGUI != null) {
@@ -896,31 +745,20 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             }
 
         } else {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Cập nhật thất bại!"
-            );
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
         }
     }
 
-    // ================= XÓA CHI TIẾT =================
     private void xoaChiTiet() {
 
         int r = table.getSelectedRow();
 
         if (r == -1) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Vui lòng chọn dòng chi tiết cần xóa!"
-            );
-
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng chi tiết cần xóa!");
             return;
         }
 
         String maPN = txtMaPN.getText().trim();
-
         String maCTSP = tableModel.getValueAt(r, 0).toString();
 
         int hoi = JOptionPane.showConfirmDialog(
@@ -935,13 +773,8 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
             if (ctpn_dao.xoaChiTietPhieuNhap(maPN, maCTSP)) {
 
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Xóa chi tiết phiếu nhập thành công!"
-                );
-
+                JOptionPane.showMessageDialog(this, "Xóa chi tiết phiếu nhập thành công!");
                 docDuLieuVaoBang(maPN);
-
                 lamRong();
 
                 if (parentGUI != null) {
@@ -949,11 +782,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 }
 
             } else {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Xóa chi tiết thất bại!"
-                );
+                JOptionPane.showMessageDialog(this, "Xóa chi tiết thất bại!");
             }
         }
     }
@@ -967,7 +796,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         }
 
         table.clearSelection();
-
         tinhThanhTien();
     }
 
@@ -985,10 +813,8 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
         ChiTietPhieuNhap ct = null;
 
         for (ChiTietPhieuNhap item : dsChiTiet) {
-
             if (item.getChiTietSanPham() != null
                     && item.getChiTietSanPham().getMaCTSP().equals(maCTSP)) {
-
                 ct = item;
                 break;
             }
@@ -1002,7 +828,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         if (ctsp != null && ctsp.getSanPham() != null) {
 
-            // Xóa điều kiện tìm kiếm để hiển thị đầy đủ sản phẩm
             txtTimMaSP.setText("");
             txtTimMaCTSP.setText("");
             txtTimMauSac.setText("");
@@ -1011,19 +836,14 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             String maSP = ctsp.getSanPham().getMaSP();
 
             for (int i = 0; i < dsSanPhamTimKiem.size(); i++) {
-
                 if (dsSanPhamTimKiem.get(i).getMaSP().equals(maSP)) {
-
                     cboSanPham.setSelectedIndex(i);
                     break;
                 }
             }
 
             for (int j = 0; j < dsCTSPTheoSP.size(); j++) {
-
-                if (dsCTSPTheoSP.get(j).getMaCTSP()
-                        .equals(ctsp.getMaCTSP())) {
-
+                if (dsCTSPTheoSP.get(j).getMaCTSP().equals(ctsp.getMaCTSP())) {
                     cboChiTietSanPham.setSelectedIndex(j);
                     break;
                 }
@@ -1037,9 +857,7 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 ? ct.getDonGiaNhap().toPlainString() : ""
         );
 
-        txtThanhTien.setText(
-                ct.tinhThanhTien().toPlainString()
-        );
+        txtThanhTien.setText(ct.tinhThanhTien().toPlainString());
     }
 
     @Override
@@ -1061,12 +879,9 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
     public void xuatrafileXML() {
 
         JFileChooser chooser = new JFileChooser();
-
         chooser.setDialogTitle("Xuất danh sách chi tiết phiếu nhập");
 
-        chooser.setSelectedFile(
-                new File("DanhSachChiTietPhieuNhap.xml")
-        );
+        chooser.setSelectedFile(new File("DanhSachChiTietPhieuNhap.xml"));
 
         int chon = chooser.showSaveDialog(this);
 
@@ -1082,22 +897,17 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
 
         try {
 
-            DocumentBuilderFactory factory
-                    = DocumentBuilderFactory.newInstance();
-
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             Document doc = builder.newDocument();
 
-            Element root
-                    = doc.createElement("DanhSachChiTietPhieuNhap");
-
+            Element root = doc.createElement("DanhSachChiTietPhieuNhap");
             doc.appendChild(root);
 
             for (int i = 0; i < table.getRowCount(); i++) {
 
                 Element ct = doc.createElement("ChiTietPhieuNhap");
-
                 root.appendChild(ct);
 
                 Element maCTSP = doc.createElement("MaCTSP");
@@ -1130,27 +940,17 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
             }
 
             TransformerFactory tf = TransformerFactory.newInstance();
-
             Transformer transformer = tf.newTransformer();
 
-            transformer.setOutputProperty(
-                    OutputKeys.INDENT, "yes"
-            );
-
-            transformer.setOutputProperty(
-                    OutputKeys.ENCODING, "UTF-8"
-            );
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
             DOMSource source = new DOMSource(doc);
-
             StreamResult result = new StreamResult(file);
 
             transformer.transform(source, result);
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Xuất file XML thành công!"
-            );
+            JOptionPane.showMessageDialog(this, "Xuất file XML thành công!");
 
         } catch (Exception e) {
 
@@ -1164,7 +964,6 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
     }
 
     public static void main(String[] args) {
-
         new ChiTietPhieuNhap_GUI().setVisible(true);
     }
 }
