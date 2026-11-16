@@ -17,6 +17,7 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
@@ -640,12 +641,21 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                 kichCo,
                 mauSac,
                 ct.getSoLuong(),
-                ct.getDonGiaNhap().toPlainString(),
-                thanhTien.toPlainString()
+                dinhDangTien(ct.getDonGiaNhap()),
+                dinhDangTien(thanhTien)
             });
         }
 
-        txtTongTien.setText(tong.toPlainString());
+        txtTongTien.setText(dinhDangTien(tong));
+    }
+
+    private String dinhDangTien(BigDecimal tien) {
+        if (tien == null) {
+            tien = BigDecimal.ZERO;
+        }
+
+        DecimalFormat df = new DecimalFormat("#,##0");
+        return df.format(tien) + " VNĐ";
     }
 
     private void themChiTiet() {
