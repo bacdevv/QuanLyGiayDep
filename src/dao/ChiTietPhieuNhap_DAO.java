@@ -16,7 +16,8 @@ public class ChiTietPhieuNhap_DAO {
 
     public ChiTietPhieuNhap_DAO() {
     }
-// Lấy chi tiết phiếu nhập theo mã phiếu nhập
+
+    // Lấy chi tiết phiếu nhập theo mã phiếu nhập
     public ArrayList<ChiTietPhieuNhap> layChiTietTheoMaPN(String maPN) {
         ArrayList<ChiTietPhieuNhap> ds = new ArrayList<>();
 
@@ -47,7 +48,7 @@ public class ChiTietPhieuNhap_DAO {
                         rs.getBigDecimal("giaBan"));
 
                 ChiTietSanPham ctsp = new ChiTietSanPham(maCTSP, sp,
-                        rs.getString("kichCo"), rs.getString("mauSac"),
+                        rs.getDouble("kichCo"), rs.getString("mauSac"),
                         rs.getInt("soLuongTon"), rs.getBoolean("ctHoatDong"));
 
                 ds.add(new ChiTietPhieuNhap(new PhieuNhap(maPN), ctsp,
@@ -271,7 +272,6 @@ public class ChiTietPhieuNhap_DAO {
             con = ConnectDB.getConnection();
             con.setAutoCommit(false);
 
-         
             int soLuong = 0;
 
             String sqlCheck = "SELECT soLuong FROM ChiTietPhieuNhap WHERE maPN = ? AND maCTSP = ?";

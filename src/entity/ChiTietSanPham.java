@@ -3,7 +3,7 @@ package entity;
 public class ChiTietSanPham {
     private String maCTSP;
     private SanPham sanPham;
-    private String kichCo;
+    private double kichCo;
     private String mauSac;
     private int soLuongTon;
     private boolean hoatDong;
@@ -15,7 +15,7 @@ public class ChiTietSanPham {
         this.maCTSP = maCTSP;
     }
 
-    public ChiTietSanPham(String maCTSP, SanPham sanPham, String kichCo, String mauSac, int soLuongTon,
+    public ChiTietSanPham(String maCTSP, SanPham sanPham, double kichCo, String mauSac, int soLuongTon,
             boolean hoatDong) {
         this.maCTSP = maCTSP;
         this.sanPham = sanPham;
@@ -41,11 +41,11 @@ public class ChiTietSanPham {
         this.sanPham = sanPham;
     }
 
-    public String getKichCo() {
+    public double getKichCo() {
         return kichCo;
     }
 
-    public void setKichCo(String kichCo) {
+    public void setKichCo(double kichCo) {
         this.kichCo = kichCo;
     }
 
