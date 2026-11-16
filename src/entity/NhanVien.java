@@ -1,6 +1,7 @@
 package entity;
 
 public class NhanVien {
+
     private String maNhanVien;
     private String tenNhanVien;
     private String soDienThoai;
@@ -19,6 +20,12 @@ public class NhanVien {
         this.tenNhanVien = tenNhanVien;
         this.soDienThoai = soDienThoai;
         this.hoatDong = hoatDong;
+    }
+
+    public NhanVien(String maNhanVien, String tenNhanVien) {
+        this.maNhanVien = maNhanVien;
+        this.tenNhanVien = tenNhanVien;
+
     }
 
     public String getMaNhanVien() {
@@ -68,18 +75,23 @@ public class NhanVien {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         NhanVien other = (NhanVien) obj;
         if (maNhanVien == null) {
-            if (other.maNhanVien != null)
+            if (other.maNhanVien != null) {
                 return false;
-        } else if (!maNhanVien.equals(other.maNhanVien))
+            }
+        } else if (!maNhanVien.equals(other.maNhanVien)) {
             return false;
+        }
         return true;
     }
 

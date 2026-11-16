@@ -3,6 +3,7 @@ package entity;
 import java.util.Objects;
 
 public class NhaCungCap {
+
     private String maNCC;
     private String tenNCC;
     private String soDienThoai;
@@ -12,6 +13,13 @@ public class NhaCungCap {
         this.hoatDong = hoatDong;
         this.maNCC = maNCC;
         this.soDienThoai = soDienThoai;
+        this.tenNCC = tenNCC;
+    }
+
+    public NhaCungCap(String maNCC, String tenNCC) {
+
+        this.maNCC = maNCC;
+
         this.tenNCC = tenNCC;
     }
 

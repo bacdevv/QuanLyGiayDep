@@ -35,6 +35,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import javax.xml.parsers.DocumentBuilder;
@@ -52,9 +54,14 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     private static final long serialVersionUID = 1L;
 
     private JComboBox<String> cboNhaCungCap;
+
     private JTextField txtNhanVien;
+    private JTextField txtTenNhanVien;
     private JTextField txtNgayNhap;
     private JTextField txtMaPN;
+
+    // Ô tìm kiếm mã nhà cung cấp
+    private JTextField txtTimMaNCC;
 
     private JButton btnThem;
     private JButton btnXoaRong;
@@ -68,17 +75,22 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
     private JTable table;
     private DefaultTableModel tableModel;
-
     private TableRowSorter<DefaultTableModel> sorter;
 
     private PhieuNhap_DAO pn_dao;
     private NhaCungCap_DAO ncc_dao;
     private ChiTietPhieuNhap_DAO ctpn_dao;
+
     private ChiTietPhieuNhap_GUI chiTietGUI;
 
+    // Danh sách nhà cung cấp ban đầu
+    private ArrayList<NhaCungCap> dsNCC = new ArrayList<>();
+
+    // ================= CONSTRUCTOR =================
     public PhieuNhap_GUI() {
+
         setTitle("Quản lý phiếu nhập");
-        setSize(1000, 650);
+        setSize(1100, 700);
         setLocationRelativeTo(null);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -91,18 +103,29 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         setNhaCungCap(maNCC);
     }
 
+    // ================= CHỌN NHÀ CUNG CẤP =================
     public void setNhaCungCap(String maNCC) {
+
+        if (maNCC == null) {
+            return;
+        }
+
         String trimmed = maNCC.trim();
+
+        // Nếu mã NCC chưa có trong ComboBox thì thêm vào
         for (int i = 0; i < cboNhaCungCap.getItemCount(); i++) {
+
             if (cboNhaCungCap.getItemAt(i).equalsIgnoreCase(trimmed)) {
                 cboNhaCungCap.setSelectedIndex(i);
                 return;
             }
         }
+
         cboNhaCungCap.addItem(trimmed);
         cboNhaCungCap.setSelectedItem(trimmed);
     }
 
+    // ================= GIAO DIỆN =================
     private void buildUI() {
 
         pn_dao = new PhieuNhap_DAO();
@@ -110,46 +133,109 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         ctpn_dao = new ChiTietPhieuNhap_DAO();
 
         try {
+
             ConnectDB.getInstance().connect();
-            System.out.println("thành công");
+            System.out.println("Thành công");
+
         } catch (Exception e) {
-            System.out.println("thất bại");
+
+            System.out.println("Thất bại");
             e.printStackTrace();
         }
 
-        JPanel pnlNorth;
-        add(pnlNorth = new JPanel(), BorderLayout.NORTH);
+        // ================= NORTH =================
+        JPanel pnlNorth = new JPanel();
 
-        pnlNorth.setPreferredSize(new Dimension(0, 150));
+        add(pnlNorth, BorderLayout.NORTH);
+
+        pnlNorth.setPreferredSize(new Dimension(0, 165));
+
         pnlNorth.setBorder(
-                BorderFactory.createTitledBorder("Thông tin phiếu nhập"));
+                BorderFactory.createTitledBorder("Thông tin phiếu nhập")
+        );
+
         pnlNorth.setLayout(null);
 
-        JLabel lblNhaCungCap, lblNhanVien, lblNgayNhap, lblMaPN;
+        JLabel lblNhaCungCap = new JLabel("Nhà cung cấp:");
+        JLabel lblTimMaNCC = new JLabel("Tìm mã NCC:");
 
-        pnlNorth.add(lblNhaCungCap = new JLabel("Nhà cung cấp:"));
-        pnlNorth.add(lblNhanVien = new JLabel("Nhân viên lập:"));
-        pnlNorth.add(lblNgayNhap = new JLabel("Ngày nhập:"));
-        pnlNorth.add(lblMaPN = new JLabel("Mã phiếu nhập:"));
+        JLabel lblNhanVien = new JLabel("Mã nhân viên:");
+        JLabel lblTenNhanVien = new JLabel("Tên nhân viên:");
 
-        pnlNorth.add(cboNhaCungCap = new JComboBox<String>());
+        JLabel lblNgayNhap = new JLabel("Ngày nhập:");
+        JLabel lblMaPN = new JLabel("Mã phiếu nhập:");
 
-        ArrayList<NhaCungCap> list = ncc_dao.getalltbNhacc();
+        pnlNorth.add(lblNhaCungCap);
+        pnlNorth.add(lblTimMaNCC);
+        pnlNorth.add(lblNhanVien);
+        pnlNorth.add(lblTenNhanVien);
+        pnlNorth.add(lblNgayNhap);
+        pnlNorth.add(lblMaPN);
 
-        for (NhaCungCap p : list) {
-            cboNhaCungCap.addItem(p.getMaNCC());
+        // ================= COMBOBOX NHÀ CUNG CẤP =================
+        cboNhaCungCap = new JComboBox<>();
+
+        // Lấy toàn bộ nhà cung cấp từ database
+        dsNCC = ncc_dao.getalltbNhacc();
+
+        for (NhaCungCap ncc : dsNCC) {
+
+            cboNhaCungCap.addItem(ncc.getMaNCC());
         }
 
-        pnlNorth.add(txtNhanVien = new JTextField());
-        pnlNorth.add(txtNgayNhap = new JTextField());
-        pnlNorth.add(txtMaPN = new JTextField());
+        pnlNorth.add(cboNhaCungCap);
 
-        txtNhanVien.setText("NV0001");
+        // ================= TEXTFIELD TÌM MÃ NCC =================
+        txtTimMaNCC = new JTextField();
+
+        pnlNorth.add(txtTimMaNCC);
+
+        // ================= MÃ NHÂN VIÊN =================
+        txtNhanVien = new JTextField("NV0001");
+
         txtNhanVien.setEditable(false);
-        txtNgayNhap.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+        pnlNorth.add(txtNhanVien);
+
+        // ================= TÊN NHÂN VIÊN =================
+        txtTenNhanVien = new JTextField();
+
+        txtTenNhanVien.setEditable(false);
+
+        try {
+
+            txtTenNhanVien.setText(
+                    pn_dao.layTenNhanVien("NV0001")
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        pnlNorth.add(txtTenNhanVien);
+
+        // ================= NGÀY NHẬP =================
+        txtNgayNhap = new JTextField();
+
+        txtNgayNhap.setText(
+                LocalDate.now().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                )
+        );
+
+        pnlNorth.add(txtNgayNhap);
+
+        // ================= MÃ PHIẾU NHẬP =================
+        txtMaPN = new JTextField();
+
         txtMaPN.setText(taoMaPN());
+
         txtMaPN.setEditable(false);
 
+        pnlNorth.add(txtMaPN);
+
+        // ================= SET BOUNDS =================
         int labelW = 110;
         int fieldW = 250;
         int h = 28;
@@ -159,59 +245,89 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         int x3 = 520;
         int x4 = 640;
 
-        int y1 = 25;
-        int y2 = 75;
+        int y1 = 15;
+        int y2 = 55;
+        int y3 = 95;
 
         lblNhaCungCap.setBounds(x1, y1, labelW, h);
         cboNhaCungCap.setBounds(x2, y1, fieldW, h);
 
-        lblNhanVien.setBounds(x3, y1, labelW, h);
-        txtNhanVien.setBounds(x4, y1, fieldW, h);
+        lblTimMaNCC.setBounds(x3, y1, labelW, h);
+        txtTimMaNCC.setBounds(x4, y1, fieldW, h);
 
-        lblNgayNhap.setBounds(x1, y2, labelW, h);
-        txtNgayNhap.setBounds(x2, y2, fieldW, h);
+        lblNhanVien.setBounds(x1, y2, labelW, h);
+        txtNhanVien.setBounds(x2, y2, fieldW, h);
 
-        lblMaPN.setBounds(x3, y2, labelW, h);
-        txtMaPN.setBounds(x4, y2, fieldW, h);
+        lblTenNhanVien.setBounds(x3, y2, labelW, h);
+        txtTenNhanVien.setBounds(x4, y2, fieldW, h);
 
-        JPanel pnlCenter;
-        add(pnlCenter = new JPanel(new BorderLayout()), BorderLayout.CENTER);
+        lblNgayNhap.setBounds(x1, y3, labelW, h);
+        txtNgayNhap.setBounds(x2, y3, fieldW, h);
 
+        lblMaPN.setBounds(x3, y3, labelW, h);
+        txtMaPN.setBounds(x4, y3, fieldW, h);
+
+        // ================= CENTER =================
+        JPanel pnlCenter = new JPanel(new BorderLayout());
+
+        add(pnlCenter, BorderLayout.CENTER);
+
+        // ================= CÁC NÚT =================
         JPanel pnlButton = new JPanel();
 
-        pnlButton.add(btnThem = new JButton("Thêm"));
-        pnlButton.add(btnXoaRong = new JButton("Làm rỗng"));
-        pnlButton.add(btnXoa = new JButton("Xóa"));
+        btnThem = new JButton("Thêm");
+        btnXoaRong = new JButton("Làm rỗng");
+        btnXoa = new JButton("Xóa");
+        btnLuu = new JButton("Xuất file danh sách phiếu nhập");
+        btnXemChiTiet = new JButton("Xem chi tiết");
 
-        pnlButton.add(btnLuu = new JButton("xuất file danh sách phiếu nhập"));
-        pnlButton.add(btnXemChiTiet = new JButton("Xem chi tiết"));
+        pnlButton.add(btnThem);
+        pnlButton.add(btnXoaRong);
+        pnlButton.add(btnXoa);
+        pnlButton.add(btnLuu);
+        pnlButton.add(btnXemChiTiet);
 
+        // ================= TÌM KIẾM BẢNG =================
         JPanel pnlTimKiem = new JPanel();
 
         pnlTimKiem.add(new JLabel("Tìm theo:"));
 
-        pnlTimKiem.add(cboTimKiem = new JComboBox<String>(
-                new String[]{
-                    "Mã phiếu nhập",
-                    "Mã nhân viên",
-                    "Mã nhà cung cấp"
-                }));
+        cboTimKiem = new JComboBox<>(new String[]{
+            "Mã phiếu nhập",
+            "Mã nhà cung cấp",
+            "Tên nhà cung cấp",
+            "Mã nhân viên",
+            "Tên nhân viên"
+        });
 
-        cboTimKiem.setPreferredSize(new Dimension(150, 25));
+        cboTimKiem.setPreferredSize(new Dimension(160, 25));
 
-        pnlTimKiem.add(txtTimKiem = new JTextField(15));
+        txtTimKiem = new JTextField(15);
 
-        pnlTimKiem.add(btnTimKiem = new JButton("Tìm kiếm"));
+        btnTimKiem = new JButton("Tìm kiếm");
+
+        pnlTimKiem.add(cboTimKiem);
+        pnlTimKiem.add(txtTimKiem);
+        pnlTimKiem.add(btnTimKiem);
 
         pnlCenter.add(pnlButton, BorderLayout.NORTH);
         pnlCenter.add(pnlTimKiem, BorderLayout.CENTER);
 
-        JScrollPane scroll;
-
-        String[] headers
-                = "Mã PN;Nhà cung cấp;Nhân viên;Ngày nhập;Tổng tiền".split(";");
+        // ================= TABLE =================
+        String[] headers = {
+            "Mã PN",
+            "Mã NCC",
+            "Tên nhà cung cấp",
+            "Mã nhân viên",
+            "Tên nhân viên",
+            "Ngày nhập",
+            "Tổng tiền"
+        };
 
         tableModel = new DefaultTableModel(headers, 0) {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -221,51 +337,168 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         table = new JTable(tableModel);
 
         sorter = new TableRowSorter<>(tableModel);
+
         table.setRowSorter(sorter);
 
-        add(scroll = new JScrollPane(
+        JScrollPane scroll = new JScrollPane(
                 table,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-        ), BorderLayout.SOUTH);
+        );
 
         scroll.setBorder(
-                BorderFactory.createTitledBorder("Danh sách phiếu nhập"));
+                BorderFactory.createTitledBorder("Danh sách phiếu nhập")
+        );
 
         table.setRowHeight(25);
 
+        add(scroll, BorderLayout.SOUTH);
+
         scroll.setPreferredSize(new Dimension(0, 350));
 
+        // Đọc dữ liệu vào bảng
         Docdldatatable();
+
         table.addMouseListener(this);
+
+        // ================= EVENTS =================
         btnTimKiem.addActionListener(this);
         btnLuu.addActionListener(this);
         btnThem.addActionListener(this);
         btnXoaRong.addActionListener(this);
         btnXoa.addActionListener(this);
         btnXemChiTiet.addActionListener(this);
+
+        txtTimKiem.addActionListener(e -> timKiem());
+
+        // Tìm kiếm NCC realtime giống ChiTietPhieuNhap_GUI
+        ganSuKienTimKiem(txtTimMaNCC);
+
     }
 
+    // ================= GẮN SỰ KIỆN TÌM KIẾM =================
+    private void ganSuKienTimKiem(JTextField txt) {
+
+        txt.getDocument().addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+
+                timKiemNCC();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+
+                timKiemNCC();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+                timKiemNCC();
+            }
+        });
+    }
+
+    // ================= TÌM KIẾM NCC =================
+    private void timKiemNCC() {
+
+        String maNCCCanTim = txtTimMaNCC.getText()
+                .trim()
+                .toLowerCase();
+
+        // Xóa danh sách cũ trong ComboBox
+        cboNhaCungCap.removeAllItems();
+
+        // Duyệt danh sách nhà cung cấp ban đầu
+        for (NhaCungCap ncc : dsNCC) {
+
+            String maNCC = ncc.getMaNCC() != null
+                    ? ncc.getMaNCC().toLowerCase()
+                    : "";
+
+            // Kiểm tra mã NCC có chứa từ khóa hay không
+            if (maNCC.contains(maNCCCanTim)) {
+
+                cboNhaCungCap.addItem(ncc.getMaNCC());
+            }
+        }
+
+        // Nếu có kết quả thì chọn phần tử đầu tiên
+        if (cboNhaCungCap.getItemCount() > 0) {
+
+            cboNhaCungCap.setSelectedIndex(0);
+        }
+    }
+
+    // ================= ĐỌC DỮ LIỆU =================
+    public void Docdldatatable() {
+
+        tableModel.setRowCount(0);
+
+        List<PhieuNhap> list = pn_dao.layphieunhap();
+
+        for (PhieuNhap pn : list) {
+
+            BigDecimal tong
+                    = ctpn_dao.layTongTienTheoMaPN(pn.getMaPN());
+
+            String ngayStr = pn.getNgayNhap() != null
+                    ? pn.getNgayNhap().format(
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    )
+                    : "";
+
+            tableModel.addRow(new Object[]{
+                pn.getMaPN(),
+                pn.getNhaCungCap() != null
+                ? pn.getNhaCungCap().getMaNCC() : "",
+                pn.getNhaCungCap() != null
+                ? pn.getNhaCungCap().getTenNCC() : "",
+                pn.getNhanVien() != null
+                ? pn.getNhanVien().getMaNhanVien() : "",
+                pn.getNhanVien() != null
+                ? pn.getNhanVien().getTenNhanVien() : "",
+                ngayStr,
+                DinhDangTien.hienThi(tong)
+            });
+        }
+    }
+
+    // ================= TÌM KIẾM BẢNG =================
     public void timKiem() {
 
         String tuKhoa = txtTimKiem.getText().trim();
+
         if (tuKhoa.isEmpty()) {
+
             sorter.setRowFilter(null);
             return;
         }
-        int cot = cboTimKiem.getSelectedIndex();
+
         int cotTimKiem;
-        switch (cot) {
+
+        switch (cboTimKiem.getSelectedIndex()) {
+
             case 0:
                 cotTimKiem = 0;
                 break;
 
             case 1:
-                cotTimKiem = 2;
+                cotTimKiem = 1;
                 break;
 
             case 2:
-                cotTimKiem = 1;
+                cotTimKiem = 2;
+                break;
+
+            case 3:
+                cotTimKiem = 3;
+                break;
+
+            case 4:
+                cotTimKiem = 4;
                 break;
 
             default:
@@ -280,6 +513,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         );
 
         if (table.getRowCount() == 0) {
+
             JOptionPane.showMessageDialog(
                     this,
                     "Không tìm thấy phiếu nhập phù hợp!"
@@ -287,47 +521,48 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         }
     }
 
-    public void Docdldatatable() {
-
-        tableModel.setRowCount(0);
-
-        List<PhieuNhap> list = pn_dao.layphieunhap();
-
-        for (PhieuNhap pn : list) {
-            BigDecimal tong = ctpn_dao.layTongTienTheoMaPN(pn.getMaPN());
-            String ngayStr = pn.getNgayNhap() != null
-                    ? pn.getNgayNhap().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                    : "";
-            tableModel.addRow(new Object[]{
-                pn.getMaPN(),
-                pn.getNhaCungCap() != null ? pn.getNhaCungCap().getMaNCC() : "",
-                pn.getNhanVien() != null ? pn.getNhanVien().getMaNhanVien() : "",
-                ngayStr,
-                DinhDangTien.hienThi(tong)
-            });
-        }
-    }
-
+    // ================= ACTION =================
     @Override
     public void actionPerformed(ActionEvent e) {
+
         Object o = e.getSource();
+
         if (o.equals(btnTimKiem)) {
+
             timKiem();
         }
+
+        // ================= THÊM PHIẾU NHẬP =================
         if (o.equals(btnThem)) {
+
             if (kiemTraNgayNhap()) {
+
                 String ma = txtMaPN.getText().trim();
+
                 if (ma.isEmpty()) {
                     ma = taoMaPN();
                 }
 
                 String mncc = (String) cboNhaCungCap.getSelectedItem();
+
                 String mv = txtNhanVien.getText().trim();
+
+                if (mncc == null || mncc.isEmpty()) {
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Vui lòng chọn nhà cung cấp!"
+                    );
+
+                    return;
+                }
+
                 if (mv.isEmpty()) {
                     mv = "NV0001";
                 }
 
                 NhaCungCap ncc = new NhaCungCap(mncc);
+
                 NhanVien nv = new NhanVien(mv);
 
                 String ngaynhap = txtNgayNhap.getText().trim();
@@ -336,78 +571,168 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                         .ofPattern("dd/MM/uuuu")
                         .withResolverStyle(ResolverStyle.STRICT);
 
-                LocalDateTime nn = LocalDate.parse(ngaynhap, formatter)
-                        .atStartOfDay();
-                PhieuNhap pn = new PhieuNhap(ma, ncc, nv, nn);
+                LocalDateTime nn = LocalDate.parse(
+                        ngaynhap,
+                        formatter
+                ).atStartOfDay();
+
+                PhieuNhap pn = new PhieuNhap(
+                        ma,
+                        ncc,
+                        nv,
+                        nn
+                );
+
                 try {
+
                     if (pn_dao.taopn(pn)) {
-                        JOptionPane.showMessageDialog(this,
-                                "Tạo phiếu nhập " + ma + " thành công! Chuyển sang chi tiết phiếu để thêm đơn hàng.");
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Tạo phiếu nhập " + ma
+                                + " thành công! Chuyển sang chi tiết phiếu để thêm đơn hàng."
+                        );
+
                         Docdldatatable();
+
                         moChiTietPhieu(pn);
+
                         txtMaPN.setText(taoMaPN());
+
                     } else {
-                        JOptionPane.showMessageDialog(this, "Thêm phiếu nhập thất bại!");
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Thêm phiếu nhập thất bại!"
+                        );
                     }
+
                 } catch (Exception s) {
-                    JOptionPane.showMessageDialog(this, "Thêm thất bại: " + s.getMessage());
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Thêm thất bại: " + s.getMessage()
+                    );
+
                     s.printStackTrace();
                 }
             }
         }
+
+        // ================= XEM CHI TIẾT =================
         if (o.equals(btnXemChiTiet)) {
+
             int r = table.getSelectedRow();
+
             if (r == -1) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn phiếu nhập cần xem chi tiết!");
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Vui lòng chọn phiếu nhập cần xem chi tiết!"
+                );
+
                 return;
             }
+
             moChiTietPhieuTheoDong(r);
         }
+
+        // ================= LÀM RỖNG =================
         if (o.equals(btnXoaRong)) {
-            txtNgayNhap.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+            txtNgayNhap.setText(
+                    LocalDate.now().format(
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    )
+            );
+
             txtMaPN.setText(taoMaPN());
+
+            // Xóa nội dung tìm kiếm NCC
+            // DocumentListener sẽ tự động hiển thị lại toàn bộ NCC
+            txtTimMaNCC.setText("");
+
             if (cboNhaCungCap.getItemCount() > 0) {
                 cboNhaCungCap.setSelectedIndex(0);
             }
+
+            txtTimKiem.setText("");
+
+            sorter.setRowFilter(null);
+
             table.clearSelection();
         }
+
+        // ================= XUẤT XML =================
         if (o.equals(btnLuu)) {
+
             xuatrafileXML();
         }
+
+        // ================= XÓA PHIẾU NHẬP =================
         if (o.equals(btnXoa)) {
+
             try {
+
                 int r = table.getSelectedRow();
 
                 if (r != -1) {
 
-                    String maPN = table.getModel().getValueAt(r, 0).toString();
+                    int row = table.convertRowIndexToModel(r);
 
-                    int hoi = JOptionPane.showConfirmDialog(this,
+                    String maPN
+                            = tableModel.getValueAt(row, 0).toString();
+
+                    int hoi = JOptionPane.showConfirmDialog(
+                            this,
                             "Bạn có chắc chắn muốn xóa phiếu nhập này cùng tất cả chi tiết?",
                             "Xác nhận xóa",
-                            JOptionPane.YES_NO_OPTION);
+                            JOptionPane.YES_NO_OPTION
+                    );
 
                     if (hoi == JOptionPane.YES_OPTION) {
+
                         ctpn_dao.xoaHetChiTietTheoMaPN(maPN);
+
                         if (pn_dao.xoapn(maPN)) {
-                            JOptionPane.showMessageDialog(this, "Xóa thành công!");
+
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Xóa thành công!"
+                            );
+
                             Docdldatatable();
+
                         } else {
-                            JOptionPane.showMessageDialog(this, "Xóa thất bại!");
+
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Xóa thất bại!"
+                            );
                         }
                     }
 
                 } else {
-                    JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần xóa!");
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Vui lòng chọn dòng cần xóa!"
+                    );
                 }
 
             } catch (Exception s) {
-                JOptionPane.showMessageDialog(this, "Xóa thất bại: " + s.getMessage());
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Xóa thất bại: " + s.getMessage()
+                );
+
                 s.printStackTrace();
             }
         }
     }
 
+    // ================= TẠO MÃ PHIẾU NHẬP =================
     private String taoMaPN() {
 
         List<PhieuNhap> lis = pn_dao.layphieunhap();
@@ -418,20 +743,99 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
             String ma = pn.getMaPN();
 
-            int so = Integer.parseInt(ma.substring(2));
+            if (ma != null && ma.startsWith("PN")) {
 
-            if (so > max) {
-                max = so;
+                try {
+
+                    int so = Integer.parseInt(ma.substring(2));
+
+                    if (so > max) {
+                        max = so;
+                    }
+
+                } catch (NumberFormatException e) {
+                    // Bỏ qua mã không đúng định dạng
+                }
             }
         }
 
-        return String.format("PN%04d", max + 1);
+        return String.format("PN%08d", max + 1);
     }
 
+    // ================= MỞ CHI TIẾT =================
+    public void moChiTietPhieu(PhieuNhap pn) {
+
+        if (chiTietGUI == null || !chiTietGUI.isDisplayable()) {
+
+            chiTietGUI = new ChiTietPhieuNhap_GUI(pn, this);
+
+            chiTietGUI.setVisible(true);
+
+        } else {
+
+            chiTietGUI.setPhieuNhap(pn);
+            chiTietGUI.setParentGUI(this);
+            chiTietGUI.setVisible(true);
+            chiTietGUI.toFront();
+            chiTietGUI.requestFocus();
+        }
+    }
+
+    // ================= MỞ CHI TIẾT THEO DÒNG =================
+    public void moChiTietPhieuTheoDong(int r) {
+
+        if (r < 0 || r >= table.getRowCount()) {
+            return;
+        }
+
+        int row = table.convertRowIndexToModel(r);
+
+        String maPN
+                = tableModel.getValueAt(row, 0).toString();
+
+        String maNCC
+                = tableModel.getValueAt(row, 1).toString();
+
+        String maNV
+                = tableModel.getValueAt(row, 3).toString();
+
+        String ngayStr
+                = tableModel.getValueAt(row, 5).toString();
+
+        LocalDateTime ngayNhap;
+
+        try {
+
+            ngayNhap = LocalDate.parse(
+                    ngayStr,
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            ).atStartOfDay();
+
+        } catch (Exception ex) {
+
+            ngayNhap = LocalDateTime.now();
+        }
+
+        PhieuNhap pn = new PhieuNhap(
+                maPN,
+                new NhaCungCap(maNCC),
+                new NhanVien(maNV),
+                ngayNhap
+        );
+
+        moChiTietPhieu(pn);
+    }
+
+    // ================= XUẤT XML =================
     public void xuatrafileXML() {
+
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("xuất danh sách phiếu nhập");
-        chooser.setSelectedFile(new File("DanhSachPhieuNhap.xml"));
+
+        chooser.setDialogTitle("Xuất danh sách phiếu nhập");
+
+        chooser.setSelectedFile(
+                new File("DanhSachPhieuNhap.xml")
+        );
 
         int chon = chooser.showSaveDialog(this);
 
@@ -442,96 +846,154 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         File file = chooser.getSelectedFile();
 
         if (!file.getName().toLowerCase().endsWith(".xml")) {
-            file = new File(file.getAbsolutePath() + ".xml");
+
+            file = new File(
+                    file.getAbsolutePath() + ".xml"
+            );
         }
 
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
+
+            DocumentBuilderFactory factory
+                    = DocumentBuilderFactory.newInstance();
+
+            DocumentBuilder builder
+                    = factory.newDocumentBuilder();
+
             Document doc = builder.newDocument();
 
-            Element root = doc.createElement("DanhSachPhieuNhap");
+            Element root
+                    = doc.createElement("DanhSachPhieuNhap");
+
             doc.appendChild(root);
 
             for (int i = 0; i < table.getRowCount(); i++) {
+
                 Element pn = doc.createElement("PhieuNhap");
+
                 root.appendChild(pn);
 
-                Element ma = doc.createElement("MaPN");
-                ma.setTextContent(table.getValueAt(i, 0).toString());
-                pn.appendChild(ma);
+                themElement(doc, pn, "MaPN",
+                        table.getValueAt(i, 0));
 
-                Element maNCC = doc.createElement("MaNCC");
-                maNCC.setTextContent(table.getValueAt(i, 1).toString());
-                pn.appendChild(maNCC);
+                themElement(doc, pn, "MaNCC",
+                        table.getValueAt(i, 1));
 
-                Element maNV = doc.createElement("MaNhanVien");
-                maNV.setTextContent(table.getValueAt(i, 2).toString());
-                pn.appendChild(maNV);
+                themElement(doc, pn, "TenNCC",
+                        table.getValueAt(i, 2));
 
-                Element ngayNhap = doc.createElement("NgayNhap");
-                ngayNhap.setTextContent(table.getValueAt(i, 3).toString());
-                pn.appendChild(ngayNhap);
+                themElement(doc, pn, "MaNhanVien",
+                        table.getValueAt(i, 3));
+
+                themElement(doc, pn, "TenNhanVien",
+                        table.getValueAt(i, 4));
+
+                themElement(doc, pn, "NgayNhap",
+                        table.getValueAt(i, 5));
+
+                themElement(doc, pn, "TongTien",
+                        table.getValueAt(i, 6));
             }
 
-            TransformerFactory tf = TransformerFactory.newInstance();
+            TransformerFactory tf
+                    = TransformerFactory.newInstance();
+
             Transformer transformer = tf.newTransformer();
 
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(
+                    OutputKeys.INDENT,
+                    "yes"
+            );
+
+            transformer.setOutputProperty(
+                    OutputKeys.ENCODING,
+                    "UTF-8"
+            );
 
             DOMSource source = new DOMSource(doc);
+
             StreamResult result = new StreamResult(file);
 
             transformer.transform(source, result);
 
-            JOptionPane.showMessageDialog(this,
-                    "Xuất file XML thành công!");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Xuất file XML thành công!"
+            );
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Xuất file XML thất bại: " + e.getMessage());
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Xuất file XML thất bại: " + e.getMessage()
+            );
+
             e.printStackTrace();
         }
     }
 
+    private void themElement(
+            Document doc,
+            Element parent,
+            String ten,
+            Object giaTri
+    ) {
+
+        Element element = doc.createElement(ten);
+
+        element.setTextContent(
+                giaTri == null ? "" : giaTri.toString()
+        );
+
+        parent.appendChild(element);
+    }
+
+    // ================= KIỂM TRA NGÀY NHẬP =================
+    public boolean kiemTraNgayNhap() {
+
+        String ngay = txtNgayNhap.getText().trim();
+
+        String regex
+                = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}$";
+
+        if (!ngay.matches(regex)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ngày nhập phải có định dạng dd/MM/yyyy!"
+            );
+
+            txtNgayNhap.requestFocus();
+
+            return false;
+        }
+
+        try {
+
+            DateTimeFormatter formatter = DateTimeFormatter
+                    .ofPattern("dd/MM/uuuu")
+                    .withResolverStyle(ResolverStyle.STRICT);
+
+            LocalDate.parse(ngay, formatter);
+
+            return true;
+
+        } catch (DateTimeParseException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ngày nhập không tồn tại!"
+            );
+
+            txtNgayNhap.requestFocus();
+
+            return false;
+        }
+    }
+
+    // ================= MOUSE LISTENER =================
     @Override
     public void mouseClicked(MouseEvent e) {
-
-    }
-
-    public void moChiTietPhieu(PhieuNhap pn) {
-        if (chiTietGUI == null || !chiTietGUI.isDisplayable()) {
-            chiTietGUI = new ChiTietPhieuNhap_GUI(pn, this);
-            chiTietGUI.setVisible(true);
-        } else {
-            chiTietGUI.setPhieuNhap(pn);
-            chiTietGUI.setParentGUI(this);
-            chiTietGUI.setVisible(true);
-            chiTietGUI.toFront();
-            chiTietGUI.requestFocus();
-        }
-    }
-
-    public void moChiTietPhieuTheoDong(int r) {
-        if (r < 0 || r >= tableModel.getRowCount()) {
-            return;
-        }
-        String maPN = tableModel.getValueAt(r, 0).toString();
-        String maNCC = tableModel.getValueAt(r, 1).toString();
-        String maNV = tableModel.getValueAt(r, 2).toString();
-        String ngayStr = tableModel.getValueAt(r, 3).toString();
-        LocalDateTime ngayNhap = LocalDateTime.now();
-        try {
-            if (ngayStr.length() == 10 && ngayStr.contains("/")) {
-                ngayNhap = LocalDate.parse(ngayStr, DateTimeFormatter.ofPattern("dd/MM/yyyy")).atStartOfDay();
-            } else {
-                ngayNhap = LocalDateTime.parse(ngayStr);
-            }
-        } catch (Exception ex) {
-        }
-        PhieuNhap pn = new PhieuNhap(maPN, new NhaCungCap(maNCC), new NhanVien(maNV), ngayNhap);
-        moChiTietPhieu(pn);
     }
 
     @Override
@@ -550,36 +1012,9 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     public void mouseReleased(MouseEvent e) {
     }
 
-    public boolean kiemTraNgayNhap() {
-        String ngay = txtNgayNhap.getText().trim();
-
-        String regex = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}$";
-
-        if (!ngay.matches(regex)) {
-            JOptionPane.showMessageDialog(this,
-                    "Ngày nhập phải có định dạng dd/MM/yyyy!");
-            txtNgayNhap.requestFocus();
-            return false;
-        }
-
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("dd/MM/uuuu")
-                    .withResolverStyle(ResolverStyle.STRICT);
-
-            LocalDate.parse(ngay, formatter);
-            return true;
-
-        } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(this,
-                    "Ngày nhập không tồn tại!");
-            txtNgayNhap.requestFocus();
-            return false;
-        }
-    }
-
+    // ================= MAIN =================
     public static void main(String[] args) {
+
         new PhieuNhap_GUI().setVisible(true);
     }
-
 }

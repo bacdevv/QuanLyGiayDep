@@ -1,9 +1,5 @@
 package dao;
 
-import java.lang.reflect.Array;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-
 import connectDB.ConnectDB;
 import entity.NhaCungCap;
 import entity.NhanVien;
@@ -12,30 +8,59 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class PhieuNhap_DAO {
 
     public ArrayList<PhieuNhap> layphieunhap() {
         ArrayList<PhieuNhap> dsp = new ArrayList<>();
+
         try {
-            ConnectDB.getInstance();
+            ConnectDB.getInstance().connect();
             Connection con = ConnectDB.getConnection();
-            String sql = "select * from PhieuNhap";
+
+            String sql = """
+            SELECT pn.maPN,
+                   ncc.maNCC, ncc.tenNCC,
+                   nv.maNhanVien, nv.tenNhanVien,
+                   pn.ngayNhap
+            FROM PhieuNhap pn
+            INNER JOIN NhaCungCap ncc
+                ON pn.maNCC = ncc.maNCC
+            INNER JOIN NhanVien nv
+                ON pn.maNhanVien = nv.maNhanVien
+        """;
+
             Statement stm = con.createStatement();
             ResultSet rs = stm.executeQuery(sql);
 
             while (rs.next()) {
-                String map = rs.getString(1);
-                NhaCungCap ncc = new NhaCungCap(rs.getString(2));
-                NhanVien nv = new NhanVien(rs.getString(3));
-                LocalDateTime nn = rs.getDate(4).toLocalDate().atStartOfDay();
+                String map = rs.getString("maPN");
+
+                NhaCungCap ncc = new NhaCungCap(
+                        rs.getString("maNCC"),
+                        rs.getString("tenNCC")
+                );
+
+                NhanVien nv = new NhanVien(
+                        rs.getString("maNhanVien"),
+                        rs.getString("tenNhanVien")
+                );
+
+                LocalDateTime nn = rs.getTimestamp("ngayNhap").toLocalDateTime();
+
                 dsp.add(new PhieuNhap(map, ncc, nv, nn));
             }
+
+            rs.close();
+            stm.close();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return dsp;
     }
 
@@ -84,5 +109,33 @@ public class PhieuNhap_DAO {
 
         return n > 0;
 
+    }
+
+    public String layTenNhanVien(String maNV) {
+
+        String tenNV = "";
+
+        try {
+            String sql = "SELECT tenNhanVien FROM NhanVien WHERE maNhanVien = ?";
+
+            PreparedStatement ps = ConnectDB.getConnection()
+                    .prepareStatement(sql);
+
+            ps.setString(1, maNV);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                tenNV = rs.getString("tenNhanVien");
+            }
+
+            ps.close();
+            rs.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return tenNV;
     }
 }
