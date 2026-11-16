@@ -573,7 +573,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
     private String taoMaTuDong() {
         int soLonNhat = 0;
         for (ChiTietSanPham ctsp : ctsp_dao.getalltbChiTietSanPham()) {
-            int so = Integer.parseInt(ctsp.getMaCTSP().substring(5));
+            int so = Integer.parseInt(ctsp.getMaCTSP().substring(4));
             if (so > soLonNhat) {
                 soLonNhat = so;
             }
@@ -590,7 +590,7 @@ public class ChiTietSanPham_GUI extends JFrame implements ActionListener {
             phanSo = "0" + phanSo;
         }
 
-        return "CTSP-" + phanSo;
+        return "CTSP" + phanSo;
     }
 
 }
