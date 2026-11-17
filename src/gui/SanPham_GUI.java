@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import connectDB.ConnectDB;
 
@@ -246,6 +248,13 @@ public class SanPham_GUI extends JFrame implements ActionListener {
 
                 model = new DefaultTableModel(cot, 0);
                 table = new JTable(model);
+                table.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
+                        @Override
+                        protected void setValue(Object value) {
+                                setHorizontalAlignment(SwingConstants.RIGHT);
+                                setText(dinhDangTien((BigDecimal) value));
+                        }
+                });
                 table.setRowHeight(25);
                 table.setDefaultEditor(Object.class, null);
                 table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -607,6 +616,15 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                 boolean hoatDong = "Đang kinh doanh".equals(cboTrangThai.getSelectedItem());
 
                 return new SanPham(maSP, danhMuc, thuongHieu, tenSP, hoatDong, giaBan);
+        }
+
+        private String dinhDangTien(BigDecimal tien) {
+                if (tien == null) {
+                        tien = BigDecimal.ZERO;
+                }
+
+                DecimalFormat df = new DecimalFormat("#,##0");
+                return df.format(tien) + " VNĐ";
         }
 
         private String taoMaTuDong() {
