@@ -84,8 +84,14 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     private ChiTietPhieuNhap_GUI chiTietGUI;
 
     private ArrayList<NhaCungCap> dsNCC = new ArrayList<>();
+    private NhanVien nhanVienDangNhap;
 
     public PhieuNhap_GUI() {
+        this((NhanVien) null);
+    }
+
+    public PhieuNhap_GUI(NhanVien nhanVien) {
+        this.nhanVienDangNhap = nhanVien;
 
         setTitle("Quản lý phiếu nhập");
         setSize(1100, 700);
@@ -97,8 +103,52 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
     }
 
     public PhieuNhap_GUI(String maNCC) {
-        this();
+        this(maNCC, null);
+    }
+
+    public PhieuNhap_GUI(String maNCC, NhanVien nhanVien) {
+        this(nhanVien);
         setNhaCungCap(maNCC);
+    }
+
+    public void setNhanVienDangNhap(NhanVien nhanVien) {
+        this.nhanVienDangNhap = nhanVien;
+        capNhatThongTinNhanVien();
+    }
+
+    public NhanVien getNhanVienDangNhap() {
+        return nhanVienDangNhap;
+    }
+
+    private void capNhatThongTinNhanVien() {
+        if (txtNhanVien == null || txtTenNhanVien == null) {
+            return;
+        }
+
+        if (nhanVienDangNhap != null) {
+            String maNV = nhanVienDangNhap.getMaNhanVien();
+            txtNhanVien.setText(maNV != null ? maNV : "");
+
+            String tenNV = nhanVienDangNhap.getTenNhanVien();
+            if (tenNV != null && !tenNV.trim().isEmpty()) {
+                txtTenNhanVien.setText(tenNV.trim());
+            } else if (maNV != null && !maNV.trim().isEmpty()) {
+                try {
+                    txtTenNhanVien.setText(pn_dao.layTenNhanVien(maNV));
+                } catch (Exception e) {
+                    txtTenNhanVien.setText("");
+                }
+            } else {
+                txtTenNhanVien.setText("");
+            }
+        } else {
+            txtNhanVien.setText("NV0001");
+            try {
+                txtTenNhanVien.setText(pn_dao.layTenNhanVien("NV0001"));
+            } catch (Exception e) {
+                txtTenNhanVien.setText("");
+            }
+        }
     }
 
     public void setNhaCungCap(String maNCC) {
@@ -185,24 +235,15 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         txtTenNCC.setEditable(false);
         pnlNorth.add(txtTenNCC);
 
-        txtNhanVien = new JTextField("NV0001");
+        txtNhanVien = new JTextField();
         txtNhanVien.setEditable(false);
         pnlNorth.add(txtNhanVien);
 
         txtTenNhanVien = new JTextField();
         txtTenNhanVien.setEditable(false);
-
-        try {
-
-            txtTenNhanVien.setText(
-                    pn_dao.layTenNhanVien("NV0001")
-            );
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         pnlNorth.add(txtTenNhanVien);
+
+        capNhatThongTinNhanVien();
 
         txtNgayNhap = new JTextField();
 
@@ -554,11 +595,15 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
                 }
 
                 if (mv.isEmpty()) {
-                    mv = "NV0001";
+                    mv = (nhanVienDangNhap != null && nhanVienDangNhap.getMaNhanVien() != null)
+                            ? nhanVienDangNhap.getMaNhanVien()
+                            : "NV0001";
                 }
 
                 NhaCungCap ncc = new NhaCungCap(mncc);
-                NhanVien nv = new NhanVien(mv);
+                NhanVien nv = (nhanVienDangNhap != null && mv.equals(nhanVienDangNhap.getMaNhanVien()))
+                        ? nhanVienDangNhap
+                        : new NhanVien(mv, txtTenNhanVien.getText().trim());
 
                 String ngaynhap = txtNgayNhap.getText().trim();
 
@@ -650,6 +695,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             txtTimKiem.setText("");
             sorter.setRowFilter(null);
             table.clearSelection();
+            capNhatThongTinNhanVien();
         }
 
         if (o.equals(btnLuu)) {
@@ -780,6 +826,9 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         String maNV
                 = tableModel.getValueAt(row, 3).toString();
 
+        String tenNV
+                = tableModel.getValueAt(row, 4) != null ? tableModel.getValueAt(row, 4).toString() : "";
+
         String ngayStr
                 = tableModel.getValueAt(row, 5).toString();
 
@@ -802,7 +851,7 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
         PhieuNhap pn = new PhieuNhap(
                 maPN,
                 new NhaCungCap(maNCC, tenNCC),
-                new NhanVien(maNV),
+                new NhanVien(maNV, tenNV),
                 ngayNhap
         );
 
@@ -973,6 +1022,9 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2) {
+            btnXemChiTiet.doClick();
+        }
     }
 
     @Override

@@ -3,6 +3,7 @@ package gui;
 import connectDB.ConnectDB;
 import dao.NhaCungCap_DAO;
 import entity.NhaCungCap;
+import entity.NhanVien;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -62,9 +63,14 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
 
     private NhaCungCap_DAO ncc_dao;
     private PhieuNhap_GUI phieuNhapGUI;
+    private NhanVien nhanVienDangNhap;
 
     public NhaCungCap_GUI() {
+        this(null);
+    }
 
+    public NhaCungCap_GUI(NhanVien nhanVien) {
+        this.nhanVienDangNhap = nhanVien;
         ncc_dao = new NhaCungCap_DAO();
 
         setTitle("Quản lý nhà cung cấp");
@@ -471,10 +477,13 @@ public class NhaCungCap_GUI extends JFrame implements ActionListener, MouseListe
 
     public void moPhieuNhap(String maNCC) {
         if (phieuNhapGUI == null || !phieuNhapGUI.isDisplayable()) {
-            phieuNhapGUI = new PhieuNhap_GUI(maNCC);
+            phieuNhapGUI = new PhieuNhap_GUI(maNCC, nhanVienDangNhap);
             phieuNhapGUI.setVisible(true);
         } else {
             phieuNhapGUI.setNhaCungCap(maNCC);
+            if (nhanVienDangNhap != null) {
+                phieuNhapGUI.setNhanVienDangNhap(nhanVienDangNhap);
+            }
             phieuNhapGUI.setVisible(true);
             phieuNhapGUI.toFront();
             phieuNhapGUI.requestFocus();

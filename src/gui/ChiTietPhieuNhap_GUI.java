@@ -152,10 +152,22 @@ public class ChiTietPhieuNhap_GUI extends JFrame implements MouseListener {
                     ? phieuNhap.getNhaCungCap().getTenNCC() : ""
             );
 
-            txtNhanVien.setText(
-                    phieuNhap.getNhanVien() != null
-                    ? phieuNhap.getNhanVien().getMaNhanVien() : ""
-            );
+            String thongTinNV = "";
+            if (phieuNhap.getNhanVien() != null) {
+                String ma = phieuNhap.getNhanVien().getMaNhanVien();
+                String ten = phieuNhap.getNhanVien().getTenNhanVien();
+                if (ten != null && !ten.trim().isEmpty()) {
+                    thongTinNV = (ma != null && !ma.trim().isEmpty()) ? ma + " - " + ten.trim() : ten.trim();
+                } else if (ma != null && !ma.trim().isEmpty()) {
+                    try {
+                        ten = pn_dao.layTenNhanVien(ma);
+                        thongTinNV = (!ten.isEmpty()) ? ma + " - " + ten : ma;
+                    } catch (Exception ex) {
+                        thongTinNV = ma;
+                    }
+                }
+            }
+            txtNhanVien.setText(thongTinNV);
 
             if (phieuNhap.getNgayNhap() != null) {
                 txtNgayNhap.setText(
