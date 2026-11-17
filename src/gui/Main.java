@@ -255,7 +255,7 @@ public class Main extends JFrame {
         tabs.setFont(new Font("Arial", Font.PLAIN, 15));
         themTrang(tabs, "Phiếu nhập", PhieuNhap_GUI::new);
 
-        themTrang(tabs, "Nhà cung cấp", NhaCungCap_GUI::new);
+        themTrang(tabs, "Nhà cung cấp", () -> new NhaCungCap_GUI(nhanVien));
         tabs.addChangeListener(e -> napTab(tabs));
         return tabs;
     }
