@@ -28,19 +28,17 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import dao.HoaDon_DAO;
 import dao.PhieuDoiTra_DAO;
-import dao.PhieuDoiTra_DAO.HangDaMua;
+import dao.ChiTietHoaDon_DAO;
+import entity.ChiTietHoaDon;
 import entity.ChiTietDoiTra;
 import entity.ChiTietSanPham;
 import entity.HoaDon;
 import entity.KhachHang;
 import entity.NhanVien;
-import dao.NhanVien_DAO;
 import connectDB.ConnectDB;
 import entity.PhieuDoiTra;
 
@@ -95,7 +93,6 @@ public class PhieuDoiTra_GUI extends JFrame
     private HoaDon_DAO hd_dao = new HoaDon_DAO();
     private PhieuDoiTra_DAO dt_dao = new PhieuDoiTra_DAO();
     private HoaDon hoaDonGoc;
-    private KhachHang khachHangTheoSDT;
     private boolean daLuu;
     private java.util.function.Consumer<String> moChiTiet;
 
@@ -175,7 +172,7 @@ public class PhieuDoiTra_GUI extends JFrame
         JPanel pnlThongTin = new JPanel(new GridLayout(9, 2, 5, 5));
         pnlThongTin.add(new JLabel("Mã phiếu đổi trả:"));
         pnlThongTin.add(txtMaPDT = new JTextField());
-        pnlThongTin.add(new JLabel("Hóa đơn gốc:"));
+        pnlThongTin.add(new JLabel("Hóa đơn gốc / SĐT KH:"));
         JPanel pnlGoc = new JPanel(new BorderLayout(5, 0));
         pnlGoc.add(txtHoaDonGoc = new JTextField(), BorderLayout.CENTER);
         pnlGoc.add(btnNapHoaDon = new JButton("Nạp"), BorderLayout.EAST);
@@ -279,37 +276,28 @@ public class PhieuDoiTra_GUI extends JFrame
         tableChiTietDoiTra.addMouseListener(this);
         cboTrangThai.addActionListener(this);
         dinhDangGiaoDien();
-        txtSoDienThoai.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) {
-                timKhachHangTheoSDT();
-            }
-
-            public void removeUpdate(DocumentEvent e) {
-                timKhachHangTheoSDT();
-            }
-
-            public void changedUpdate(DocumentEvent e) {
-                timKhachHangTheoSDT();
-            }
-        });
+        // So dien thoai chi hien thi thong tin hoa don goc, khong can nhap lai.
+        txtSoDienThoai.setEditable(false);
     }
 
     private void thongBao(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Thông báo", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void timKhachHangTheoSDT() {
-        khachHangTheoSDT = null;
-        txtKhachHang.setText("");
-        String sdt = txtSoDienThoai.getText().trim();
-        if (!sdt.matches("0[0-9]{9}"))
-            return;
-        try {
-            khachHangTheoSDT = hd_dao.getKhachHangTheoSoDienThoai(sdt);
-            if (khachHangTheoSDT != null)
-                txtKhachHang.setText(khachHangTheoSDT.getTenKH());
-        } catch (SQLException e) {
-            thongBao("Lỗi tra cứu khách hàng: " + e.getMessage());
+    // Nạp chi tiết hóa đơn gốc vào JTable, không cần lớp HangDaMua.
+    private void docHangDaMua(String maHD) throws SQLException {
+        modelHangDaMua.setRowCount(0);
+        ArrayList<ChiTietHoaDon> ds = new ChiTietHoaDon_DAO().getChiTietTheoMaHD(maHD);
+        for (ChiTietHoaDon ct : ds) {
+            String maCTSP = ct.getChiTietSanPham().getMaCTSP();
+            int daMua = ct.getSoLuong();
+            int daTra = dt_dao.getSoLuongDaTra(maHD, maCTSP);
+            modelHangDaMua.addRow(new Object[] {
+                    maCTSP, ct.getChiTietSanPham().getSanPham().getTenSP(),
+                    ct.getChiTietSanPham().getKichCo(),
+                    ct.getChiTietSanPham().getMauSac(),
+                    daMua, daTra, daMua - daTra, ct.getDonGia()
+            });
         }
     }
 
@@ -318,33 +306,47 @@ public class PhieuDoiTra_GUI extends JFrame
             throw new IllegalArgumentException("Phiếu đã lưu, hãy làm mới");
         String maHD = txtHoaDonGoc.getText().trim();
         if (maHD.isEmpty())
-            throw new IllegalArgumentException("Nhập mã hóa đơn gốc");
+            throw new IllegalArgumentException("Nhập mã hóa đơn hoặc SĐT khách hàng");
         HoaDon hd = hd_dao.getHoaDonTheoMaHD(maHD);
+        if (hd == null && maHD.matches("0[0-9]{9}")) {
+            ArrayList<String> ds = hd_dao.getMaHoaDonTheoSoDienThoai(maHD);
+            if (ds.isEmpty())
+                throw new IllegalArgumentException("Không có hóa đơn của số điện thoại này");
+            if (ds.size() == 1) {
+                maHD = ds.get(0);
+            } else {
+                String[] luaChon = new String[ds.size()];
+                for (int i = 0; i < ds.size(); i++) {
+                    HoaDon h = hd_dao.getHoaDonTheoMaHD(ds.get(i));
+                    luaChon[i] = ds.get(i) + " | " + h.getNgayLap().toLocalDate()
+                            + " | " + h.getTongTien() + " VND";
+                }
+                Object chon = JOptionPane.showInputDialog(this,
+                        "Khách có nhiều hóa đơn, hãy chọn hóa đơn cần đổi/trả:",
+                        "Chọn hóa đơn gốc", JOptionPane.QUESTION_MESSAGE,
+                        null, luaChon, luaChon[0]);
+                if (chon == null) return;
+                maHD = chon.toString().substring(0, 10);
+            }
+            hd = hd_dao.getHoaDonTheoMaHD(maHD);
+        }
         if (hd == null)
             throw new IllegalArgumentException("Không tìm thấy hóa đơn gốc");
-        ArrayList<HangDaMua> ds = dt_dao.getHangDaMua(maHD);
-        if (ds.isEmpty())
+        docHangDaMua(maHD);
+        if (modelHangDaMua.getRowCount() == 0)
             throw new IllegalArgumentException("Hóa đơn không có chi tiết");
         hoaDonGoc = hd;
-        modelHangDaMua.setRowCount(0);
+        txtHoaDonGoc.setText(maHD);
+        txtHoaDonGoc.setEditable(false);
         modelChiTietDoiTra.setRowCount(0);
-        for (HangDaMua ct : ds) {
-            modelHangDaMua.addRow(new Object[] {
-                    ct.getMaCTSP(), ct.getTenSP(), ct.getKichCo(), ct.getMauSac(),
-                    ct.getDaMua(), ct.getDaTra(), ct.getConLai(), ct.getDonGia()
-            });
-        }
         txtThueGoc.setText(hd.getThue().toPlainString());
-        if (hd.getKhachHang() == null) {
-            txtSoDienThoai.setText("");
-            txtKhachHang.setText("Khách lẻ");
-        } else {
-            KhachHang kh = hd_dao.getKhachHangTheoMaKH(hd.getKhachHang().getMaKH());
-            if (kh == null)
-                throw new SQLException("Khách hàng của hóa đơn gốc không còn tồn tại");
-            txtSoDienThoai.setText(kh.getSoDienThoai() == null ? "" : kh.getSoDienThoai());
-            txtKhachHang.setText(kh.getTenKH());
-        }
+        if (hd.getKhachHang() == null)
+            throw new SQLException("Hóa đơn gốc chưa liên kết khách hàng, không thể đổi/trả");
+        KhachHang kh = hd_dao.getKhachHangTheoMaKH(hd.getKhachHang().getMaKH());
+        if (kh == null || kh.getSoDienThoai() == null || kh.getSoDienThoai().trim().isEmpty())
+            throw new SQLException("Hóa đơn gốc chưa có số điện thoại khách hàng");
+        txtSoDienThoai.setText(kh.getSoDienThoai());
+        txtKhachHang.setText(kh.getTenKH());
         tinhLaiTien();
         boolean quaHan = LocalDateTime.now().isAfter(hd.getNgayLap().plusDays(7));
         btnLuu.setEnabled(!quaHan);
@@ -462,27 +464,11 @@ public class PhieuDoiTra_GUI extends JFrame
             throw new IllegalArgumentException("Phiếu đã lưu");
         if (hoaDonGoc == null)
             throw new IllegalArgumentException("Chưa nạp hóa đơn gốc");
-        if (!hoaDonGoc.getMaHD().equals(txtHoaDonGoc.getText().trim())) {
-            throw new IllegalArgumentException("Mã hóa đơn gốc đã đổi, hãy bấm Nạp lại");
-        }
         if (modelChiTietDoiTra.getRowCount() == 0)
             throw new IllegalArgumentException("Chưa chọn sản phẩm đổi/trả");
         String lyDo = txtLyDo.getText().trim();
-        if (lyDo.isEmpty() || lyDo.length() > 300) {
-            throw new IllegalArgumentException("Lý do bắt buộc, tối đa 300 ký tự");
-        }
-        String sdt = txtSoDienThoai.getText().trim();
-        if (hoaDonGoc.getKhachHang() == null) {
-            if (!sdt.isEmpty())
-                throw new IllegalArgumentException("Hóa đơn khách lẻ không có số điện thoại");
-        } else {
-            if (!sdt.matches("0[0-9]{9}"))
-                throw new IllegalArgumentException("SĐT không hợp lệ");
-            KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
-            if (kh == null || !kh.getMaKH().equals(hoaDonGoc.getKhachHang().getMaKH()))
-                throw new IllegalArgumentException("SĐT không khớp hóa đơn gốc");
-        }
-
+        if (lyDo.isEmpty())
+            throw new IllegalArgumentException("Nhập lý do đổi/trả");
         boolean doi = "Đổi size".equals(cboTrangThai.getSelectedItem());
         HoaDon hoaDonMoi = null; // DAO tự tạo khi đổi size.
         PhieuDoiTra phieu = new PhieuDoiTra(null, hoaDonGoc, hoaDonMoi,
@@ -495,12 +481,10 @@ public class PhieuDoiTra_GUI extends JFrame
                     (int) modelChiTietDoiTra.getValueAt(i, 4),
                     (int) modelChiTietDoiTra.getValueAt(i, 5)));
         }
-        java.util.Map<String, String> sizeMoi = new java.util.HashMap<>();
+        ArrayList<String> sizeMoi = new ArrayList<>();
         if (doi) {
-            for (int i = 0; i < modelChiTietDoiTra.getRowCount(); i++) {
-                sizeMoi.put(modelChiTietDoiTra.getValueAt(i, 0).toString(),
-                        modelChiTietDoiTra.getValueAt(i, 6).toString());
-            }
+            for (int i = 0; i < modelChiTietDoiTra.getRowCount(); i++)
+                sizeMoi.add(modelChiTietDoiTra.getValueAt(i, 6).toString());
         }
         String maMoi = dt_dao.create(phieu, ds, sizeMoi);
         txtMaPDT.setText(maMoi);
@@ -521,19 +505,13 @@ public class PhieuDoiTra_GUI extends JFrame
         txtSoDienThoai.setEditable(false);
         txtLyDo.setEditable(false);
         JOptionPane.showMessageDialog(this, "Lưu phiếu thành công: " + maMoi);
-        // Nap lai so luong da tra de bang phan anh ton tai moi.
-        modelHangDaMua.setRowCount(0);
-        for (HangDaMua ct : dt_dao.getHangDaMua(hoaDonGoc.getMaHD())) {
-            modelHangDaMua.addRow(new Object[] { ct.getMaCTSP(), ct.getTenSP(),
-                    ct.getKichCo(), ct.getMauSac(), ct.getDaMua(),
-                    ct.getDaTra(), ct.getConLai(), ct.getDonGia() });
-        }
+        // Cap nhat bang de thay so luong con duoc doi/tra.
+        docHangDaMua(hoaDonGoc.getMaHD());
     }
 
     private void lamMoi() {
         daLuu = false;
         hoaDonGoc = null;
-        khachHangTheoSDT = null;
         try {
             txtMaPDT.setText(dt_dao.taoMaPhieuDoiTraMoi());
         } catch (SQLException e) {
@@ -546,7 +524,7 @@ public class PhieuDoiTra_GUI extends JFrame
         txtSizeMoi.setEditable(false);
         txtNgayLap.setText(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-        txtSoDienThoai.setEditable(true);
+        txtSoDienThoai.setEditable(false);
         txtSoDienThoai.setText("");
         txtKhachHang.setText("");
         txtLyDo.setText("");

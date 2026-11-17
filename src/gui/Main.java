@@ -52,12 +52,15 @@ public class Main extends JFrame {
         JPanel dauTrang = new JPanel(new BorderLayout());
         dauTrang.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         JLabel tieuDe = new JLabel("QUẢN LÝ GIÀY DÉP");
-        tieuDe.setFont(new Font("Arial", Font.BOLD, 20));
+        tieuDe.setFont(new Font("Arial", Font.BOLD, 26));
         dauTrang.add(tieuDe, BorderLayout.WEST);
 
         JPanel benPhai = new JPanel();
-        benPhai.add(new JLabel("Nhân viên: " + nhanVien.getTenNhanVien()));
+        JLabel lblNhanVien = new JLabel("Nhân viên: " + nhanVien.getTenNhanVien());
+        lblNhanVien.setFont(new Font("Arial", Font.BOLD, 15));
+        benPhai.add(lblNhanVien);
         JButton btnDangXuat = new JButton("Đăng xuất");
+        btnDangXuat.setFont(new Font("Arial", Font.PLAIN, 14));
         benPhai.add(btnDangXuat);
         btnDangXuat.addActionListener(e -> {
             if (JOptionPane.showConfirmDialog(this, "Bạn muốn đăng xuất?", "Xác nhận",
@@ -69,6 +72,7 @@ public class Main extends JFrame {
         dauTrang.add(benPhai, BorderLayout.EAST);
         add(dauTrang, BorderLayout.NORTH);
 
+        tabChinh.setFont(new Font("Arial", Font.BOLD, 16));
         tabChinh.addTab("Thống kê", taoThongKe());
         tabChinh.addTab("Bán hàng", tabBanHang = taoTabBanHang());
         tabChinh.addTab("Đổi / Trả", tabDoiTra = taoTabDoiTra());
@@ -192,6 +196,7 @@ public class Main extends JFrame {
 
     private JTabbedPane taoTabBanHang() {
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Arial", Font.PLAIN, 15));
         themTrang(tabs, "Lập hóa đơn", () -> {
             HoaDon_GUI gui = new HoaDon_GUI(nhanVien);
             gui.setMoChiTiet(this::hienChiTietHoaDon);
@@ -212,6 +217,7 @@ public class Main extends JFrame {
 
     private JTabbedPane taoTabDoiTra() {
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Arial", Font.PLAIN, 15));
         themTrang(tabs, "Phiếu đổi/trả", () -> {
             PhieuDoiTra_GUI gui = new PhieuDoiTra_GUI(nhanVien);
             gui.setMoChiTiet(this::hienChiTietDoiTra);
@@ -246,6 +252,7 @@ public class Main extends JFrame {
 
     private JTabbedPane taoTabNhapHang() {
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Arial", Font.PLAIN, 15));
         themTrang(tabs, "Phiếu nhập", PhieuNhap_GUI::new);
 
         themTrang(tabs, "Nhà cung cấp", NhaCungCap_GUI::new);
@@ -255,6 +262,7 @@ public class Main extends JFrame {
 
     private JTabbedPane taoTabSanPham() {
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Arial", Font.PLAIN, 15));
         themTrang(tabs, "Sản phẩm", SanPham_GUI::new);
 
         tabs.addChangeListener(e -> napTab(tabs));

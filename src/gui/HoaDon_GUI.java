@@ -1,6 +1,7 @@
 
 package gui;
 
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -35,10 +36,8 @@ import javax.swing.table.DefaultTableModel;
 import dao.HoaDon_DAO;
 import entity.ChiTietHoaDon;
 import entity.ChiTietSanPham;
-import dao.HoaDon_DAO.SanPhamBan;
 import entity.HoaDon;
 import entity.NhanVien;
-import dao.NhanVien_DAO;
 import connectDB.ConnectDB;
 import entity.KhachHang;
 
@@ -74,19 +73,6 @@ public class HoaDon_GUI extends JFrame
             bang.getColumnModel().getColumn(i).setCellRenderer(renderer);
     }
 
-    // Gioi han theo SQL DECIMAL(18,2).
-    private static final BigDecimal GIOI_HAN_SQL = new BigDecimal("9999999999999999.99");
-
-    private static void kiemTraGioiHanTien(BigDecimal tien, String ten) {
-        if (tien == null || tien.signum() < 0
-                || tien.compareTo(GIOI_HAN_SQL) > 0
-                || tien.stripTrailingZeros().scale() > 2) {
-            throw new IllegalArgumentException(ten
-                    + " phải từ 0 đến " + hienThiTien(GIOI_HAN_SQL)
-                    + " và có tối đa 2 chữ số thập phân (SQL DECIMAL(18,2)).");
-        }
-    }
-
     // Thue GTGT co dinh cho hoa don moi.
     private static final BigDecimal THUE_SUAT = HoaDon_DAO.THUE_SUAT;
 
@@ -106,7 +92,7 @@ public class HoaDon_GUI extends JFrame
     private JComboBox<String> cboThanhToan;
 
     private JButton btnTim, btnLamMoiSanPham;
-    private JButton btnTaoHD, btnLamMoiHD, btnXuatHD;
+    private JButton btnTaoHD, btnLamMoiHD, btnInHD;
     private JButton btnThem, btnSuaSoLuong, btnXoa;
 
     private JTable tableSanPham, tableChiTietHoaDon;
@@ -169,7 +155,7 @@ public class HoaDon_GUI extends JFrame
         txtNhanVien.setFont(font);
         for (JButton btn : new JButton[] { btnThemKhachHang, btnTim,
                 btnLamMoiSanPham, btnThem, btnSuaSoLuong, btnXoa,
-                btnTaoHD, btnLamMoiHD, btnXuatHD })
+                btnTaoHD, btnLamMoiHD, btnInHD })
             btn.setFont(font);
         for (JTable table : new JTable[] { tableSanPham, tableChiTietHoaDon }) {
             table.setFont(fontBang);
@@ -326,11 +312,11 @@ public class HoaDon_GUI extends JFrame
 
         btnTaoHD = new JButton("Tạo hóa đơn");
         btnLamMoiHD = new JButton("Làm mới");
-        btnXuatHD = new JButton("Xem / In hóa đơn");
+        btnInHD = new JButton("In chi tiết");
 
         pnlNut.add(btnTaoHD);
         pnlNut.add(btnLamMoiHD);
-        pnlNut.add(btnXuatHD);
+        pnlNut.add(btnInHD);
 
         pnlDuoi.add(pnlNut, BorderLayout.SOUTH);
         pnlHoaDon.add(pnlDuoi, BorderLayout.SOUTH);
@@ -389,7 +375,7 @@ public class HoaDon_GUI extends JFrame
         btnXoa.addActionListener(this);
         btnTaoHD.addActionListener(this);
         btnLamMoiHD.addActionListener(this);
-        btnXuatHD.addActionListener(this);
+        btnInHD.addActionListener(this);
 
         tableSanPham.addMouseListener(this);
         tableChiTietHoaDon.addMouseListener(this);
@@ -424,7 +410,7 @@ public class HoaDon_GUI extends JFrame
 
         String sdt = txtSoDienThoai.getText().trim();
         if (sdt.isEmpty()) {
-            txtKhachHang.setText("Khách lẻ");
+            txtKhachHang.setText("Chưa có khách hàng");
             return;
         }
         if (!sdt.matches("0[0-9]{9}"))
@@ -473,18 +459,18 @@ public class HoaDon_GUI extends JFrame
     private void docDuLieuSanPham() throws SQLException {
         modelSanPham.setRowCount(0);
 
-        ArrayList<SanPhamBan> ds = hd_dao.getDanhSachSanPham(
+        ArrayList<ChiTietSanPham> ds = hd_dao.getDanhSachSanPham(
                 txtTimMaCTSP.getText(),
                 txtTimTenSP.getText());
 
-        for (SanPhamBan sp : ds) {
+        for (ChiTietSanPham ct : ds) {
             modelSanPham.addRow(new Object[] {
-                    sp.getMaCTSP(),
-                    sp.getTenSP(),
-                    sp.getKichCo(),
-                    sp.getMauSac(),
-                    sp.getGiaBan(),
-                    sp.getSoLuongTon()
+                    ct.getMaCTSP(),
+                    ct.getSanPham().getTenSP(),
+                    ct.getKichCo(),
+                    ct.getMauSac(),
+                    ct.getSanPham().getGiaBan(),
+                    ct.getSoLuongTon()
             });
         }
     }
@@ -548,9 +534,6 @@ public class HoaDon_GUI extends JFrame
                     throw new IllegalArgumentException(
                             "Không đủ tồn kho. Còn: " + tonKho);
                 }
-
-                kiemTraGioiHanTien(donGia.multiply(
-                        BigDecimal.valueOf(slMoi)), "Thành tiền");
                 modelChiTietHoaDon.setValueAt(slMoi, i, 4);
                 modelChiTietHoaDon.setValueAt(
                         donGia.multiply(
@@ -569,7 +552,6 @@ public class HoaDon_GUI extends JFrame
 
         BigDecimal thanhTien = donGia.multiply(
                 BigDecimal.valueOf(soLuong));
-        kiemTraGioiHanTien(thanhTien, "Thành tiền");
 
         modelChiTietHoaDon.addRow(new Object[] {
                 maCTSP, tenSP, kichCo, mauSac,
@@ -608,9 +590,6 @@ public class HoaDon_GUI extends JFrame
         }
 
         BigDecimal donGia = (BigDecimal) modelChiTietHoaDon.getValueAt(row, 5);
-
-        kiemTraGioiHanTien(donGia.multiply(
-                BigDecimal.valueOf(soLuong)), "Thành tiền");
         modelChiTietHoaDon.setValueAt(soLuong, row, 4);
         modelChiTietHoaDon.setValueAt(
                 donGia.multiply(
@@ -661,8 +640,7 @@ public class HoaDon_GUI extends JFrame
         txtTienThue.setText(hienThiTien(tienThue));
         txtTongTien.setText(hienThiTien(tongTien));
         if (!daLuu)
-            btnTaoHD.setEnabled(nhanVienDangNhap != null
-                    && tongTien.compareTo(GIOI_HAN_SQL) <= 0);
+            btnTaoHD.setEnabled(nhanVienDangNhap != null);
     }
 
     // ====== TAO HOA DON ======
@@ -672,19 +650,14 @@ public class HoaDon_GUI extends JFrame
             throw new IllegalArgumentException("Hóa đơn đã lưu");
         if (modelChiTietHoaDon.getRowCount() == 0)
             throw new IllegalArgumentException("Hóa đơn chưa có sản phẩm");
-        kiemTraGioiHanTien(tongTienDangTinh, "Tổng tiền");
 
         String sdt = txtSoDienThoai.getText().trim();
-        if (sdt.isEmpty()) {
-            khachHangDangChon = null;
-        } else {
-            if (!sdt.matches("0[0-9]{9}"))
-                throw new IllegalArgumentException("SĐT phải đủ 10 chữ số, bắt đầu bằng 0");
-            KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
-            if (kh == null)
-                throw new IllegalArgumentException("Khách mới: nhấn Thêm KH và lưu trước khi thanh toán");
-            khachHangDangChon = kh;
-        }
+        if (!sdt.matches("0[0-9]{9}"))
+            throw new IllegalArgumentException("Bắt buộc nhập SĐT khách hàng gồm 10 chữ số, bắt đầu bằng 0");
+        KhachHang kh = hd_dao.getKhachHangTheoSoDienThoai(sdt);
+        if (kh == null)
+            throw new IllegalArgumentException("Khách hàng chưa tồn tại: nhấn Thêm KH và lưu trước khi thanh toán");
+        khachHangDangChon = kh;
 
         BigDecimal thue = THUE_SUAT;
         BigDecimal tong = tongTienDangTinh;
@@ -698,7 +671,6 @@ public class HoaDon_GUI extends JFrame
             String maCTSP = modelChiTietHoaDon.getValueAt(i, 0).toString();
             int soLuong = (int) modelChiTietHoaDon.getValueAt(i, 4);
             BigDecimal gia = (BigDecimal) modelChiTietHoaDon.getValueAt(i, 5);
-            kiemTraGioiHanTien(gia, "Đơn giá");
             ds.add(new ChiTietHoaDon(null, new ChiTietSanPham(maCTSP), soLuong, gia));
         }
         String maMoi = hd_dao.create(hd, ds);
@@ -710,7 +682,7 @@ public class HoaDon_GUI extends JFrame
         btnThem.setEnabled(false);
         btnSuaSoLuong.setEnabled(false);
         btnXoa.setEnabled(false);
-        btnXuatHD.setEnabled(true);
+        btnInHD.setEnabled(true);
         txtThue.setEditable(false);
         txtSoDienThoai.setEditable(false);
         btnThemKhachHang.setEnabled(false);
@@ -736,7 +708,7 @@ public class HoaDon_GUI extends JFrame
         txtSoDienThoai.setEditable(true);
         txtSoDienThoai.setText("");
         khachHangDangChon = null;
-        txtKhachHang.setText("Khách lẻ");
+        txtKhachHang.setText("Chưa có khách hàng");
         txtKhachHang.setEditable(false);
         btnThemKhachHang.setEnabled(false);
         btnThemKhachHang.setText("Thêm KH");
@@ -746,17 +718,16 @@ public class HoaDon_GUI extends JFrame
         btnThem.setEnabled(true);
         btnSuaSoLuong.setEnabled(true);
         btnXoa.setEnabled(true);
-        btnXuatHD.setEnabled(false);
+        btnInHD.setEnabled(false);
         txtThue.setEditable(false);
         cboThanhToan.setEnabled(true);
         tinhLaiTien();
     }
 
-    private void xuatHoaDon() {
-        if (!daLuu)
-            throw new IllegalArgumentException("Cần lưu hóa đơn trước");
-        if (moChiTiet != null) moChiTiet.accept(txtMaHD.getText());
-        else new ChiTietHoaDon_GUI(txtMaHD.getText()).setVisible(true);
+    // In hóa đơn bằng DOM XML -> XSLT -> HTML (xử lý ở GUI danh sách).
+    private void inHoaDon() throws Exception {
+        if (!daLuu) throw new IllegalArgumentException("Hãy lưu hóa đơn trước");
+        ChiTietHoaDon_GUI.inHoaDon(txtMaHD.getText().trim(), this);
     }
 
     // ====== XU LY SU KIEN BUTTON ======
@@ -769,6 +740,12 @@ public class HoaDon_GUI extends JFrame
             if (o == btnThemKhachHang) {
                 themKhachHang();
             } else if (o == btnTim) {
+                if (txtTimMaCTSP.getText().trim().isEmpty()
+                        && txtTimTenSP.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Hãy nhập mã biến thể hoặc tên giày/dép để tìm");
+                    txtTimMaCTSP.requestFocusInWindow();
+                    return;
+                }
                 docDuLieuSanPham();
 
             } else if (o == btnLamMoiSanPham) {
@@ -791,8 +768,8 @@ public class HoaDon_GUI extends JFrame
             } else if (o == btnLamMoiHD) {
                 lamMoiHoaDon();
 
-            } else if (o == btnXuatHD) {
-                xuatHoaDon();
+            } else if (o == btnInHD) {
+                inHoaDon();
             }
 
         } catch (Exception ex) {
