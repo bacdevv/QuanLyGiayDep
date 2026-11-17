@@ -612,7 +612,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
         private String taoMaTuDong() {
                 int soLonNhat = 0;
                 for (SanPham sp : sp_dao.getallSanPham()) {
-                        int so = Integer.parseInt(sp.getMaSP().substring(3));
+                        int so = Integer.parseInt(sp.getMaSP().substring(2));
                         if (so > soLonNhat) {
                                 soLonNhat = so;
                         }
@@ -628,7 +628,7 @@ public class SanPham_GUI extends JFrame implements ActionListener {
                         phanSo = "0" + phanSo;
                 }
 
-                return "SP-" + phanSo;
+                return "SP" + phanSo;
         }
 
 }
