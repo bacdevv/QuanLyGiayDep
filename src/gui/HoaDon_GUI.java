@@ -1,7 +1,6 @@
 
 package gui;
 
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -46,36 +45,34 @@ public class HoaDon_GUI extends JFrame
 
     private static final long serialVersionUID = 1L;
 
-    // Dinh dang so tien ngay trong giao dien (VD: 1.250.000,5).
     private static String hienThiTien(BigDecimal tien) {
-        if (tien == null) return "";
-        java.text.DecimalFormatSymbols symbols =
-                new java.text.DecimalFormatSymbols(java.util.Locale.forLanguageTag("vi-VN"));
+        if (tien == null)
+            return "";
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(
+                java.util.Locale.forLanguageTag("vi-VN"));
         java.text.DecimalFormat format = new java.text.DecimalFormat("#,##0.##", symbols);
         format.setRoundingMode(RoundingMode.HALF_UP);
         return format.format(tien);
     }
 
-    // Hien thi cot tien can le phai, khong doi gia tri BigDecimal trong bang.
     private static void dinhDangCotTien(JTable bang, int... cot) {
-        javax.swing.table.DefaultTableCellRenderer renderer =
-                new javax.swing.table.DefaultTableCellRenderer() {
+        
+        javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
+
             @Override
             protected void setValue(Object value) {
                 if (value instanceof BigDecimal)
                     setText(hienThiTien((BigDecimal) value));
-                else super.setValue(value);
+                else
+                    super.setValue(value);
             }
         };
         renderer.setHorizontalAlignment(SwingConstants.RIGHT);
         for (int i : cot)
             bang.getColumnModel().getColumn(i).setCellRenderer(renderer);
     }
-
-    // Thue GTGT co dinh cho hoa don moi.
     private static final BigDecimal THUE_SUAT = HoaDon_DAO.THUE_SUAT;
-
     private JTextField txtMaHD, txtNgayLap;
     private JTextField txtTienHang, txtThue;
     private JTextField txtTienThue, txtTongTien;
@@ -726,7 +723,8 @@ public class HoaDon_GUI extends JFrame
 
     // In hóa đơn bằng DOM XML -> XSLT -> HTML (xử lý ở GUI danh sách).
     private void inHoaDon() throws Exception {
-        if (!daLuu) throw new IllegalArgumentException("Hãy lưu hóa đơn trước");
+        if (!daLuu)
+            throw new IllegalArgumentException("Hãy lưu hóa đơn trước");
         ChiTietHoaDon_GUI.inHoaDon(txtMaHD.getText().trim(), this);
     }
 

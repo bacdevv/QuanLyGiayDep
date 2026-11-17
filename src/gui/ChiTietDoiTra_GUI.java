@@ -35,7 +35,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-// Lớp cũ dùng làm Danh sách đổi trả và xem chi tiết, không cho chỉnh sửa.
 public class ChiTietDoiTra_GUI extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final java.time.format.DateTimeFormatter DINH_DANG_NGAY =

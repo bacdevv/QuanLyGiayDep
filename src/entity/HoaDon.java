@@ -62,7 +62,6 @@ public class HoaDon {
         return tongTien;
     }
 
-    // Don gia chi tiet la gia chua thue
     public BigDecimal tinhTienHang(ArrayList<ChiTietHoaDon> dsChiTiet) {
         BigDecimal tienHang = BigDecimal.ZERO;
         for (ChiTietHoaDon ct : dsChiTiet) {

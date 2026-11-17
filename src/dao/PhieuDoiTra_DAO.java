@@ -18,19 +18,20 @@ import entity.NhanVien;
 import entity.PhieuDoiTra;
 
 public class PhieuDoiTra_DAO {
-    public PhieuDoiTra_DAO() { }
-
+    public PhieuDoiTra_DAO() {
+    }
 
     public ArrayList<PhieuDoiTra> getAllTablePhieuDoiTra() throws SQLException {
         ArrayList<PhieuDoiTra> ds = new ArrayList<>();
         try (PreparedStatement stmt = ConnectDB.getConnection().prepareStatement(
                 "SELECT p.maPDT, p.hoaDonGoc, p.hoaDonMoi, p.maNhanVien, "
-                + "p.ngayLap, p.lyDo, nv.tenNhanVien, "
-                + "CASE WHEN p.hoaDonMoi IS NULL THEN N'Trả hàng' ELSE N'Đổi size' END AS trangThai "
-                + "FROM PhieuDoiTra p JOIN NhanVien nv ON p.maNhanVien = nv.maNhanVien "
-                + "ORDER BY p.ngayLap DESC");
+                        + "p.ngayLap, p.lyDo, nv.tenNhanVien, "
+                        + "CASE WHEN p.hoaDonMoi IS NULL THEN N'Trả hàng' ELSE N'Đổi size' END AS trangThai "
+                        + "FROM PhieuDoiTra p JOIN NhanVien nv ON p.maNhanVien = nv.maNhanVien "
+                        + "ORDER BY p.ngayLap DESC");
                 ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) ds.add(docPhieu(rs));
+            while (rs.next())
+                ds.add(docPhieu(rs));
         }
         return ds;
     }
@@ -38,10 +39,10 @@ public class PhieuDoiTra_DAO {
     public PhieuDoiTra getPhieuTheoMaPDT(String maPDT) throws SQLException {
         try (PreparedStatement stmt = ConnectDB.getConnection().prepareStatement(
                 "SELECT p.maPDT, p.hoaDonGoc, p.hoaDonMoi, p.maNhanVien, "
-                + "p.ngayLap, p.lyDo, nv.tenNhanVien, "
-                + "CASE WHEN p.hoaDonMoi IS NULL THEN N'Trả hàng' ELSE N'Đổi size' END AS trangThai "
-                + "FROM PhieuDoiTra p JOIN NhanVien nv ON p.maNhanVien = nv.maNhanVien "
-                + "WHERE p.maPDT=?")) {
+                        + "p.ngayLap, p.lyDo, nv.tenNhanVien, "
+                        + "CASE WHEN p.hoaDonMoi IS NULL THEN N'Trả hàng' ELSE N'Đổi size' END AS trangThai "
+                        + "FROM PhieuDoiTra p JOIN NhanVien nv ON p.maNhanVien = nv.maNhanVien "
+                        + "WHERE p.maPDT=?")) {
             stmt.setString(1, maPDT);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() ? docPhieu(rs) : null;
@@ -107,8 +108,6 @@ public class PhieuDoiTra_DAO {
         return capMa(ConnectDB.getConnection(), "PhieuDoiTra", "maPDT", "DT");
     }
 
-    // Tao phieu va cap nhat kho trong mot transaction.
-    // Tra hang: khong tao HD moi. Doi size: tao HD moi va tru size thay the.
     public String create(PhieuDoiTra phieu, ArrayList<ChiTietDoiTra> ds,
             ArrayList<String> sizeMoi) throws SQLException {
         if (phieu == null || phieu.getHoaDonGoc() == null || ds == null || ds.isEmpty())
@@ -123,7 +122,8 @@ public class PhieuDoiTra_DAO {
             if (hdGoc == null)
                 throw new SQLException("Không tìm thấy hóa đơn gốc");
             if (hdGoc.getKhachHang() == null)
-                throw new SQLException("Hóa đơn gốc chưa có thông tin khách hàng; cần xử lý dữ liệu cũ trước khi đổi/trả");
+                throw new SQLException(
+                        "Hóa đơn gốc chưa có thông tin khách hàng; cần xử lý dữ liệu cũ trước khi đổi/trả");
             LocalDateTime ngayLap = LocalDateTime.now();
             if (ngayLap.isAfter(hdGoc.getNgayLap().plusDays(7)))
                 throw new SQLException("Hóa đơn đã quá 7 ngày, không được đổi/trả");
@@ -190,7 +190,7 @@ public class PhieuDoiTra_DAO {
                     String maCTMoi = maHangMoi.get(i);
                     try (PreparedStatement stmt = con.prepareStatement(
                             "UPDATE ChiTietSanPham SET soLuongTon=soLuongTon-? "
-                            + "WHERE maCTSP=? AND soLuongTon>=?")) {
+                                    + "WHERE maCTSP=? AND soLuongTon>=?")) {
                         stmt.setInt(1, ct.getSoLuong());
                         stmt.setString(2, maCTMoi);
                         stmt.setInt(3, ct.getSoLuong());
@@ -209,8 +209,10 @@ public class PhieuDoiTra_DAO {
             try (PreparedStatement stmt = con.prepareStatement(sqlPDT)) {
                 stmt.setString(1, maPDT);
                 stmt.setString(2, maHDGoc);
-                if (maHDMoi == null) stmt.setNull(3, Types.VARCHAR);
-                else stmt.setString(3, maHDMoi);
+                if (maHDMoi == null)
+                    stmt.setNull(3, Types.VARCHAR);
+                else
+                    stmt.setString(3, maHDMoi);
                 stmt.setString(4, phieu.getNhanVien().getMaNhanVien());
                 stmt.setTimestamp(5, Timestamp.valueOf(ngayLap));
                 stmt.setNString(6, phieu.getLyDo());
