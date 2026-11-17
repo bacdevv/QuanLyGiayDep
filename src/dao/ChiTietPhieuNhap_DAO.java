@@ -3,6 +3,7 @@ package dao;
 import connectDB.ConnectDB;
 import entity.ChiTietPhieuNhap;
 import entity.ChiTietSanPham;
+import entity.NhaCungCap;
 import entity.PhieuNhap;
 import entity.SanPham;
 import java.math.BigDecimal;
@@ -25,12 +26,17 @@ public class ChiTietPhieuNhap_DAO {
             Connection con = ConnectDB.getConnection();
 
             String sql = "SELECT ct.maPN, ct.maCTSP, ct.soLuong, ct.donGiaNhap, "
-                    + "ctsp.maSP, ctsp.kichCo, ctsp.mauSac, ctsp.soLuongTon, ctsp.hoatDong AS ctHoatDong, "
-                    + "sp.tenSP, sp.giaBan, sp.hoatDong AS spHoatDong "
+                    + "ctsp.maSP, ctsp.kichCo, ctsp.mauSac, ctsp.soLuongTon, "
+                    + "ctsp.hoatDong AS ctHoatDong, "
+                    + "sp.tenSP, sp.giaBan, sp.hoatDong AS spHoatDong, "
+                    + "pn.maNCC, ncc.tenNCC "
                     + "FROM ChiTietPhieuNhap ct "
                     + "JOIN ChiTietSanPham ctsp ON ct.maCTSP = ctsp.maCTSP "
                     + "JOIN SanPham sp ON ctsp.maSP = sp.maSP "
-                    + "WHERE ct.maPN = ? ORDER BY ct.maCTSP";
+                    + "JOIN PhieuNhap pn ON ct.maPN = pn.maPN "
+                    + "JOIN NhaCungCap ncc ON pn.maNCC = ncc.maNCC "
+                    + "WHERE ct.maPN = ? "
+                    + "ORDER BY ct.maCTSP";
 
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, maPN);
@@ -41,6 +47,17 @@ public class ChiTietPhieuNhap_DAO {
                 String maCTSP = rs.getString("maCTSP");
                 int soLuong = rs.getInt("soLuong");
                 BigDecimal donGiaNhap = rs.getBigDecimal("donGiaNhap");
+
+                // Lấy thông tin nhà cung cấp
+                NhaCungCap ncc = new NhaCungCap(
+                        rs.getString("maNCC"),
+                        rs.getString("tenNCC")
+                );
+
+                // Tạo phiếu nhập có thông tin nhà cung cấp
+                PhieuNhap pn = new PhieuNhap(
+                        maPN, ncc, null, null
+                );
 
                 SanPham sp = new SanPham(
                         rs.getString("maSP"),
@@ -61,7 +78,7 @@ public class ChiTietPhieuNhap_DAO {
                 );
 
                 ds.add(new ChiTietPhieuNhap(
-                        new PhieuNhap(maPN),
+                        pn,
                         ctsp,
                         soLuong,
                         donGiaNhap

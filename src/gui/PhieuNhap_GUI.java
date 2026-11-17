@@ -797,9 +797,11 @@ public class PhieuNhap_GUI extends JFrame implements MouseListener, ActionListen
             ngayNhap = LocalDateTime.now();
         }
 
+        String tenNCC = tableModel.getValueAt(row, 2).toString();
+
         PhieuNhap pn = new PhieuNhap(
                 maPN,
-                new NhaCungCap(maNCC),
+                new NhaCungCap(maNCC, tenNCC),
                 new NhanVien(maNV),
                 ngayNhap
         );
