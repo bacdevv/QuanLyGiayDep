@@ -302,7 +302,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
     private String taoMaTuDong() {
         int soLonNhat = 0;
         for (ThuongHieu th : th_dao.getalltbThuongHieu()) {
-            int so = Integer.parseInt(th.getMaThuongHieu().substring(3));
+            int so = Integer.parseInt(th.getMaThuongHieu().substring(2));
             if (so > soLonNhat) {
                 soLonNhat = so;
             }
@@ -319,7 +319,7 @@ public class ThuongHieu_GUI extends JFrame implements ActionListener {
             phanSo = "0" + phanSo;
         }
 
-        return "TH-" + phanSo;
+        return "TH" + phanSo;
     }
 
 }

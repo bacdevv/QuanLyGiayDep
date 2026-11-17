@@ -16,15 +16,6 @@ public class ChiTietDoiTra_DAO {
     public ChiTietDoiTra_DAO() {
     }
 
-    private Connection getConnection() throws SQLException {
-        Connection con = ConnectDB.getConnection();
-        if (con == null || con.isClosed()) {
-            ConnectDB.getInstance().connect();
-            con = ConnectDB.getConnection();
-        }
-        return con;
-    }
-
     private String sqlDoc() {
         return "SELECT dt.maPDT, dt.maCTSP, dt.soLuong, dt.soLuongNhapLai, "
                 + "ct.maSP, ct.kichCo, ct.mauSac, ct.soLuongTon, "
@@ -47,7 +38,7 @@ public class ChiTietDoiTra_DAO {
 
     public ArrayList<ChiTietDoiTra> getAllTableChiTietDoiTra() throws SQLException {
         ArrayList<ChiTietDoiTra> ds = new ArrayList<>();
-        try (PreparedStatement stmt = getConnection().prepareStatement(sqlDoc());
+        try (PreparedStatement stmt = ConnectDB.getConnection().prepareStatement(sqlDoc());
                 ResultSet rs = stmt.executeQuery()) {
             while (rs.next())
                 ds.add(docChiTiet(rs));
@@ -57,7 +48,7 @@ public class ChiTietDoiTra_DAO {
 
     public ArrayList<ChiTietDoiTra> getChiTietTheoMaPDT(String maPDT) throws SQLException {
         ArrayList<ChiTietDoiTra> ds = new ArrayList<>();
-        try (PreparedStatement stmt = getConnection().prepareStatement(
+        try (PreparedStatement stmt = ConnectDB.getConnection().prepareStatement(
                 sqlDoc() + "WHERE dt.maPDT = ? ORDER BY dt.maCTSP")) {
             stmt.setString(1, maPDT);
             try (ResultSet rs = stmt.executeQuery()) {

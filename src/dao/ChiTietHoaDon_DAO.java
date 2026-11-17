@@ -16,15 +16,6 @@ public class ChiTietHoaDon_DAO {
     public ChiTietHoaDon_DAO() {
     }
 
-    private Connection getConnection() throws SQLException {
-        Connection con = ConnectDB.getConnection();
-        if (con == null || con.isClosed()) {
-            ConnectDB.getInstance().connect();
-            con = ConnectDB.getConnection();
-        }
-        return con;
-    }
-
     private ChiTietHoaDon docChiTiet(ResultSet rs) throws SQLException {
         SanPham sp = new SanPham(rs.getString("maSP"), null, null,
                 rs.getString("tenSP"), rs.getBoolean("spHoatDong"), rs.getBigDecimal("giaBan"));
@@ -47,7 +38,7 @@ public class ChiTietHoaDon_DAO {
 
     public ArrayList<ChiTietHoaDon> getAllTableChiTietHoaDon() throws SQLException {
         ArrayList<ChiTietHoaDon> ds = new ArrayList<>();
-        try (PreparedStatement stmt = getConnection().prepareStatement(sqlDoc());
+        try (PreparedStatement stmt = ConnectDB.getConnection().prepareStatement(sqlDoc());
                 ResultSet rs = stmt.executeQuery()) {
             while (rs.next())
                 ds.add(docChiTiet(rs));
@@ -57,7 +48,7 @@ public class ChiTietHoaDon_DAO {
 
     public ArrayList<ChiTietHoaDon> getChiTietTheoMaHD(String maHD) throws SQLException {
         ArrayList<ChiTietHoaDon> ds = new ArrayList<>();
-        try (PreparedStatement stmt = getConnection().prepareStatement(
+        try (PreparedStatement stmt = ConnectDB.getConnection().prepareStatement(
                 sqlDoc() + "WHERE hd.maHD = ? ORDER BY hd.maCTSP")) {
             stmt.setString(1, maHD);
             try (ResultSet rs = stmt.executeQuery()) {

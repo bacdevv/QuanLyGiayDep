@@ -301,7 +301,7 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
     private String taoMaTuDong() {
         int soLonNhat = 0;
         for (DanhMuc dm : dm_dao.getalltbDanhMuc()) {
-            int so = Integer.parseInt(dm.getMaDanhMuc().substring(3));
+            int so = Integer.parseInt(dm.getMaDanhMuc().substring(2));
             if (so > soLonNhat) {
                 soLonNhat = so;
             }
@@ -318,7 +318,7 @@ public class DanhMuc_GUI extends JFrame implements ActionListener {
             phanSo = "0" + phanSo;
         }
 
-        return "DM-" + phanSo;
+        return "DM" + phanSo;
     }
 
 }

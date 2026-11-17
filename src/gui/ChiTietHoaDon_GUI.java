@@ -1,5 +1,18 @@
 package gui;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.stream.StreamSource;
+import java.awt.Desktop;
+import java.awt.Component;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import connectDB.ConnectDB;
 import dao.ChiTietHoaDon_DAO;
 import dao.HoaDon_DAO;
 import entity.ChiTietHoaDon;
@@ -9,14 +22,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,8 +37,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
 
 // Lớp cũ, giờ hiển thị danh sách hóa đơn và chi tiết chỉ đọc (không thêm lớp mới).
 public class ChiTietHoaDon_GUI extends JFrame {
@@ -61,6 +69,9 @@ public class ChiTietHoaDon_GUI extends JFrame {
             bang.getColumnModel().getColumn(i).setCellRenderer(renderer);
     }
 
+    private static final java.time.format.DateTimeFormatter DINH_DANG_NGAY =
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
     private final HoaDon_DAO hd_dao = new HoaDon_DAO();
     private final ChiTietHoaDon_DAO ct_dao = new ChiTietHoaDon_DAO();
     private JTextField txtTim;
@@ -89,18 +100,16 @@ public class ChiTietHoaDon_GUI extends JFrame {
         JButton btnTim = new JButton("Tìm");
         JButton btnLamMoi = new JButton("Làm mới");
         btnXem = new JButton("Xem chi tiết");
-        JButton btnXml = new JButton("Xuất XML");
         JButton btnIn = new JButton("In chi tiết");
         btnXem.setEnabled(false);
         thanhTim.add(txtTim);
         thanhTim.add(btnTim);
         thanhTim.add(btnLamMoi);
         thanhTim.add(btnXem);
-        thanhTim.add(btnXml);
         thanhTim.add(btnIn);
 
         modelDanhSach = new DefaultTableModel(new String[]{
-                "Mã HD", "Ngày lập", "Nhân viên", "Mã KH", "Thanh toán", "Tổng tiền"}, 0) {
+                "Mã HD", "Ngày lập", "Nhân viên", "Tên KH", "Thanh toán", "Tổng tiền"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         bangDanhSach = new JTable(modelDanhSach);
@@ -128,7 +137,12 @@ public class ChiTietHoaDon_GUI extends JFrame {
         chia.setDividerLocation(350);
         add(chia, BorderLayout.CENTER);
 
-        btnTim.addActionListener(e -> napDanhSach());
+        btnTim.addActionListener(e -> {
+            // Tìm chỉ lọc danh sách, không yêu cầu chọn dòng trước.
+            modelChiTiet.setRowCount(0);
+            lblThongTin.setText("Chọn một hóa đơn rồi nhấn Xem chi tiết");
+            napDanhSach();
+        });
         txtTim.addActionListener(e -> btnTim.doClick());
         btnLamMoi.addActionListener(e -> {
             txtTim.setText("");
@@ -150,17 +164,15 @@ public class ChiTietHoaDon_GUI extends JFrame {
                 if (e.getClickCount() == 2) btnXem.doClick();
             }
         });
-        btnXml.addActionListener(e -> xuatXml());
         btnIn.addActionListener(e -> {
-            if (modelChiTiet.getRowCount() == 0) {
-                thongBao("Chọn Xem chi tiết trước khi in");
-                return;
-            }
-            try {
-                bangChiTiet.print(JTable.PrintMode.FIT_WIDTH,
-                        new MessageFormat(lblThongTin.getText()), null);
-            } catch (Exception ex) { thongBao(ex.getMessage()); }
+            int r = bangDanhSach.getSelectedRow();
+            if (r < 0) { thongBao("Chọn hóa đơn để in"); return; }
+            String ma = modelDanhSach.getValueAt(bangDanhSach.convertRowIndexToModel(r), 0).toString();
+            try { inHoaDon(ma, this); }
+            catch (Exception ex) { thongBao("Không in được hóa đơn: " + ex.getMessage()); }
         });
+        try { ConnectDB.getInstance().connect(); }
+        catch (SQLException ex) { thongBao("Lỗi kết nối SQL Server: " + ex.getMessage()); }
         napDanhSach();
         if (maHD != null && !maHD.trim().isEmpty()) {
             try { docDuLieuDatabaseVaoTable(maHD.trim()); }
@@ -199,12 +211,17 @@ public class ChiTietHoaDon_GUI extends JFrame {
         String tim = txtTim.getText().trim().toLowerCase();
         try {
             for (HoaDon hd : hd_dao.getAllTableHoaDon()) {
-                String maKH = hd.getKhachHang() == null ? "Khách lẻ" : hd.getKhachHang().getMaKH();
-                String cotTim = (hd.getMaHD() + " " + maKH + " " + hd.getNgayLap()
-                        + " " + hd.getNhanVien().getMaNhanVien()).toLowerCase();
+                String maKH = hd.getKhachHang() == null ? "" : hd.getKhachHang().getMaKH();
+                String tenKH = hd.getKhachHang() == null ? "Chưa liên kết"
+                        : hd.getKhachHang().getTenKH();
+                String sdt = hd.getKhachHang() == null ? "" : hd.getKhachHang().getSoDienThoai();
+                String tenNV = hd.getNhanVien().getTenNhanVien();
+                String ngay = hd.getNgayLap().format(DINH_DANG_NGAY);
+                String cotTim = (hd.getMaHD() + " " + maKH + " " + tenKH + " " + sdt + " "
+                        + ngay + " " + hd.getNhanVien().getMaNhanVien() + " " + tenNV).toLowerCase();
                 if (!cotTim.contains(tim)) continue;
-                modelDanhSach.addRow(new Object[]{hd.getMaHD(), hd.getNgayLap(),
-                        hd.getNhanVien().getMaNhanVien(), maKH, hd.getPhuongThucThanhToan(), hd.getTongTien()});
+                modelDanhSach.addRow(new Object[]{hd.getMaHD(), ngay,
+                        tenNV, tenKH, hd.getPhuongThucThanhToan(), hd.getTongTien()});
             }
         } catch (SQLException ex) { thongBao("Lỗi tải danh sách: " + ex.getMessage()); }
     }
@@ -224,53 +241,70 @@ public class ChiTietHoaDon_GUI extends JFrame {
         lblThongTin.setText("Hóa đơn: " + maHD + "   |   Tổng tiền: " + hienThiTien(tong));
     }
 
-    private void ghi(XMLStreamWriter xml, String tag, Object value) throws Exception {
-        xml.writeStartElement(tag);
-        xml.writeCharacters(value == null ? "" : value.toString());
-        xml.writeEndElement();
+    // JAXP DOM tạo XML, sau đó JAXP + XSLT chuyển XML thành HTML để in.
+    private static void themThe(Document doc, Element cha, String ten, Object giaTri) {
+        Element the = doc.createElement(ten);
+        the.setTextContent(giaTri == null ? "" : giaTri.toString());
+        cha.appendChild(the);
     }
 
-    private void xuatXml() {
-        if (modelDanhSach.getRowCount() == 0) { thongBao("Danh sách đang trống"); return; }
-        JFileChooser chon = new JFileChooser();
-        chon.setSelectedFile(new File("DanhSachHoaDon.xml"));
-        if (chon.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
-        File tep = chon.getSelectedFile();
-        if (!tep.getName().toLowerCase().endsWith(".xml")) tep = new File(tep.getPath() + ".xml");
-        if (tep.exists() && JOptionPane.showConfirmDialog(this, "Ghi đè " + tep.getName() + "?",
-                "Xác nhận", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
-        XMLStreamWriter xml = null;
-        try (FileOutputStream os = new FileOutputStream(tep)) {
-            xml = XMLOutputFactory.newFactory().createXMLStreamWriter(os, "UTF-8");
-            xml.writeStartDocument("UTF-8", "1.0");
-            xml.writeStartElement("danhSachHoaDon");
-            for (int i = 0; i < modelDanhSach.getRowCount(); i++) {
-                String maHD = modelDanhSach.getValueAt(i, 0).toString();
-                HoaDon hd = hd_dao.getHoaDonTheoMaHD(maHD);
-                xml.writeStartElement("hoaDon");
-                ghi(xml, "maHD", hd.getMaHD());
-                ghi(xml, "maNhanVien", hd.getNhanVien().getMaNhanVien());
-                ghi(xml, "maKH", hd.getKhachHang() == null ? "" : hd.getKhachHang().getMaKH());
-                ghi(xml, "ngayLap", hd.getNgayLap());
-                ghi(xml, "phuongThucThanhToan", hd.getPhuongThucThanhToan());
-                ghi(xml, "thue", hd.getThue());
-                ghi(xml, "tongTien", hd.getTongTien());
-                xml.writeStartElement("chiTiet");
-                for (ChiTietHoaDon ct : ct_dao.getChiTietTheoMaHD(maHD)) {
-                    xml.writeStartElement("dong");
-                    ghi(xml, "maCTSP", ct.getChiTietSanPham().getMaCTSP());
-                    ghi(xml, "soLuong", ct.getSoLuong());
-                    ghi(xml, "donGia", ct.getDonGia());
-                    xml.writeEndElement();
-                }
-                xml.writeEndElement();
-                xml.writeEndElement();
-            }
-            xml.writeEndElement();
-            xml.writeEndDocument();
-            xml.flush();
-            JOptionPane.showMessageDialog(this, "Đã xuất: " + tep.getAbsolutePath());
-        } catch (Exception ex) { thongBao("Không xuất được XML: " + ex.getMessage()); }
-        finally { if (xml != null) try { xml.close(); } catch (Exception ignored) { } }
+    // Dùng chung cho nút In chi tiết ở màn hình bán hàng và danh sách hóa đơn.
+    public static void inHoaDon(String maHD, Component parent) throws Exception {
+        HoaDon_DAO hdDao = new HoaDon_DAO();
+        HoaDon hd = hdDao.getHoaDonTheoMaHD(maHD);
+        if (hd == null) throw new SQLException("Không tìm thấy hóa đơn");
+        ArrayList<ChiTietHoaDon> ds = new ChiTietHoaDon_DAO().getChiTietTheoMaHD(maHD);
+
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        Element goc = doc.createElement("hoaDon");
+        doc.appendChild(goc);
+        themThe(doc, goc, "maHD", hd.getMaHD());
+        themThe(doc, goc, "ngayLap", hd.getNgayLap().format(DINH_DANG_NGAY));
+        themThe(doc, goc, "tenNhanVien", hd.getNhanVien().getTenNhanVien());
+        themThe(doc, goc, "phuongThucThanhToan", hd.getPhuongThucThanhToan());
+        themThe(doc, goc, "thue", hd.getThue());
+        themThe(doc, goc, "tongTien", hd.getTongTien());
+        if (hd.getKhachHang() == null)
+            throw new SQLException("Hóa đơn chưa liên kết khách hàng; vui lòng xử lý dữ liệu cũ");
+        entity.KhachHang kh = hdDao.getKhachHangTheoMaKH(hd.getKhachHang().getMaKH());
+        if (kh == null || kh.getSoDienThoai() == null || kh.getSoDienThoai().trim().isEmpty())
+            throw new SQLException("Khách hàng chưa có số điện thoại");
+        themThe(doc, goc, "tenKH", kh.getTenKH());
+        themThe(doc, goc, "soDienThoai", kh.getSoDienThoai());
+        themThe(doc, goc, "tienHang", hd.tinhTienHang(ds));
+        themThe(doc, goc, "tienThue", hd.tinhTienThue(ds));
+        Element chiTiet = doc.createElement("chiTiet");
+        goc.appendChild(chiTiet);
+        for (ChiTietHoaDon ct : ds) {
+            Element dong = doc.createElement("dong");
+            chiTiet.appendChild(dong);
+            themThe(doc, dong, "maCTSP", ct.getChiTietSanPham().getMaCTSP());
+            themThe(doc, dong, "tenSP", ct.getChiTietSanPham().getSanPham().getTenSP());
+            themThe(doc, dong, "kichCo", ct.getChiTietSanPham().getKichCo());
+            themThe(doc, dong, "mauSac", ct.getChiTietSanPham().getMauSac());
+            themThe(doc, dong, "soLuong", ct.getSoLuong());
+            themThe(doc, dong, "donGia", ct.getDonGia());
+            themThe(doc, dong, "thanhTien", ct.tinhThanhTien());
+        }
+
+        File thuMuc = new File(System.getProperty("java.io.tmpdir"), "QuanLyGiayDep_In");
+        if (!thuMuc.exists() && !thuMuc.mkdirs())
+            throw new java.io.IOException("Không tạo được thư mục in");
+        File xml = new File(thuMuc, maHD + ".xml");
+        File html = new File(thuMuc, maHD + ".html");
+        Transformer ghiXml = TransformerFactory.newInstance().newTransformer();
+        ghiXml.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        ghiXml.setOutputProperty(OutputKeys.INDENT, "yes");
+        ghiXml.transform(new DOMSource(doc), new StreamResult(xml));
+
+        File xsl = new File("data/HoaDon.xsl");
+        if (!xsl.isFile()) throw new java.io.IOException("Thiếu data/HoaDon.xsl");
+        Transformer chuyenHtml = TransformerFactory.newInstance()
+                .newTransformer(new StreamSource(xsl));
+        chuyenHtml.transform(new StreamSource(xml), new StreamResult(html));
+        if (Desktop.isDesktopSupported())
+            Desktop.getDesktop().browse(html.toURI());
+        else
+            JOptionPane.showMessageDialog(parent, "Đã tạo HTML: " + html.getAbsolutePath());
     }
 }
