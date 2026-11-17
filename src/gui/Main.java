@@ -253,8 +253,7 @@ public class Main extends JFrame {
     private JTabbedPane taoTabNhapHang() {
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Arial", Font.PLAIN, 15));
-        themTrang(tabs, "Phiếu nhập", PhieuNhap_GUI::new);
-
+        themTrang(tabs, "Phiếu nhập", () -> new PhieuNhap_GUI(nhanVien));
         themTrang(tabs, "Nhà cung cấp", () -> new NhaCungCap_GUI(nhanVien));
         tabs.addChangeListener(e -> napTab(tabs));
         return tabs;
